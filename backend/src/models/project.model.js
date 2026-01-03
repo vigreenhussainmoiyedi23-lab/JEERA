@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const projectSchema = mongoose.Schema(
   {
     title: String,
-    description: String,
+    description: { type: String, default: "" },
     admin: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
@@ -20,7 +20,6 @@ const projectSchema = mongoose.Schema(
         ref: "user",
       },
     ],
-    createdAt: { type: Date, default: Date.now },
     chats: [
       {
         message: String,
@@ -34,6 +33,7 @@ const projectSchema = mongoose.Schema(
         },
       },
     ],
+    //messages like pop up for admin so that he can know what important thing happened and can
     newMessages: [
       {
         title: String,
@@ -47,7 +47,9 @@ const projectSchema = mongoose.Schema(
         },
       },
     ],
+    //mark as read to delete from db
     allTasks: [{ type: mongoose.Schema.Types.ObjectId, ref: "task" }],
+    createdAt: { type: Date, default: Date.now },
   },
   {
     toJSON: { virtuals: true }, // 👈 important

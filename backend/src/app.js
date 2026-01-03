@@ -4,15 +4,21 @@ const app = express();
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
-require("dotenv").config()
+
+
+// _______OTHERS_______
+const { limiter } = require("./config/limiters");
+const devlopementUrls=["http://localhost:5173","http://localhost:5174/"]
 
 // requiring Routes
 const userRoutes=require("./routes/user.routes");
-const { limiter } = require("./config/limiters");
+const projectRoutes=require("./routes/project.routes");
 
 
 // requiring Middlewares
-const devlopementUrls=["http://localhost:5173","http://localhost:5174/"]
+const { UserIsLoggedIn } = require("./middlewares/UserAuth.middleware");
+
+
 
 //_______Middlewares_______
 app.use(express.json());
@@ -33,4 +39,7 @@ app.use(cors({
 
 //_______routes_______
 app.use("/api/user",userRoutes)
+app.use("/api/project",UserIsLoggedIn,projectRoutes)
+
+
 module.exports = app;
