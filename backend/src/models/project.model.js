@@ -27,6 +27,7 @@ const projectSchema = mongoose.Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: "user",
         },
+        post:{type:String,default:"member",enum:["admin","coAdmin","member"]},
         CreatedAt: {
           type: Date,
           default: Date.now,
