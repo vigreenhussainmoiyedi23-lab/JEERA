@@ -22,8 +22,17 @@ const projectSchema = mongoose.Schema(
     ],
     chats: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "chat",
+        message: String,
+        User: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "user",
+        },
+        post: {
+          type: String,
+          default: "member",
+          enum: ["admin", "coAdmin", "member"],
+        },
+        createdAt: { type: Date, default: Date.now },
       },
     ],
     Excluded: [

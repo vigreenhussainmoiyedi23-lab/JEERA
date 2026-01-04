@@ -2,13 +2,14 @@ const mongoose = require("mongoose");
 
 const taskSchema = mongoose.Schema(
   {
-    asignedTo: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    assignedTo: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
     title: String,
     description: String,
     createdAt: { type: Date, default: Date.now },
     categoury: {
       type: String,
-      enum: ["frontend","backend","devops","debugging","other"],
+      enum: ["frontend", "backend", "devops", "debugging", "other"],
       default: "other",
     },
     taskStatus: {
