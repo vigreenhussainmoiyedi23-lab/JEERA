@@ -1,80 +1,120 @@
-const { body, validationResult } = require('express-validator')
+const { body, validationResult } = require("express-validator");
+
+/* ======================================================
+   🧩 AUTH VALIDATORS
+====================================================== */
 
 const RegisterValidator = [
-  body('email')
-    .isEmail().withMessage('Invalid Email').bail().isLength({ min: 10 }).withMessage("Email must be atleast 8 characters long").bail(),
-  body('username').isLength({ min: 3 }).withMessage('Invalid Username').bail(),
-  body('password').isLength({ min: 8 }).withMessage('Weak Password').bail()
-]
+  body("email")
+    .trim()
+    .isEmail()
+    .withMessage("Invalid email format")
+    .isLength({ min: 8 })
+    .withMessage("Email must be at least 8 characters long")
+    .normalizeEmail(),
+
+  body("username")
+    .trim()
+    .escape()
+    .isLength({ min: 3 })
+    .withMessage("Username must be at least 3 characters long"),
+
+  body("password")
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters long")
+    .matches(/\d/)
+    .withMessage("Password must contain at least one number")
+    .matches(/[A-Z]/)
+    .withMessage("Password must contain at least one uppercase letter")
+];
+
+const LoginValidator = [
+  body("email")
+    .trim()
+    .isEmail()
+    .withMessage("Invalid email")
+    .normalizeEmail(),
+
+  body("password")
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters long"),
+];
+
+/* ======================================================
+   🧩 PROJECT VALIDATOR (for create/edit routes)
+====================================================== */
+
+const ProjectValidator = [
+  body("title")
+    .trim()
+    .escape()
+    .notEmpty()
+    .withMessage("Project title is required")
+    .isLength({ min: 3 })
+    .withMessage("Title must be at least 3 characters long"),
+
+  body("description")
+    .optional()
+    .trim()
+    .escape()
+    .isLength({ max: 500 })
+    .withMessage("Description must be less than 500 characters"),
+];
+
+
+/* ======================================================
+   🧩 CHAT VALIDATOR (for message sending)
+====================================================== */
+
+const ChatMessageValidator = [
+  body("content")
+    .trim()
+    .notEmpty()
+    .withMessage("Message content is required")
+    .isLength({ min: 1, max: 500 })
+    .withMessage("Message must be between 1 and 500 characters")
+    .matches(/^[a-zA-Z0-9\s.,!?'"-]+$/)
+    .withMessage("Message contains invalid characters")
+    .escape(),
+];
+
+
+/* ======================================================
+   🧩 COMMON VALIDATE MIDDLEWARE
+====================================================== */
 
 function validate(req, res, next) {
   try {
-    const error = validationResult(req)
-    if (!error.isEmpty()) { return res.status(400).json({ success: false, errors: error.array() }) }
-    next()
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const formatted = {};
+      errors.array().forEach((err) => {
+        formatted[err.path] = err.msg;
+      });
+      return res.status(400).json({
+        success: false,
+        message: "Validation error",
+        errors: formatted,
+      });
+    }
+    next();
   } catch (error) {
     return res.status(500).json({
-      message: 'Internal Server Error'
-    })
+      success: false,
+      message: "Internal Server Error",
+    });
   }
 }
 
-const LoginValidator = [
-  body('email').isEmail().withMessage('Invalid Email').bail().isLength({ min: 10 }).withMessage('Invalid Email').bail(),
-  body('password').isLength({ min: 8 }).withMessage('Password must be atleast 8 chars long')
-]
 
-const productValidation = [
-  body("title")
-    .notEmpty().withMessage("Title is required")
-    .isLength({ min: 3 }).withMessage("Title must be at least 3 characters"),
-  body("description")
-    .notEmpty().withMessage("Description is required")
-    .isLength({ min: 10 }).withMessage("Description must be at least 10 characters"),
-  body("price")
-    .notEmpty().withMessage("Price is required")
-    .isFloat({ gt: 0 }).withMessage("Price must be greater than 0"),
-  body("stock")
-    .notEmpty().withMessage("stock is required")
-    .isFloat({ gt: 0 }).withMessage("stock must be greater than 0"),
-  body("discount")
-    .optional()
-    .isFloat({ min: 0, max: 100 })
-    .withMessage("Discount must be between 0 and 100"),
-];
+/* ======================================================
+   ✅ EXPORT ALL VALIDATORS
+====================================================== */
 
-const OrderValidator = [
-  body("paymentOption")
-    .notEmpty()
-    .withMessage("Payment option is required")
-    .isIn(["COD", "ONLINE"])
-    .withMessage("Payment option must be COD or ONLINE"),
-
-  body("fullName").notEmpty().withMessage("Full name is required"),
-
-  body("state").notEmpty().withMessage("State is required"),
-
-  body("city").notEmpty().withMessage("City is required"),
-
-  body("street").notEmpty().withMessage("Street address is required"),
-
-  body("phoneNumber")
-    .notEmpty()
-    .withMessage("Phone number is required")
-    .isMobilePhone("en-IN")
-    .withMessage("Invalid phone number format"),
-
-  body("paymentStatus")
-    .notEmpty()
-    .withMessage("Payment status is required")
-    .isIn(["paid", "pending", "failed"])
-    .withMessage("Payment status must be paid, pending, or failed"),
-]
-
-  module.exports = {
-    RegisterValidator,
-    validate,
-    LoginValidator,
-    productValidation,
-    OrderValidator
-  }
+module.exports = {
+  RegisterValidator,
+  LoginValidator,
+  ProjectValidator,
+  ChatMessageValidator,
+  validate,
+};

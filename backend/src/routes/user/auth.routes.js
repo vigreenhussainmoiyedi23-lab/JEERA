@@ -3,9 +3,9 @@ const {
   RegisterValidator,
   validate,
   LoginValidator,
-} = require("../utils/express-validator");
-const { authLimiter } = require("../config/limiters");//a limiter for 5 requests per minute
-const { LogoutHandler, VerifyOTP, LoginHandler, RegisterHandler } = require("../controllers/user/user.auth.controller.js");
+} = require("../../utils/express-validator.js");
+const { authLimiter } = require("../../config/limiters.js");//a limiter for 5 requests per minute
+const { LogoutHandler, VerifyOTP, LoginHandler, RegisterHandler } = require("../../controllers/user/user.auth.controller.js");
 
 
 const Router = express.Router();

@@ -8,8 +8,9 @@ const userSchema = mongoose.Schema(
     profilePic: String,
     fileId: String,
     skills: [],
-    projects: [{ type: mongoose.Schema.Types.ObjectId, ref: "project" }],
+    projects: [{project:{ type: mongoose.Schema.Types.ObjectId, ref: "project" },status:{type:String,default:"member"}}],
     tasks: [{ type: mongoose.Schema.Types.ObjectId, ref: "task" }],
+    invites:[{ type: mongoose.Schema.Types.ObjectId, ref: "project" }]
   },
   { timestamps: true }
 );

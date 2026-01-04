@@ -22,16 +22,20 @@ const projectSchema = mongoose.Schema(
     ],
     chats: [
       {
-        message: String,
-        User: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "user",
-        },
-        post:{type:String,default:"member",enum:["admin","coAdmin","member"]},
-        CreatedAt: {
-          type: Date,
-          default: Date.now,
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "chat",
+      },
+    ],
+    Excluded: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user",
+      },
+    ],
+    invited: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user",
       },
     ],
     //messages like pop up for admin so that he can know what important thing happened and can
