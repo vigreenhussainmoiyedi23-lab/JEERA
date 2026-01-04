@@ -3,7 +3,9 @@ const testUserModel = require("../../models/testUser.model");
 const { HashPassword, comparePassword } = require("../../utils/bcrypt");
 const { GenerateToken, VerifyToken } = require("../../utils/jwt");
 const sendMail = require("../../config/sendMail");
-
+const { OAuth2Client } = require("google-auth-library");
+const jwt = require("jsonwebtoken");
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 async function RegisterHandler(req, res) {
   try {
     const { email, password, username } = req.body;
@@ -159,10 +161,59 @@ async function LogoutHandler(req, res) {
       .json({ message: "error occured While logging out", error });
   }
 }
+async function GoogleHandler(req, res) {
+  try {
+    const { token } = req.body;
 
+    // 1️⃣ Verify Google ID token
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = payload;
+
+    // 2️⃣ Check if user exists
+    let user = await UserModel.findOne({ email });
+
+    if (!user) {
+      // 3️⃣ If not, create new user (register)
+      user = await UserModel.create({
+        email,
+        name,
+        googleId,
+        avatar: picture,
+        authProvider: "google",
+        isVerified: true, // Google verified email
+      });
+    } else {
+      // Optional: ensure their provider is consistent
+      if (user.authProvider !== "google") {
+        return res.status(400).json({
+          message: "This email is already registered with another method.",
+        });
+      }
+    }
+    // 4️⃣ Generate your own JWT for session management
+    let id = user._id
+    const appToken = await GenerateToken(id)
+    res.cookie("token", appToken)
+    
+    // 5️⃣ Return success response
+    res.status(200).json({
+      message: user.isNew ? "User registered successfully" : "Login successful",
+      user,
+    });
+  } catch (error) {
+    console.error("Google login failed:", error);
+    res.status(401).json({ message: "Invalid Google token" });
+  }
+}
 module.exports = {
   LogoutHandler,
   LoginHandler,
   RegisterHandler,
   VerifyOTP,
+  GoogleHandler
 };
