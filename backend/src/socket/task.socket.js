@@ -59,7 +59,7 @@ function taskSocket(io, socket, socketIdMap) {
       io.to(socketIdMap.get(userid)).emit("taskUpdated", updatedTask);;
     })
   });
-  socket.on("get-all-tasks", async () => {
+  socket.on("get-all-tasks", async ({projectId}) => {
     const user = await UserModel.findById(socket.user?.id).populate("tasks.task")
     socket.to(socketIdMap.get(user._id)).emit("all-tasks",{tasks:user.allTasks})
   });

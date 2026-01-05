@@ -15,7 +15,7 @@ const Home = () => {
         className="fixed top-0 z-0 inset-0 bg-cover bg-center brightness-75"
         style={{
           backgroundImage:
-            'url("https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1600&q=80")',
+            'url("/hero.avif")',
         }}
       ></div>
       <div className="fixed top-0 z-0 inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/70"></div>

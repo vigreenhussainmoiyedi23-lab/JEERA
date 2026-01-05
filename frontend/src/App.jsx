@@ -5,6 +5,8 @@ import Register from './pages/auth/Register';
 import Home from './pages/dashboard/Home';
 import Projects from './pages/projects/Projects';
 import ProjectDetails from './pages/projects/ProjectDetails';
+import NotFound from './pages/NotFound';
+import CreateProject from './pages/projects/CreateProject';
 
 const App = () => {
   return (
@@ -13,7 +15,10 @@ const App = () => {
     <Route path='/login' element={<Login/>}/>
     <Route path='/register' element={<Register/>}/>
     <Route path='/projects' element={<Projects/>}/>
+    <Route path='/createProject' element={<CreateProject/>}/>
     <Route path='/project/:projectid' element={<ProjectDetails/>}/>
+
+     <Route path="*" element={<NotFound />} />
    </Routes>
   )
 }

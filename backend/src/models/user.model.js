@@ -8,6 +8,7 @@ const userSchema = mongoose.Schema(
     profilePic: String,
     fileId: String,
     skills: [],
+    posts:[{type:mongoose.Schema.Types.ObjectId,ref:"post"}],
     projects: [{ project: { type: mongoose.Schema.Types.ObjectId, ref: "project" }, status: { type: String, default: "member" } }],
     tasks: [{ task: { type: mongoose.Schema.Types.ObjectId, ref: "task" }, project: { type: mongoose.Schema.Types.ObjectId, ref: "project" } }],
     invites: [{ type: mongoose.Schema.Types.ObjectId, ref: "project" }],

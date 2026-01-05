@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosInstance";
 
 const Login = () => {
   const [errorMessage, setErrorMessage] = useState(null);
-
+  const navigate = useNavigate();
   const handleGoogleSuccess = async (credentialResponse) => {
     const token = credentialResponse.credential;
 
@@ -15,14 +15,15 @@ const Login = () => {
         { token },
         { withCredentials: true }
       );
-
-      console.log("Logged in user:", res.data);
-
-      localStorage.setItem("token", res.data.token);
-      window.location.href = "/projects";
+     navigate("/projects");
     } catch (err) {
-      console.error("Backend verification failed:", err.response?.data || err.message);
-      setErrorMessage(err.response?.data?.message || "Login failed. Please try again.");
+      console.error(
+        "Backend verification failed:",
+        err.response?.data || err.message
+      );
+      setErrorMessage(
+        err.response?.data?.message || "Login failed. Please try again."
+      );
     }
   };
 
@@ -34,7 +35,6 @@ const Login = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-black flex items-center justify-center px-4 sm:px-6 md:px-8">
       <div className="w-full max-w-md">
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 sm:p-8 md:p-10 space-y-6 sm:space-y-8">
-          
           {/* Header */}
           <div className="text-center space-y-1 sm:space-y-2">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">

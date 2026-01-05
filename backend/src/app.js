@@ -11,6 +11,7 @@ const { limiter } = require("./config/limiters");
 const allowedOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
 // requiring Routes
 const userRoutes = require("./routes/main/user.routes");
+const taskRoutes = require("./routes/task/task.routes");
 const projectRoutes = require("./routes/main/project.routes");
 
 // requiring Middlewares
@@ -47,5 +48,6 @@ app.use(
 //_______routes_______
 app.use("/api/user", userRoutes);
 app.use("/api/project", UserIsLoggedIn, projectRoutes);
+app.use("/api/task", UserIsLoggedIn, taskRoutes);
 
 module.exports = app;
