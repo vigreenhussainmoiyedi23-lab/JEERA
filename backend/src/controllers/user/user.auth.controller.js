@@ -187,14 +187,7 @@ async function GoogleHandler(req, res) {
         authProvider: "google",
         isVerified: true, // Google verified email
       });
-    } else {
-      // Optional: ensure their provider is consistent
-      if (user.authProvider !== "google") {
-        return res.status(400).json({
-          message: "This email is already registered with another method.",
-        });
-      }
-    }
+    } 
     // 4️⃣ Generate your own JWT for session management
     let id = user._id
     const appToken = await GenerateToken(id)

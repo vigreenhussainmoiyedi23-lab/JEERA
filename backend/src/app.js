@@ -7,9 +7,8 @@ const helmet = require("helmet");
 
 // _______OTHERS_______
 const { limiter } = require("./config/limiters");
-const Url =
-  process.env.NODE_ENV === "devlopement" ? "http://localhost:5173" : "";
 
+const allowedOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
 // requiring Routes
 const userRoutes = require("./routes/main/user.routes");
 const projectRoutes = require("./routes/main/project.routes");
@@ -22,8 +21,12 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(limiter);
 app.use(
-  helmet({
-    crossOriginResourcePolicy: false,
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "https://accounts.google.com"],
+      frameSrc: ["https://accounts.google.com"],
+    },
   })
 );
 
@@ -31,7 +34,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || origin == Url) {
+      if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
