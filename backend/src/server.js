@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const http = require("http");
 const connectDB = require("./config/db");
-const { initializeSockets } = require("./socket/index"); // we'll create this soon
+const  initializeSockets  = require("./socket/index"); // we'll create this soon
 
 const app = require("./app");
 const PORT = process.env.PORT || 5000;

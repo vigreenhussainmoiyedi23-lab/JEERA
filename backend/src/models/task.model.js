@@ -17,6 +17,7 @@ const taskSchema = mongoose.Schema(
       default: "pending",
       enum: ["pending", "Inprogress", "cancelled", "finished"],
     },
+    project:{type:mongoose.Schema.Types.ObjectId,ref:"project"}
   },
   {
     toJSON: { virtuals: true }, // 👈 important

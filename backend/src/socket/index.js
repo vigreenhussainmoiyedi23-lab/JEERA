@@ -1,58 +1,65 @@
-const { VerifyToken } = require("../utils/jwt");
-const chatSocket = require("./chat.socket");
-const taskSocket = require("./task.socket");
+const cookie = require("cookie");
+const { VerifyToken } = require("../utils/jwt.js");
+const chatSocket = require("./chat.socket.js");
+const taskSocket = require("./task.socket.js");
+function setupSocket(io) {
+  // ✅ Track connected users (userId → socket.id)
+  const socketIdMap = new Map();
 
-function initializeSockets(io) {
-  // ✅ Middleware: Authenticate socket connections using JWT
+  // ✅ Auth middleware for all socket connections
   io.use((socket, next) => {
     const cookieHeader = socket.handshake.headers.cookie;
     if (!cookieHeader) return next(new Error("No cookies found"));
 
     const cookies = cookie.parse(cookieHeader);
-    const token = cookies.token; // your JWT or session token
-    if (!token) {
-      return next(new Error("Token Not Found"));
-    }
+    const token = cookies.token;
+    if (!token) return next(new Error("Token not found"));
+
     try {
-      const decoded = VerifyToken(token); // your existing VerifyToken function
-      socket.user = decoded; // attach user to socket instance
+      const decoded = VerifyToken(token);
+      socket.user = decoded; // attach user info
       next();
     } catch (error) {
+      console.error("❌ Invalid token:", error.message);
       next(new Error("Authentication error: Invalid token"));
     }
   });
 
-  // ✅ Connection
+  // ✅ On successful connection
   io.on("connection", (socket) => {
- 
+    const userId = socket.user?.id; // ensure consistency
+    if (!userId) {
+      console.error("⚠️ Missing user ID in socket");
+      socket.disconnect();
+      return;
+    }
+
+    // Save user in the map
+    socketIdMap.set(userId.toString(), socket.id);
+    console.log(`🟢 User ${userId} connected with socket ${socket.id}`);
+
     // Join project room
     socket.on("joinProject", (projectId) => {
       socket.join(projectId);
-      console.log(`📦 ${socket.user.id} joined project: ${projectId}`);
-    });
-    socket.on("jointask", (taskid) => {
-      socket.join(taskid);
-      console.log(`📦 ${socket.user.id} joined task: ${taskid}`);
-    });
-    socket.on("leavetask", (taskid) => {
-      socket.leave(taskid);
-      console.log(`📦 ${socket.user.id} left task: ${taskid}`);
+      console.log(`📦 User ${userId} joined project: ${projectId}`);
     });
 
     // Leave project room
     socket.on("leaveProject", (projectId) => {
       socket.leave(projectId);
-      console.log(`🚪 ${socket.user.id} left project: ${projectId}`);
+      console.log(`🚪 User ${userId} left project: ${projectId}`);
     });
 
-    // Initialize feature-specific sockets
-    chatSocket(io, socket);
-    taskSocket(io, socket);
+    // Feature modules
+    chatSocket(io, socket, socketIdMap);
+    taskSocket(io, socket, socketIdMap);
 
+    // Handle disconnect
     socket.on("disconnect", () => {
-      console.log(`🔴 ${socket.user.id} disconnected`);
+      console.log(`🔴 User ${userId} disconnected`);
+      socketIdMap.delete(userId.toString());
     });
   });
 }
-
-module.exports = { initializeSockets };
+module.exports= setupSocket
+  

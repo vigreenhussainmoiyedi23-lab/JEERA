@@ -2,7 +2,7 @@ const projectModel = require("../models/project.model");
 const TaskModel = require("../models/task.model");
 const UserModel = require("../models/user.model");
 
-function taskSocket(io, socket) {
+function taskSocket(io, socket, socketIdMap) {
   // ✅ Create a new task
   socket.on(
     "createTask",
@@ -17,7 +17,7 @@ function taskSocket(io, socket) {
 
       if (!isAdmin && !isCoAdmin) {
         // User is not authorized to create a task
-        return socket.emit("errorMessage", {
+        return socket.to(socketIdMap(createdBy.toString())).emit("errorMessage", {
           message: "You are not authorized to create tasks in this project.",
         });
       }
@@ -25,7 +25,7 @@ function taskSocket(io, socket) {
         isCoAdmin &&
         project.coAdmins.some((co) => co.toString() == assignedTo.toString())
       ) {
-        return socket.emit("errorMessage", {
+        return socket.to(socketIdMap(createdBy.toString())).emit("errorMessage", {
           message:
             "You are not authorized to give tasks to coadmins in this project.",
         });
@@ -37,11 +37,14 @@ function taskSocket(io, socket) {
         createdBy,
         status: "inProgress",
       });
+      assignedTo.map(async (userid) =>
+        await UserModel.findOneAndUpdate({ _id: userid }, { $push: { tasks: newTask._id } }, { new: true })
+      )
       project.allTasks.push(newTask._id);
-      user.tasks.push(newTask._id);
       await project.save();
-      await user.save();
-      io.to(newTask._id).emit("newTask", newTask);
+      assignedTo.map(userid => {
+        io.to(socketIdMap.get(userid)).emit("newTask", newTask);
+      })
     }
   );
 
@@ -52,7 +55,13 @@ function taskSocket(io, socket) {
       { status },
       { new: true }
     );
-    io.to(taskId).emit("taskUpdated", updatedTask);
+    updatedTask.assignedTo.map(userid => {
+      io.to(socketIdMap.get(userid)).emit("taskUpdated", updatedTask);;
+    })
+  });
+  socket.on("get-all-tasks", async () => {
+    const user = await UserModel.findById(socket.user?.id).populate("tasks.task")
+    socket.to(socketIdMap.get(user._id)).emit("all-tasks",{tasks:user.allTasks})
   });
 }
 

@@ -9,9 +9,9 @@ import ProjectDetails from './pages/projects/ProjectDetails';
 const App = () => {
   return (
    <Routes>
+    <Route path='/' element={<Home/>}/>
     <Route path='/login' element={<Login/>}/>
     <Route path='/register' element={<Register/>}/>
-    <Route path='/' element={<Home/>}/>
     <Route path='/projects' element={<Projects/>}/>
     <Route path='/project/:projectid' element={<ProjectDetails/>}/>
    </Routes>
