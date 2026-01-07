@@ -13,7 +13,7 @@ const allowedOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
 const userRoutes = require("./routes/main/user.routes");
 const taskRoutes = require("./routes/task/task.routes");
 const projectRoutes = require("./routes/main/project.routes");
-
+const postRoutes=require("./routes/main/post.routes")
 // requiring Middlewares
 const { UserIsLoggedIn } = require("./middlewares/UserAuth.middleware");
 
@@ -49,5 +49,5 @@ app.use(
 app.use("/api/user", userRoutes);
 app.use("/api/project", UserIsLoggedIn, projectRoutes);
 app.use("/api/task", UserIsLoggedIn, taskRoutes);
-
+app.use("/api/post",UserIsLoggedIn,postRoutes)
 module.exports = app;

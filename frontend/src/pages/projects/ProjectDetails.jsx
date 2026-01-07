@@ -218,7 +218,29 @@ const ProjectDetails = () => {
           <p className="text-gray-300 text-base sm:text-lg mb-10 leading-relaxed">
             {project?.description || "No description provided."}
           </p>
-
+          <div className="w-full flex relative items-center justify-center lg:gap-10 gap-4 flex-nowrap mb-4">
+            <button
+              onClick={() => setCurrent("tasks")}
+              className="border-b-blue-700 text-yellow-300 text-sm md:text-lg xl:text-xl font-bold bg-slate-600 px-3 py-2 rounded-3xl"
+              style={{ background: current == "tasks" ? "#111" : "" }}
+            >
+              Tasks
+            </button>
+            <button
+              onClick={() => setCurrent("chats")}
+              className="border-b-blue-700 text-yellow-300 text-sm md:text-lg xl:text-xl font-bold bg-slate-600 px-3 py-2 rounded-3xl"
+              style={{ background: current == "chats" ? "#111" : "" }}
+            >
+              Chat
+            </button>
+            <button
+              onClick={() => setCurrent("panel")}
+              className="border-b-blue-700 text-yellow-300 text-sm md:text-lg xl:text-xl font-bold bg-slate-600 px-3 py-2 rounded-3xl"
+              style={{ background: current == "panel" ? "#111" : "" }}
+            >
+              Your Panel
+            </button>
+          </div>
           {/* Tasks */}
           {current == "tasks" && (
             <div className="bg-gray-900/60 p-5 rounded-xl border border-gray-700 mb-10">
@@ -294,7 +316,7 @@ const ProjectDetails = () => {
           {/* Users Panel */}
           {tasks == "panel" && (
             <div>
-              ["admin", "coAdmin"].includes(data.status) && 
+              ["admin", "coAdmin"].includes(data.status) &&
               <h1> Admin and Coadmin Panel </h1>
               <button></button>
             </div>

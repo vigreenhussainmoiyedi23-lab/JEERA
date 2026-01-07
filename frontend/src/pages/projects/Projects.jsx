@@ -12,8 +12,8 @@ const Projects = () => {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  if (isLoading) return <p>Loading projects...</p>;
-  if (isError) return <p>{error}</p>;
+  if (isLoading) return <p className="bg-linear-to-br flex items-center justify-center text-white min-h-screen w-screen from-zinc-800 via-slate-950 to-gray-900 ">Loading projects...</p>;
+  if (isError) return <p className="bg-linear-to-br flex items-center justify-center text-white min-h-screen w-screen from-zinc-800 via-slate-950 to-gray-900">{error}</p>;
   return (
     <>
       <Navbar />

@@ -6,6 +6,18 @@ const { default: mongoose } = require("mongoose");
 const commentModel = require("../../models/comment.model");
 
 const Router = express.Router();
+Router.get("/all", async function (req, res) {
+    try {
+        const user = req.user
+        const posts = await postModel.find({ createdBy: user._id }).populate({
+            path: "createdBy",
+            select: "username email profilePic",
+        });
+        return res.status(200).json({ message: "All User Posts", posts })
+    } catch (error) {
+        return res.status(500).json({ message: "Something went Wrong", error })
+    }
+})
 Router.post("/create", upload.fields([
     {
         name: "images",
@@ -13,17 +25,14 @@ Router.post("/create", upload.fields([
     }]), async (req, res) => {
         const user = req.user
         try {
-            const { images } = req.files
+            const { images } = req.files || []
             const { title, description } = req.body
             if (!title || !description) {
                 return res.status(400).json({ message: "title and description Both are required" })
             }
-            let thumbnailUrl = {};
+
+            let thumbnailUrl = null;
             let imagesUrl = [];
-
-            // ✅ Upload thumbnail
-
-
             // ✅ Upload multiple images
             if (images && images.length > 0) {
                 const uploadedImages = await Promise.all(
@@ -41,13 +50,13 @@ Router.post("/create", upload.fields([
                 thumbnailUrl = uploadedImages[0]
             }
             const post = await postModel.create({
-                thumbnail: thumbnailUrl || null,
-                images: imagesUrl || [],
                 title,
                 description,
-                createdBy: user._id
+                createdBy:user._id,
+                images:imagesUrl,
+                thumbnail:thumbnailUrl
             })
-            const populatedPost = await post.populate("createdBy", "username email");
+            const populatedPost = await post.populate({ path: "createdBy", select: "username email" });
             user.posts.push(post._id)
             await user.save()
             return res.status(200).json({

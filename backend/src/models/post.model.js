@@ -6,10 +6,10 @@ const postSchema = mongoose.Schema(
     title: String,
     description: String,
     createdAt: { type: Date, default: Date.now },
-    thumbnail: [{
+    thumbnail: {
       url: String,
       fileId: String
-    }],
+    },
     images: [{ url: String, fileId: String }],
     likedBy:[ { type: mongoose.Schema.Types.ObjectId, ref: "user" }],
     comments:[ { type: mongoose.Schema.Types.ObjectId, ref: "comment" }],
