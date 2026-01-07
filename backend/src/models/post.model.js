@@ -10,7 +10,8 @@ const postSchema = mongoose.Schema(
       url: String,
       fileId: String
     }],
-    images: [{ url: String, fileId: String }]
+    images: [{ url: String, fileId: String }],
+    likedBy:[ { type: mongoose.Schema.Types.ObjectId, ref: "user" }]
   },
   {
     toJSON: { virtuals: true }, // 👈 important
