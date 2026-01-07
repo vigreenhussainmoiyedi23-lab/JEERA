@@ -1,26 +1,23 @@
 const mongoose = require("mongoose");
 
-const chatSchema = mongoose.Schema(
+const commentSchema = mongoose.Schema(
     {
         message: String,
         User: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "user",
         },
-        status: {
-            type: String,
-            default: "member",
-            enum: ["admin", "coAdmin", "member"],
+        post: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "post"
         },
-        project:{type:mongoose.Schema.Types.ObjectId,ref:"project"},
         createdAt: { type: Date, default: Date.now },
-
     },
     {
         toJSON: { virtuals: true }, // 👈 important
     }
 );
 
-const chatModel = mongoose.model("chat", chatSchema);
+const commentModel = mongoose.model("comment", commentSchema);
 
-module.exports = chatModel;
+module.exports = commentModel;
