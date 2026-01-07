@@ -6,8 +6,11 @@ const postSchema = mongoose.Schema(
     title: String,
     description: String,
     createdAt: { type: Date, default: Date.now },
-    thumbnail:String,
-    images:[{type:String}]
+    thumbnail: [{
+      url: String,
+      fileId: String
+    }],
+    images: [{ url: String, fileId: String }]
   },
   {
     toJSON: { virtuals: true }, // 👈 important

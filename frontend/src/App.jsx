@@ -7,6 +7,7 @@ import Projects from './pages/projects/Projects';
 import ProjectDetails from './pages/projects/ProjectDetails';
 import NotFound from './pages/NotFound';
 import CreateProject from './pages/projects/CreateProject';
+import Profile from './pages/Profile/Profile';
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
     <Route path='/login' element={<Login/>}/>
     <Route path='/register' element={<Register/>}/>
     <Route path='/projects' element={<Projects/>}/>
+    <Route path='/profile' element={<Profile/>}/>
     <Route path='/createProject' element={<CreateProject/>}/>
     <Route path='/project/:projectid' element={<ProjectDetails/>}/>
 

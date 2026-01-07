@@ -5,8 +5,11 @@ const userSchema = mongoose.Schema(
     username: String,
     email: String,
     password: String,
-    profilePic: String,
-    fileId: String,
+    profilePic: {
+      url:String,
+      fileId:String
+    },
+    bio: String,
     skills: [],
     posts:[{type:mongoose.Schema.Types.ObjectId,ref:"post"}],
     projects: [{ project: { type: mongoose.Schema.Types.ObjectId, ref: "project" }, status: { type: String, default: "member" } }],
