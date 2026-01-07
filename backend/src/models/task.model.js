@@ -14,10 +14,10 @@ const taskSchema = mongoose.Schema(
     },
     taskStatus: {
       type: String,
-      default: "pending",
-      enum: ["pending", "Inprogress", "cancelled", "finished"],
+      default: "toDo",
+      enum: ["Inprogress", "cancelled", "finished","toDo"],
     },
-    project:{type:mongoose.Schema.Types.ObjectId,ref:"project"}
+    project: { type: mongoose.Schema.Types.ObjectId, ref: "project" }
   },
   {
     toJSON: { virtuals: true }, // 👈 important

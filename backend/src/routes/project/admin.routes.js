@@ -6,6 +6,7 @@ const {
   PromoteHandler,
   RemoveMemberHandler,
 } = require("../../controllers/project/project.admin.controllers");
+const { ProjectValidator, validate } = require("../../utils/express-validator");
 
 // base Route --> /api/project/admin
 // admin only feature

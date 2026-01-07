@@ -14,11 +14,11 @@ const projectSchema = mongoose.Schema(
         ref: "user",
       },}
     ],
-    coAdmins: [{coAdmin:
+    coAdmins: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
-      },}
+      }
     ],
     chats: [
       {

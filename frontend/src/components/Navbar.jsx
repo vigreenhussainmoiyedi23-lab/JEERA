@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 
 const Navbar = () => {
@@ -17,6 +17,7 @@ const Navbar = () => {
         text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl h-full"
         >
           {links.map((l, idx) => {
+           
             return (
               <NavLink
                 key={idx}

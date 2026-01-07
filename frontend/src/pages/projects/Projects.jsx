@@ -5,23 +5,15 @@ import ProjectCard from "../../components/project/ProjectCard";
 import axiosInstance from "../../utils/axiosInstance";
 import { useQuery } from "@tanstack/react-query";
 const Projects = () => {
-  const [projects, setProjects] = useState([])
-  const {
-    data,
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["projects"], // unique key for caching
     queryFn: async () => (await axiosInstance.get("/user/other/projects")).data,
     enabled: true,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
-  
+
   if (isLoading) return <p>Loading projects...</p>;
   if (isError) return <p>{error}</p>;
-
   return (
     <>
       <Navbar />
@@ -48,13 +40,12 @@ const Projects = () => {
             All Your Projects
           </h1>
           {data.projects.length === 0 && (
-            <>No projects created or you are not in any projects</>
+            <p className="text-sky-300 text-center text-sm">No projects created or you are not in any projects</p>
           )}
-          {data.projects.length}
           {/* Project Card */}
           {data.projects.length > 0 &&
             data.projects.map((p) => {
-              return <ProjectCard project={p} />;
+              return <ProjectCard project={p.project} status={p.status}/>;
             })}
         </div>
       </div>

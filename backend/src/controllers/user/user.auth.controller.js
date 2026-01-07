@@ -181,7 +181,7 @@ async function GoogleHandler(req, res) {
       // 3️⃣ If not, create new user (register)
       user = await UserModel.create({
         email,
-        name,
+        username:name,
         googleId,
         avatar: picture,
         authProvider: "google",

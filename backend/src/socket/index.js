@@ -2,12 +2,13 @@ const cookie = require("cookie");
 const { VerifyToken } = require("../utils/jwt.js");
 const chatSocket = require("./chat.socket.js");
 const taskSocket = require("./task.socket.js");
+const UserModel = require("../models/user.model.js");
 function setupSocket(io) {
   // ✅ Track connected users (userId → socket.id)
   const socketIdMap = new Map();
 
   // ✅ Auth middleware for all socket connections
-  io.use((socket, next) => {
+  io.use(async (socket, next) => {
     const cookieHeader = socket.handshake.headers.cookie;
     if (!cookieHeader) return next(new Error("No cookies found"));
 
@@ -17,7 +18,8 @@ function setupSocket(io) {
 
     try {
       const decoded = VerifyToken(token);
-      socket.user = decoded; // attach user info
+      const user=await UserModel.findById(decoded.id)
+      socket.user = user; // attach user info
       next();
     } catch (error) {
       console.error("❌ Invalid token:", error.message);
@@ -27,27 +29,22 @@ function setupSocket(io) {
 
   // ✅ On successful connection
   io.on("connection", (socket) => {
-    const userId = socket.user?.id; // ensure consistency
-    if (!userId) {
-      console.error("⚠️ Missing user ID in socket");
+    const user = socket.user; // ensure consistency
+    if (!user) {
       socket.disconnect();
       return;
     }
-
     // Save user in the map
-    socketIdMap.set(userId.toString(), socket.id);
-    console.log(`🟢 User ${userId} connected with socket ${socket.id}`);
-
+    socketIdMap.set(user._id.toString(), socket.id);
+    
     // Join project room
     socket.on("joinProject", (projectId) => {
-      socket.join(projectId);
-      console.log(`📦 User ${userId} joined project: ${projectId}`);
+      socket.join(projectId.toString());
     });
 
     // Leave project room
     socket.on("leaveProject", (projectId) => {
       socket.leave(projectId);
-      console.log(`🚪 User ${userId} left project: ${projectId}`);
     });
 
     // Feature modules
@@ -56,8 +53,7 @@ function setupSocket(io) {
 
     // Handle disconnect
     socket.on("disconnect", () => {
-      console.log(`🔴 User ${userId} disconnected`);
-      socketIdMap.delete(userId.toString());
+      socketIdMap.delete(user._id.toString());
     });
   });
 }

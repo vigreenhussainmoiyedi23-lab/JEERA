@@ -18,7 +18,7 @@ const Hero = () => {
             LinkedIn.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link className="px-8 py-3 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-lg transition shadow-lg">
+            <Link to={"/projects"} className="px-8 py-3 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-lg transition shadow-lg">
               Get Started
             </Link>
           </div>
