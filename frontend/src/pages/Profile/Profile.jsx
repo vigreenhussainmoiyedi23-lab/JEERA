@@ -35,10 +35,10 @@ const Profile = () => {
       <CreatePost setPosts={setPosts} />
 
       {/* User’s All Posts */}
-      <AllPosts posts={posts} />
+      <AllPosts posts={posts} user={user}/>
 
       {/* Suggested Posts */}
-      <PostSuggestions posts={suggestedPosts} />
+      <PostSuggestions posts={suggestedPosts} user={user}/>
     </div>
   );
 };

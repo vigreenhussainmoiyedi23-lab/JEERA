@@ -1,5 +1,5 @@
 const express = require("express");
-const upload = require("../../config/multer");
+const upload = require("../../config/multer")
 const imagekit = require("../../config/Imagekit");
 const postModel = require("../../models/post.model");
 const { default: mongoose } = require("mongoose");
@@ -12,62 +12,71 @@ Router.get("/all", async function (req, res) {
         const posts = await postModel.find({ createdBy: user._id }).populate({
             path: "createdBy",
             select: "username email profilePic",
+        }).populate({
+            path: "comments",
+            populate: {
+                path: "user",
+                select: "username email profilePic"
+            },
+            populate: {
+                path: "comments",
+                populate: {
+                    path: "user",
+                    select: "username email profilePic"
+                }
+            }
         });
         return res.status(200).json({ message: "All User Posts", posts })
     } catch (error) {
         return res.status(500).json({ message: "Something went Wrong", error })
     }
 })
-Router.post("/create", upload.fields([
-    {
-        name: "images",
-        maxCount: 5,
-    }]), async (req, res) => {
-        const user = req.user
-        try {
-            const { images } = req.files || []
-            const { title, description } = req.body
-            if (!title || !description) {
-                return res.status(400).json({ message: "title and description Both are required" })
-            }
 
-            let thumbnailUrl = null;
-            let imagesUrl = [];
-            // ✅ Upload multiple images
-            if (images && images.length > 0) {
-                const uploadedImages = await Promise.all(
-                    images.map(async (img) => {
-                        const result = await imagekit.upload({
-                            file: img.buffer,
-                            fileName: `${Date.now()}-${img.originalname}`,
-                            folder: "/jeera/projects/images",
-                        });
-                        return { url: result.url, fileId: result.fileId };
-                    })
-                );
-
-                imagesUrl = uploadedImages;
-                thumbnailUrl = uploadedImages[0]
-            }
-            const post = await postModel.create({
-                title,
-                description,
-                createdBy:user._id,
-                images:imagesUrl,
-                thumbnail:thumbnailUrl
-            })
-            const populatedPost = await post.populate({ path: "createdBy", select: "username email" });
-            user.posts.push(post._id)
-            await user.save()
-            return res.status(200).json({
-                message: "post created succesfully",
-                post: populatedPost
-            })
-
-        } catch (error) {
-            return res.status(500).json({ message: "an error occured", error })
+Router.post("/create", upload.array("images", 5), async (req, res) => {
+    const user = req.user
+    try {
+        const images = [...req.files] || [];
+        const { title, description } = req.body
+        if (!title || !description) {
+            return res.status(400).json({ message: "title and description Both are required" })
         }
-    })
+
+        let thumbnailUrl = null;
+        let imagesUrl = [];
+        // ✅ Upload multiple images
+        if (images && images.length > 0) {
+            const uploadedImages = await Promise.all(
+                images.map(async (img) => {
+                    const result = await imagekit.upload({
+                        file: img.buffer,
+                        fileName: `${Date.now()}-${img.originalname}`,
+                        folder: "/jeera/projects/images",
+                    });
+                    return { url: result.url, fileId: result.fileId };
+                })
+            );
+
+            imagesUrl = uploadedImages;
+            thumbnailUrl = uploadedImages[0]
+        }
+        const post = await postModel.create({
+            title,
+            description,
+            createdBy: user._id,
+            images: imagesUrl,
+            thumbnail: thumbnailUrl
+        })
+        const populatedPost = await post.populate({ path: "createdBy", select: "username email" });
+        user.posts.push(post._id)
+        await user.save()
+        return res.status(200).json({
+            message: "post created succesfully",
+            post: populatedPost
+        })
+    } catch (error) {
+        return res.status(500).json({ message: "an error occured", error })
+    }
+})
 Router.delete("/delete/:postId", async (req, res) => {
     try {
         const user = req.user
@@ -154,81 +163,6 @@ Router.post("/feed", async (req, res) => {
         });
     }
 });
-// post  --> create comment
-// patch --> Update comment
-// delete--> delete comment
-Router.post("/comment/:postId", async function (req, res) {
-    try {
-        const user = req.user
-        const { message } = req.body
-        const { postId } = req.params
-        const post = await postModel.findById(postId)
-        if (!message || !post) return res.status(400).json({ message: "Either postId is incorrect or message is empty" })
-        const comment = await commentModel.create({
-            message,
-            user: user._id,
-            post: postId
-        })
-        post.comments.push(comment._id)
-        await post.save()
-        return res.status(200).json({
-            message: "comment posted successfully",
-            comment
-        })
-    } catch (error) {
-        return res.status(500).json({
-            message: "Something Went Wrong",
-            error
-        })
-    }
-})
-Router.delete("/comment/:postId/:commentId", async function (req, res) {
-    try {
-        const user = req.user
-
-        const { message } = req.body
-        const { postId, commentId } = req.params
-        const post = await postModel.findById(postId)
-        if (!message || !post) return res.status(400).json({ message: "Either postId is incorrect or message is empty" })
-        const comment = await commentModel.findByIdAndUpdate(commentId, {
-            message,
-        })
-        const pindex = post.comments.findIndex(p => p.toString() == postId.toString())
-        post.comments.splice(pindex, 1)
-        await post.save()
-        return res.status(200).json({
-            message: "comment deleted succesfully",
-            comment
-        })
-    } catch (error) {
-        return res.status(500).json({
-            message: "Something Went Wrong",
-            error
-        })
-    }
-})
-Router.patch("/comment/:postId/:commentId", async function (req, res) {
-    try {
-        const user = req.user
-
-        const { message } = req.body
-        const { postId, commentId } = req.params
-        const post = await postModel.findById(postId)
-        if (!message || !post) return res.status(400).json({ message: "Either postId is incorrect or message is empty" })
-        const comment = await commentModel.findByIdAndUpdate(commentId, {
-            message,
-        })
-        return res.status(200).json({
-            message: "comment updated succesfully",
-            comment
-        })
-    } catch (error) {
-        return res.status(500).json({
-            message: "Something Went Wrong",
-            error
-        })
-    }
-})
 Router.get("/likeUnlike/:postId", async function (req, res) {
     try {
         const user = req.user

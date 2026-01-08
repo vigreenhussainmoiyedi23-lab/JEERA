@@ -1,3 +1,4 @@
+import { Edit2, Trash } from "lucide-react";
 import React from "react";
 
 const Information = ({ user }) => {
@@ -13,14 +14,16 @@ const Information = ({ user }) => {
       <div className="flex flex-col sm:flex-row items-center sm:items-start sm:justify-between gap-6">
         {/* Profile Picture */}
         <img
-          src={user.profilePic?.url || "/default-avatar.png"}
+          src={user.profilePic?.url || "/user.png"}
           alt="profile"
           className="w-28 h-28 rounded-full border-4 border-yellow-400 object-cover shadow-md"
         />
 
         {/* Info */}
         <div className="flex-1 text-center sm:text-left space-y-2">
-          <h2 className="text-3xl font-bold text-yellow-300">{user.username}</h2>
+          <h2 className="text-3xl font-bold text-yellow-300">
+            {user.username}
+          </h2>
           <p className="text-gray-400">{user.email}</p>
           <div className="flex flex-wrap gap-2 mt-2 justify-center sm:justify-start">
             {user.skills?.length ? (
@@ -36,6 +39,12 @@ const Information = ({ user }) => {
               <p className="text-gray-500">No skills added</p>
             )}
           </div>
+        </div>
+        {/* {Edit  Profile  */}
+        <div>
+          <button className="text-sm text-center flex items-center justify-center gap-2 md:text-lg xl:text-2xl active:scale-110 hover:cursor-pointer text-blue-500  font-extrabold px-3 py-2 rounded-2xl">
+            <Edit2 /> Edit
+          </button>
         </div>
       </div>
     </div>

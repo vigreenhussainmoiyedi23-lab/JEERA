@@ -6,12 +6,13 @@ const userSchema = mongoose.Schema(
     email: String,
     password: String,
     profilePic: {
-      url:String,
-      fileId:String
-    },
+      url: { type: String, default: "" },
+      fileId: { type: String, default: "" }
+    }
+    ,
     bio: String,
     skills: [],
-    posts:[{type:mongoose.Schema.Types.ObjectId,ref:"post"}],
+    posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "post" }],
     projects: [{ project: { type: mongoose.Schema.Types.ObjectId, ref: "project" }, status: { type: String, default: "member" } }],
     tasks: [{ task: { type: mongoose.Schema.Types.ObjectId, ref: "task" }, project: { type: mongoose.Schema.Types.ObjectId, ref: "project" } }],
     invites: [{ type: mongoose.Schema.Types.ObjectId, ref: "project" }],

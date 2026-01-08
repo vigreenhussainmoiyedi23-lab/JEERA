@@ -21,10 +21,15 @@ const CreatePost = ({ setPosts }) => {
 
     setLoading(true);
     try {
-      const res = await axiosInstance.post("/post/create", data);
+      const res = await axiosInstance.post("/post/create", data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       setPosts((prev) => [res.data.post, ...prev]);
       setFormData({ title: "", description: "" });
       setImages([]);
+      console.log(res)
     } catch (err) {
       console.error(err);
     }
@@ -34,6 +39,7 @@ const CreatePost = ({ setPosts }) => {
   return (
     <form
       onSubmit={handleSubmit}
+      encType="multipart/form-data"
       className="bg-black/30 border border-gray-800 rounded-2xl p-6 shadow-lg space-y-4"
     >
       <h3 className="text-2xl font-bold text-yellow-300">Create Post</h3>

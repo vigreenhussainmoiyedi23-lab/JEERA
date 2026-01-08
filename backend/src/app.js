@@ -18,7 +18,7 @@ const postRoutes=require("./routes/main/post.routes")
 const { UserIsLoggedIn } = require("./middlewares/UserAuth.middleware");
 
 //_______Middlewares_______
-app.use(express.json());
+
 app.use(cookieParser());
 app.use(limiter);
 app.use(
@@ -30,8 +30,6 @@ app.use(
     },
   })
 );
-
-app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -45,9 +43,12 @@ app.use(
   })
 );
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+// routes using multipart form
+app.use("/api/post",UserIsLoggedIn,postRoutes) 
 //_______routes_______
 app.use("/api/user", userRoutes);
 app.use("/api/project", UserIsLoggedIn, projectRoutes);
 app.use("/api/task", UserIsLoggedIn, taskRoutes);
-app.use("/api/post",UserIsLoggedIn,postRoutes)
 module.exports = app;

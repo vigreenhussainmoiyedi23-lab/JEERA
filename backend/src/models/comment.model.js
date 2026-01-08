@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const commentSchema = mongoose.Schema(
     {
         message: String,
-        User: {
+        user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "user",
         },
@@ -12,6 +12,15 @@ const commentSchema = mongoose.Schema(
             ref: "post"
         },
         createdAt: { type: Date, default: Date.now },
+        replies:[{
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"comment", 
+        }],
+        isReply:{type:Boolean,default:false},
+        likedBy:[{
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"user"
+        }]
     },
     {
         toJSON: { virtuals: true }, // 👈 important
