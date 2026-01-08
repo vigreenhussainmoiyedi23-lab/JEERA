@@ -12,20 +12,7 @@ Router.get("/all", async function (req, res) {
         const posts = await postModel.find({ createdBy: user._id }).populate({
             path: "createdBy",
             select: "username email profilePic",
-        }).populate({
-            path: "comments",
-            populate: {
-                path: "user",
-                select: "username email profilePic"
-            },
-            populate: {
-                path: "comments",
-                populate: {
-                    path: "user",
-                    select: "username email profilePic"
-                }
-            }
-        });
+        })
         return res.status(200).json({ message: "All User Posts", posts })
     } catch (error) {
         return res.status(500).json({ message: "Something went Wrong", error })
@@ -163,7 +150,7 @@ Router.post("/feed", async (req, res) => {
         });
     }
 });
-Router.get("/likeUnlike/:postId", async function (req, res) {
+Router.patch("/likeUnlike/:postId", async function (req, res) {
     try {
         const user = req.user
         let liked = false

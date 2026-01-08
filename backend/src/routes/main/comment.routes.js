@@ -11,6 +11,40 @@ const { populate } = require("dotenv");
 // delete--> delete comment
 
 const Router = express.Router();
+Router.get("/all/:postId", async function (req, res) {
+    try {
+        const { postId } = req.params;
+
+        const comments = await commentModel
+            .find({ post: postId, isReply: false })
+            .sort({ createdAt: -1 })
+            .populate({
+                path: "user", // ✅ use correct field name (your schema uses "user", not "createdBy")
+                select: "username email profilePic",
+            })
+            .populate({
+                path: "replies",
+                populate: {
+                    path: "user", // ✅ again, it’s "user" not "createdBy"
+                    select: "username email profilePic",
+                },
+            });
+
+        return res.status(200).json({
+            success: true,
+            message: "Here are all comments with replies",
+            comments,
+        });
+    } catch (error) {
+        console.error("❌ Error fetching comments:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong while fetching comments",
+            error: error.message,
+        });
+    }
+});
+
 Router.post("/create/:postId", async function (req, res) {
     try {
         const user = req.user
@@ -59,7 +93,30 @@ Router.delete("/:postId/:commentId", async function (req, res) {
         })
     }
 })
-Router.patch("/update/:commentId", async function (req, res) {
+Router.patch("/like/:commentId", async (req, res) => {
+    try {
+        const user = req.user;
+        const { commentId } = req.params;
+
+        const comment = await commentModel.findById(commentId);
+        if (!comment) return res.status(404).json({ message: "Comment not found." });
+
+        const index = comment.likedBy.findIndex((u) => u.toString() === user._id.toString());
+        let liked = false;
+        if (index === -1) {
+            comment.likedBy.push(user._id);
+            liked = true;
+        } else {
+            comment.likedBy.splice(index, 1);
+        }
+
+        await comment.save();
+        res.status(200).json({ message: liked ? "Liked comment" : "Unliked comment", liked });
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error });
+    }
+});
+Router.patch("/edit/:commentId", async function (req, res) {
     try {
         const { message } = req.body
         const { commentId } = req.params
@@ -105,33 +162,6 @@ Router.post("/reply/:parentCommentId", async function (req, res) {
         })
     }
 })
-Router.post("/reply/:parentCommentId", async function (req, res) {
-    try {
-        const { message } = req.body
-        const { parentCommentId } = req.params
-        const comment = await commentModel.create({
-            message,
-            user: req.user._id,
-            commentId,
-            isReply: true
-        })
-        await commentModel.findByIdAndUpdate(parentCommentId,
-            {
-                $push: { replies: comment._id }
-            },
-            {
-                new: true
-            })
-        return res.status(200).json({
-            message: "comment updated succesfully",
-            comment
-        })
-    } catch (error) {
-        return res.status(500).json({
-            message: "Something Went Wrong",
-            error
-        })
-    }
-})
+
 
 module.exports = Router;
