@@ -22,6 +22,30 @@ Router.get("/all/:postId", async function (req, res) {
                 path: "user", // ✅ use correct field name (your schema uses "user", not "createdBy")
                 select: "username email profilePic",
             })
+        return res.status(200).json({
+            success: true,
+            message: "Here are all comments",
+            comments,
+        });
+    } catch (error) {
+        console.error("❌ Error fetching comments:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong while fetching comments",
+            error: error.message,
+        });
+    }
+});
+Router.get("/replies/:commentId", async function (req, res) {
+    try {
+        const { commentId } = req.params;
+
+        const { replies } = await commentModel
+            .findById(commentId)
+            .populate({
+                path: "user", // ✅ use correct field name (your schema uses "user", not "createdBy")
+                select: "username email profilePic",
+            })
             .populate({
                 path: "replies",
                 populate: {
@@ -32,8 +56,8 @@ Router.get("/all/:postId", async function (req, res) {
 
         return res.status(200).json({
             success: true,
-            message: "Here are all comments with replies",
-            comments,
+            message: "Here are all replies ",
+            replies,
         });
     } catch (error) {
         console.error("❌ Error fetching comments:", error);
@@ -141,7 +165,7 @@ Router.post("/reply/:parentCommentId", async function (req, res) {
         const comment = await commentModel.create({
             message,
             user: req.user._id,
-            commentId,
+            parentCommentId,
             isReply: true
         })
         await commentModel.findByIdAndUpdate(parentCommentId,
@@ -152,7 +176,7 @@ Router.post("/reply/:parentCommentId", async function (req, res) {
                 new: true
             })
         return res.status(200).json({
-            message: "comment updated succesfully",
+            message: "reply added succesfully",
             comment
         })
     } catch (error) {

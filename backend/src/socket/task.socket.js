@@ -3,102 +3,143 @@ const TaskModel = require("../models/task.model");
 const UserModel = require("../models/user.model");
 
 function taskSocket(io, socket, socketIdMap) {
-  // ✅ Create Task
-  socket.on("createTask", async ({ projectId, title, description, assignedTo }) => {
+  async function isProjectMember(projectId, userId) {
+    const project = await projectModel.findById(projectId);
+    if (!project) return false;
+
+    return (
+      project.admin.toString() === userId.toString() ||
+      project.coAdmins.some((id) => id.toString() === userId.toString()) ||
+      project.members.some((id) => id.toString() === userId.toString())
+    );
+  }
+
+  // Join project & send members
+  socket.on("joinProject", async (projectId) => {
+    try {
+      const user = socket.user;
+      if (!(await isProjectMember(projectId, user._id))) {
+        return socket.emit("errorMessage", { message: "Access denied" });
+      }
+
+      socket.join(projectId);
+
+      const project = await projectModel
+        .findById(projectId)
+        .populate("members", "username email profilePic")
+        .populate("coAdmins", "username email profilePic")
+        .populate("admin", "username email profilePic");
+
+      const members = [
+        project.admin,
+        ...project.coAdmins,
+        ...project.members,
+      ].filter(Boolean);
+
+      socket.emit("projectMembers", members);
+    } catch (err) {
+      socket.emit("errorMessage", { message: "Failed to join project" });
+    }
+  });
+
+  // CREATE TASK - now accepts taskStatus from client
+  socket.on("createTask", async ({ projectId, title, description, assignedTo = [], taskStatus }) => {
     try {
       const createdBy = socket.user;
       const project = await projectModel.findById(projectId);
-      if (!project) return socket.emit("errorMessage", { message: "Project not found." });
-
-      const isAdmin = project.admin.toString() === createdBy._id.toString();
-      const isCoAdmin = project.coAdmins.some(
-        (co) => co.toString() === createdBy._id.toString()
-      );
-
-      if (!isAdmin && !isCoAdmin) {
-        return socket.emit("errorMessage", {
-          message: "You are not authorized to create tasks in this project.",
-        });
+      if (!project) {
+        return socket.emit("errorMessage", { message: "Project not found" });
       }
 
+      if (!(await isProjectMember(projectId, createdBy._id))) {
+        return socket.emit("errorMessage", { message: "Not authorized" });
+      }
+
+      // Validate status
+      const validStatuses = ["toDo", "inProgress", "review", "done"];
+      const finalStatus = validStatuses.includes(taskStatus) ? taskStatus : "toDo";
+
       const newTask = await TaskModel.create({
-        title,
-        description,
-        assignedTo,
-        createdBy,
+        title: title.trim(),
+        description: description?.trim() || "",
+        assignedTo: assignedTo.length ? assignedTo : [createdBy._id],
+        createdBy: createdBy._id,
         project: projectId,
-        taskStatus: "toDo",
+        taskStatus: finalStatus,
       });
 
-      // Update users
       await UserModel.updateMany(
-        { _id: { $in: assignedTo } },
+        { _id: { $in: newTask.assignedTo } },
         { $push: { tasks: newTask._id } }
       );
 
       project.allTasks.push(newTask._id);
       await project.save();
 
-      // Notify assigned users
-      assignedTo.forEach((userId) => {
-        const targetSocketId = socketIdMap.get(userId);
-        if (targetSocketId) {
-          io.to(targetSocketId).emit("newTask", newTask);
-        }
-      });
+      const populatedTask = await TaskModel.findById(newTask._id)
+        .populate("createdBy", "username email profilePic")
+        .populate("assignedTo", "username email profilePic");
 
-      socket.emit("taskCreated", newTask);
+      io.to(projectId).emit("newTask", populatedTask);
+      socket.emit("taskCreated", populatedTask);
     } catch (err) {
-      console.error("❌ Error creating task:", err);
-      socket.emit("errorMessage", { message: "Task creation failed." });
+      console.error("Create task error:", err);
+      socket.emit("errorMessage", { message: "Failed to create task" });
     }
   });
 
-  // ✅ Update Task
-  socket.on("updateTask", async ({ taskId, status }) => {
+  // UPDATE TASK (status + other fields)
+  socket.on("updateTask", async ({ taskId, status, assignedTo }) => {
     try {
-      const updatedTask = await TaskModel.findByIdAndUpdate(
-        taskId,
-        { taskStatus: status },
-        { new: true }
-      ).populate("assignedTo", "username email");
+      const task = await TaskModel.findById(taskId);
+      if (!task) return socket.emit("errorMessage", { message: "Task not found" });
 
-      if (!updatedTask) return;
+      if (!(await isProjectMember(task.project, socket.user._id))) {
+        return socket.emit("errorMessage", { message: "Not authorized" });
+      }
 
-      updatedTask.assignedTo.forEach((user) => {
-        const targetSocketId = socketIdMap.get(user._id.toString());
-        if (targetSocketId) {
-          io.to(targetSocketId).emit("taskUpdated", updatedTask);
-        }
-      });
+      let changed = false;
 
-      socket.emit("taskUpdated", updatedTask);
+      if (status && ["toDo", "inProgress", "review", "done"].includes(status)) {
+        task.taskStatus = status;
+        changed = true;
+      }
+
+      if (assignedTo && Array.isArray(assignedTo)) {
+        task.assignedTo = assignedTo;
+        changed = true;
+      }
+
+      if (changed) {
+        await task.save();
+
+        const updatedTask = await TaskModel.findById(taskId)
+          .populate("createdBy", "username email profilePic")
+          .populate("assignedTo", "username email profilePic");
+
+        io.to(task.project.toString()).emit("taskUpdated", updatedTask);
+      }
     } catch (err) {
-      console.error("❌ Error updating task:", err);
+      console.error("Update task error:", err);
+      socket.emit("errorMessage", { message: "Failed to update task" });
     }
   });
 
-  // ✅ Get all tasks — only for this user
-  socket.on("get-all-tasks", async (projectId) => {
+  // GET ALL TASKS
+  socket.on("getAllTasks", async (projectId) => {
     try {
-      const user = socket.user;
-      if (!user) throw new Error("No User Found");
+      if (!(await isProjectMember(projectId, socket.user._id))) {
+        return socket.emit("errorMessage", { message: "Not authorized" });
+      }
 
-      // Get only tasks assigned to this user for this project
-      const tasks = await TaskModel.find({
-        project: projectId,
-        assignedTo: user._id,
-      })
-        .populate("createdBy", "username email")
-        .populate("assignedTo", "username email");
+      const tasks = await TaskModel.find({ project: projectId })
+        .populate("createdBy", "username email profilePic")
+        .populate("assignedTo", "username email profilePic")
+        .sort({ createdAt: -1 });
 
-      console.log(`📦 Sending ${tasks.length} tasks to ${user.username}`);
-
-      // Send only to the requesting user
-      socket.emit("all-tasks", { tasks });
+      socket.emit("allTasks", { tasks });
     } catch (err) {
-      console.error("❌ Error fetching tasks:", err);
-      socket.emit("errorMessage", { message: "Failed to fetch tasks." });
+      socket.emit("errorMessage", { message: "Failed to load tasks" });
     }
   });
 }

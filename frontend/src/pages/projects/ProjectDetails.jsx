@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "../../utils/axiosInstance";
 import Navbar from "../../components/Navbar";
 import socket from "../../socket/socket";
-import TaskCard from "../../components/project/task/TaskCard";
 import KanbanBoard from "../../components/project/task/KanbanBoard";
 
 const ProjectDetails = () => {
@@ -202,7 +201,7 @@ const ProjectDetails = () => {
         </div>
 
         <div className="h-[10vh]"></div>
-        <div className="max-w-5xl mx-auto">
+        <div>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10 border-b border-gray-700 pb-4">
             <h1 className="text-3xl sm:text-4xl font-bold text-yellow-300">
               {project?.title}
@@ -243,49 +242,11 @@ const ProjectDetails = () => {
           </div>
           {/* Tasks */}
           {current == "tasks" && (
-            <div className="bg-gray-900/60 p-5 rounded-xl border border-gray-700 mb-10">
+            <div className="bg-gray-900/60 p-5 rounded-xl border border-gray-700 mb-10 w-full min-h-screen">
               <h2 className="text-2xl font-extrabold text-yellow-400 mb-3 text-center">
                 Tasks
               </h2>
-              <KanbanBoard />
-              {/* <div className="grid md:grid-cols-3 grid-cols-1 sm:grid-cols-2 md:gap-4 sm:gap-2 gap-1">
-              <div className="w-full">
-                <h1 className="text-center text-xl md:text-2xl xl:text-4xl text-yellow-300 font-bold">
-                  In Progress
-                </h1>
-                {tasks.length>0 && tasks.map((t) => {
-                  if (t.taskStatus == "Inprogress") {
-                    return <TaskCard task={t} />;
-                  }
-                  {
-                  }
-                })}
-              </div>
-              <div className="w-full border-x-2 border-gray-700">
-                <h1 className="text-center text-xl md:text-2xl xl:text-4xl text-yellow-300 font-bold">
-                  Finished
-                </h1>
-                {tasks.length>0 && tasks.map((t) => {
-                  if (t.taskStatus == "Inprogress") {
-                    return <TaskCard task={t} />;
-                  }
-                  {
-                  }
-                })}
-              </div>
-              <div className="w-full">
-                <h1 className="text-center text-xl md:text-2xl xl:text-4xl text-yellow-300 font-bold">
-                  Cancelled
-                </h1>
-                {tasks.length>0 && tasks.map((t) => {
-                  if (t.taskStatus == "Inprogress") {
-                    return <TaskCard task={t} />;
-                  }
-                  {
-                  }
-                })}
-              </div>
-            </div> */}
+              <KanbanBoard projectId={projectid} currentUser={user}/>
             </div>
           )}
           {/* Notifications / New Messages */}

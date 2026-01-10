@@ -39,7 +39,7 @@ function setupSocket(io) {
     
     // Join project room
     socket.on("joinProject", (projectId) => {
-      socket.join(projectId.toString());
+      socket.join(projectId);
     });
 
     // Leave project room

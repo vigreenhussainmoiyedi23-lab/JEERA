@@ -68,12 +68,12 @@ const Features = () => {
           <motion.div
             key={i}
             variants={cardVariants}
-            className="p-8 rounded-xl shadow-lg bg-black/10 backdrop-blur-3xl dark:bg-gray-800 hover:scale-105 hover:shadow-xl transition-transform duration-300"
+            className="p-8 rounded-xl shadow-lg bg-yellow-400 backdrop-blur-3xl hover:scale-105 hover:shadow-xl transition-transform duration-300"
           >
-            <h3 className="text-xl sm:text-2xl font-semibold text-blue-600 dark:text-blue-400 mb-3">
+            <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-3">
               {f.title}
             </h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">
+            <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
               {f.desc}
             </p>
           </motion.div>

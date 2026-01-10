@@ -30,7 +30,7 @@ const Projects = () => {
             className="text-lg md:text-xl font-semibold bg-blue-400 text-black px-4 py-2 rounded-t-2xl rounded-b-3xl hover:bg-blue-500 transition duration-200"
             to={"/tasks"}
           >
-            View Tasks
+            View Task Board
           </Link>
         </div>
 
