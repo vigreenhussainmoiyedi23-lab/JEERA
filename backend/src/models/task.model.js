@@ -1,28 +1,92 @@
 const mongoose = require("mongoose");
-
-const taskSchema = mongoose.Schema(
+const taskSchema = new mongoose.Schema(
   {
-    assignedTo: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
-    title: String,
+    title: {
+      type: String,
+      required: true,
+      trim: true
+    },
+
     description: String,
-    createdAt: { type: Date, default: Date.now },
+
+    issueType: {
+      type: String,
+      enum: ["task", "bug", "story", "epic"],
+      default: "task"
+    },
+
+    priority: {
+      type: String,
+      enum: ["low", "medium", "high", "critical", "highest"],
+      default: "medium"
+    },
+
+    taskStatus: {
+      type: String,
+      enum: ["toDo", "Inprogress", "Inreview", "done", "Failed"],
+      default: "toDo"
+    },
+
     categoury: {
       type: String,
       enum: ["frontend", "backend", "devops", "debugging", "other"],
-      default: "other",
+      default: "other"
     },
-    taskStatus: {
-      type: String,
-      default: "toDo",
-      enum: ["Inprogress", "cancelled", "finished","toDo"],
+
+    storyPoints: {
+      type: Number,
+      min: 0 //1, 2, 3, 5, 8, 13, 21
     },
-    project: { type: mongoose.Schema.Types.ObjectId, ref: "project" }
+
+    labels: [String],
+
+    assignedTo: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user"
+    }],
+
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+      required: true
+    },
+
+    project: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "project",
+      required: true
+    },
+
+    sprint: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "sprint"
+    },
+
+    history: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "taskHistory"
+    }],
+
+    attachments: [
+      {
+        filename: String,
+        url: String
+      }
+    ],
+
+    dueDate: Date,
+
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+
+    updatedAt: Date
   },
   {
-    toJSON: { virtuals: true }, // 👈 important
+    timestamps: true,
+    toJSON: { virtuals: true }
   }
 );
-const taskModel = mongoose.model("task", taskSchema);
 
-module.exports = taskModel;
+module.exports = mongoose.model("task", taskSchema);

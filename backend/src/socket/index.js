@@ -37,15 +37,6 @@ function setupSocket(io) {
     // Save user in the map
     socketIdMap.set(user._id.toString(), socket.id);
     
-    // Join project room
-    socket.on("joinProject", (projectId) => {
-      socket.join(projectId);
-    });
-
-    // Leave project room
-    socket.on("leaveProject", (projectId) => {
-      socket.leave(projectId);
-    });
 
     // Feature modules
     chatSocket(io, socket, socketIdMap);
