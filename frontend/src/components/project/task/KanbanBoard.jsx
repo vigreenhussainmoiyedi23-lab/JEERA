@@ -1,203 +1,106 @@
-import React, { useEffect, useState } from "react";
-import {
-  DndContext,
-  closestCorners,
-  useSensor,
-  useSensors,
-  PointerSensor,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  arrayMove,
-  useSortable,
-  verticalListSortingStrategy,
-  horizontalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import socket from "../../../socket/socket";
+import { useState, useCallback } from "react";
+import KanbanColumn  from "./KanbanColumn.jsx";
 
-// --- 🧱 Sortable Column Wrapper ---
-function SortableColumn({ id, children }) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id });
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-  return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      {children}
-    </div>
+const columns = [
+  { id: "toDo", label: "To Do" },
+  { id: "inProgress", label: "In Progress" },
+  { id: "review", label: "Review" },
+  { id: "done", label: "Done" },
+];
+
+const initialTasks = {
+  toDo: [
+    { id: "1", title: "Create Login UI", description: "Make responsive layout", priority: "high" },
+    { id: "2", title: "Set up Lint Rules", description: "Add ESLint & Prettier", priority: "low" },
+  ],
+  inProgress: [
+    { id: "3", title: "Implement Auth API", description: "JWT + refresh tokens", priority: "medium" },
+  ],
+  review: [
+    { id: "4", title: "Optimize DB Queries", description: "Add indexing for performance", priority: "high" },
+  ],
+  done: [
+    { id: "5", title: "Deploy Backend", description: "Render with env vars", priority: "high" },
+  ],
+};
+
+export default function KanbanBoard() {
+  const [tasks, setTasks] = useState(initialTasks);
+  const [dragState, setDragState] = useState(null);
+  const [dropIndicator, setDropIndicator] = useState(null);
+
+  const handleDragStart = useCallback((task, columnId, index) => {
+    setDragState({ task, fromColumnId: columnId, fromIndex: index });
+  }, []);
+
+  const handleDragEnd = useCallback(() => {
+    setDragState(null);
+    setDropIndicator(null);
+  }, []);
+
+  const handleDragOver = useCallback((e, columnId, index) => {
+    e.preventDefault();
+    setDropIndicator((prev) => {
+      if (prev?.columnId === columnId && prev?.index === index) return prev;
+      return { columnId, index };
+    });
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setDropIndicator(null);
+  }, []);
+
+  const handleDrop = useCallback(
+    (e, targetColumnId) => {
+      e.preventDefault();
+      if (!dragState || !dropIndicator) {
+        handleDragEnd();
+        return;
+      }
+
+      const { task, fromColumnId, fromIndex } = dragState;
+      let targetIndex = dropIndicator.index;
+
+      const newTasks = { ...tasks };
+      newTasks[fromColumnId] = [...newTasks[fromColumnId]];
+      newTasks[fromColumnId].splice(fromIndex, 1);
+
+      if (fromColumnId === targetColumnId && fromIndex < targetIndex) {
+        targetIndex = targetIndex - 1;
+      }
+
+      newTasks[targetColumnId] = [...newTasks[targetColumnId]];
+      targetIndex = Math.max(0, Math.min(targetIndex, newTasks[targetColumnId].length));
+      newTasks[targetColumnId].splice(targetIndex, 0, task);
+
+      setTasks(newTasks);
+      handleDragEnd();
+    },
+    [dragState, dropIndicator, tasks, handleDragEnd]
   );
-}
-
-// --- 📋 Sortable Task Card ---
-function SortableTask({ task }) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: task._id });
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
 
   return (
-    <div
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-      style={style}
-      className="bg-gray-900/70 border border-gray-700 rounded-lg p-3 mb-3 cursor-grab active:cursor-grabbing text-yellow-200 hover:border-yellow-400 transition"
-    >
-      <h3 className="font-semibold text-sm">{task.title}</h3>
-      <p className="text-xs text-gray-400 line-clamp-2 mb-1">
-        {task.description}
-      </p>
-      <p className="text-xs text-gray-500">
-        👤 {task.createdBy?.username || "Unknown"}
-      </p>
-    </div>
-  );
-}
-
-export default function KanbanBoard({ projectId, currentUser }) {
-  const [tasks, setTasks] = useState([
-    {
-      title: "Design Login Page UI",
-      description: "Create responsive login and signup UI using Tailwind CSS",
-      categoury: "frontend",
-      priority: "high",
-      status: "pending",
-      assignedTo: ["65f12a1b9c1a2e0012a11111"],
-      createdBy: "65f129f99c1a2e0012a00001",
-      dueDate: new Date("2026-01-20"),
-    },
-    {
-      title: "JWT Authentication API",
-      description:
-        "Implement JWT-based authentication with access and refresh tokens",
-      categoury: "backend",
-      priority: "high",
-      status: "Failed",
-      assignedTo: ["65f12a1b9c1a2e0012a11112", "65f12a1b9c1a2e0012a11113"],
-      createdBy: "65f129f99c1a2e0012a00001",
-      dueDate: new Date("2026-01-18"),
-    },
-    {
-      title: "Fix Navbar Bug",
-      description: "Navbar breaks on mobile view below 375px width",
-      categoury: "frontend",
-      priority: "medium",
-      status: "Failed",
-      assignedTo: ["65f12a1b9c1a2e0012a11114"],
-      createdBy: "65f129f99c1a2e0012a00002",
-      dueDate: new Date("2026-01-10"),
-    },
-    {
-      title: "Database Index Optimization",
-      description: "Add indexes to frequently queried fields for performance",
-      categoury: "backend",
-      priority: "medium",
-      status: "toDo",
-      assignedTo: ["65f12a1b9c1a2e0012a11115"],
-      createdBy: "65f129f99c1a2e0012a00001",
-      dueDate: new Date("2026-01-25"),
-    },
-    {
-      title: "Deploy Backend to Render",
-      description:
-        "Deploy Node.js backend with environment variables configured",
-      categoury: "devops",
-      priority: "high",
-      status: "Inprogress",
-      assignedTo: ["65f12a1b9c1a2e0012a11116"],
-      createdBy: "65f129f99c1a2e0012a00003",
-      dueDate: new Date("2026-01-15"),
-    },
-    {
-      title: "Write API Documentation",
-      description: "Document all REST APIs using Swagger",
-      categoury: "documentation",
-      priority: "low",
-      status: "done",
-      assignedTo: ["65f12a1b9c1a2e0012a11117"],
-      createdBy: "65f129f99c1a2e0012a00001",
-      dueDate: new Date("2026-01-30"),
-    },
-  ]);
-  const [columns, setColumns] = useState([
-    { id: "toDo", label: "To Do", Bgcolor: "bg-yellow-500" },
-    { id: "Inprogress", label: "In Progress", Bgcolor: "bg-slate-500" },
-    { id: "Inreview", label: "Review", Bgcolor: "bg-blue-500" },
-    { id: "done", label: "Done", Bgcolor: "bg-green-500" },
-    { id: "Failed", label: "Failed", Bgcolor: "bg-red-500" },
-  ]);
-
-  const [newTask, setNewTask] = useState({
-    title: "",
-    description: "",
-    assignedTo: [],
-    taskStatus: "toDo",
-  });
-  const [activeDragElem, setActiveDragElem] = useState(null);
-  // 📡 Socket setup
-  useEffect(() => {
-    if (!projectId) return;
-
-    socket.emit("joinProject", projectId);
-    socket.emit("getAllTasks", projectId);
-
-    socket.on("newTask", (task) => setTasks((prev) => [task, ...prev]));
-    socket.on("taskUpdated", (updatedTask) =>
-      setTasks((prev) =>
-        prev.map((t) => (t._id === updatedTask._id ? updatedTask : t))
-      )
-    );
-
-    return () => socket.off();
-  }, [projectId]);
-
-  if (!tasks || tasks.length == 0) {
-  }
-  return (
-    <>
-      <div className="grid grid-cols-5 gap-2">
-        {columns.map((c, idx) => {
-          return (
-            <div
-              id={c.id}
-              className="px-3 py-2 bg-slate-800 flex flex-col gap-3"
-              onDrop={async function (e) {
-                console.log(e);
-              }}
-            >
-              <h1 className="text-yellow-300 font-bold text-2xl text-center mb-3">
-                {c.label}
-              </h1>
-              {tasks.map((t) => {
-                if (c.id==t.status) return (
-                  <div
-                    draggable
-                    className={`${c.Bgcolor}  rounded-xl flex items-center justify-center flex-col h-40 w-full`}
-                  >
-                    <div className="flex items-center justify-between text-sm h-10">
-                      <div>{t.status}</div>
-                      <div>{new Date(t.dueDate).toLocaleDateString()}</div>
-                    </div>
-                    <div className="h-20">
-                      <h1 className="text-xl font-bold text-sky-200 p-2">{t.title}</h1>
-                      <p className="w-full h-3/4 overflow-clip">{t.description}</p>
-                    </div>
-                    <div className="flex items-center justify-between h-10">
-                      <div>{t.categoury}</div>
-                      <div>{t.priority}</div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 p-6 lg:p-8">
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-100 mb-2">Project Board</h1>
+        <p className="text-gray-400">Drag and drop tasks to manage your workflow</p>
+      </header>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {columns.map((column) => (
+          <KanbanColumn
+            key={column.id}
+            column={column}
+            tasks={tasks[column.id]}
+            dragState={dragState}
+            dropIndicator={dropIndicator}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          />
+        ))}
       </div>
-    </>
+    </div>
   );
 }

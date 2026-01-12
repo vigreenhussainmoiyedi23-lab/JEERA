@@ -1,0 +1,128 @@
+// {columns.map((c) => (
+//       <div
+//         key={c.id}
+//         className={`
+//           relative
+//           rounded-xl
+//           border
+//           ${c.Bgcolor}
+//           backdrop-blur-sm
+//           transition-all duration-300
+//           ${activeDropZone === c.id
+//             ? 'ring-2 ring-blue-400/50 scale-[1.02] shadow-xl shadow-blue-500/20'
+//             : 'shadow-lg hover:shadow-xl border-transparent/30'}
+//         `}
+//         onDragOver={dragDropHandlers.onDragOver}
+//         onDragEnter={(e) => dragDropHandlers.onDragEnter(e, c.id)}
+//         onDragLeave={(e) => dragDropHandlers.onDragLeave(e, c.id)}
+//         onDrop={(e) => dragDropHandlers.onDrop(e, c.id)}
+//       >
+//         {/* Column Header */}
+//         <div className={`
+//           px-4 py-3
+//           border-b
+//           ${c.Bgcolor.replace('/20', '/30')}
+//           rounded-t-xl
+//           flex items-center justify-between
+//         `}>
+//           <h2 className="font-bold text-lg text-white tracking-wide">
+//             {c.label}
+//           </h2>
+//           <span className="text-xs bg-black/40 px-2.5 py-1 rounded-full font-medium">
+//             {tasks[c.id]?.length || 0}
+//           </span>
+//         </div>
+
+//         {/* Drop Zone Indicator */}
+//         {activeDropZone === c.id && (
+//           <div className="
+//             mx-3 mt-3 mb-1.5
+//             h-16
+//             bg-blue-600/20
+//             border-2 border-dashed border-blue-400/60
+//             rounded-lg
+//             flex items-center justify-center
+//             text-blue-300/80
+//             text-sm font-medium
+//             animate-pulse
+//             transition-all
+//           ">
+//             Drop task here
+//           </div>
+//         )}
+
+//         {/* Tasks List */}
+//         <div className="p-3 flex flex-col gap-3 min-h-[200px]">
+//           {tasks[c.id]?.map((t, idx) => (
+//             <div
+//               key={`${c.id}-${idx}`}
+//               draggable
+//               onDragStart={(e) => dragDropHandlers.onDragStart(e, t, c.id, idx)}
+//               className={`
+//                 group
+//                 bg-gray-900/60
+//                 backdrop-blur-sm
+//                 border border-gray-700/50
+//                 hover:border-gray-500/70
+//                 hover:bg-gray-800/70
+//                 rounded-lg
+//                 p-4
+//                 shadow-md
+//                 transition-all duration-200
+//                 cursor-grab
+//                 active:cursor-grabbing
+//                 active:scale-[0.98]
+//                 hover:shadow-xl
+//                 hover:-translate-y-0.5
+//               `}
+//             >
+//               {/* Top row - category + date */}
+//               <div className="flex justify-between items-center text-xs mb-2.5 text-gray-400">
+//                 <span className={`
+//                   px-2.5 py-0.5 rounded-full text-xs font-medium
+//                   ${t.categoury === 'frontend' ? 'bg-cyan-500/20 text-cyan-300' :
+//                     t.categoury === 'devops' ? 'bg-violet-500/20 text-violet-300' :
+//                     t.categoury === 'docs' ? 'bg-emerald-500/20 text-emerald-300' :
+//                     'bg-gray-500/20 text-gray-300'}
+//                 `}>
+//                   {t.categoury}
+//                 </span>
+
+//                 <span>
+//                   {new Date(t.dueDate).toLocaleDateString('en-GB', {
+//                     day: 'numeric',
+//                     month: 'short'
+//                   })}
+//                 </span>
+//               </div>
+
+//               {/* Title */}
+//               <h3 className="font-semibold text-base text-white mb-2 line-clamp-2 group-hover:text-blue-300 transition-colors">
+//                 {t.title}
+//               </h3>
+
+//               {/* Description */}
+//               <p className="text-sm text-gray-300 line-clamp-2 mb-3">
+//                 {t.description}
+//               </p>
+
+//               {/* Bottom row - priority + status */}
+//               <div className="flex justify-between items-center text-xs mt-auto pt-2 border-t border-gray-700/50">
+//                 <span className={`
+//                   px-2.5 py-1 rounded-full font-medium
+//                   ${t.priority === 'high' ? 'bg-red-500/20 text-red-300' :
+//                     t.priority === 'medium' ? 'bg-amber-500/20 text-amber-300' :
+//                     'bg-green-500/20 text-green-300'}
+//                 `}>
+//                   {t.priority}
+//                 </span>
+
+//                 <span className="text-gray-400 italic">
+//                   {t.status}
+//                 </span>
+//               </div>
+//             </div>
+//           ))}
+//         </div>
+//       </div>
+//     ))}
