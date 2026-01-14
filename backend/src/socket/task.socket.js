@@ -1,4 +1,5 @@
 const projectModel = require("../models/project.model");
+const taskModel = require("../models/task.model");
 const TaskModel = require("../models/task.model");
 const UserModel = require("../models/user.model");
 
@@ -137,11 +138,32 @@ function taskSocket(io, socket, socketIdMap) {
         .populate("assignedTo", "username email profilePic")
         .sort({ createdAt: -1 });
 
-      socket.emit("allTasks", { tasks });
+      socket.emit("allTasks", tasks);
     } catch (err) {
       socket.emit("errorMessage", { message: "Failed to load tasks" });
     }
   });
+  socket.on("getAllEnums", async (projectId) => {
+    try {
+
+      const schema = taskModel.schema;
+      const enumFields = ["priority", "category", "taskStatus", "issueType"]; // fields you care about
+      const enumValues = {};
+      const assigntoFelds =["members","coAdmins","admin"]
+      for (const field of enumFields) {
+        const path = schema.path(field); // ✅ use dynamic field name
+        if (path && path.enumValues && path.enumValues.length > 0) {
+          enumValues[field] = path.enumValues;
+        }
+      }
+
+      socket.emit("allEnums", enumValues);
+    } catch (err) {
+      console.error(err);
+      socket.emit("errorMessage", { message: "Failed to load enums" });
+    }
+  });
+
 }
 
 module.exports = taskSocket;

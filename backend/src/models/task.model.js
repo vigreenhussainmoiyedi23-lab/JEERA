@@ -27,7 +27,7 @@ const taskSchema = new mongoose.Schema(
       default: "toDo"
     },
 
-    categoury: {
+    category: {
       type: String,
       enum: ["frontend", "backend", "devops", "debugging", "other"],
       default: "other"
@@ -69,7 +69,7 @@ const taskSchema = new mongoose.Schema(
 
     attachments: [
       {
-        filename: String,
+        fileId: String,
         url: String
       }
     ],
