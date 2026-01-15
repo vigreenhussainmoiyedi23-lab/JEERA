@@ -27,7 +27,7 @@ async function PromoteHandler(req, res) {
 
     // Only admin can promote or demote
     const user = req.user;
-    if (project.admin.toString() !== user._id.toString())
+    if (project.members.findIndex(m => m.member.toString() === userid.toString && m.role == "admin") !== -1)
       return res
         .status(403)
         .json({ message: "Only admin can promote or demote members" });
@@ -35,26 +35,26 @@ async function PromoteHandler(req, res) {
     // Define move mapping: from → to
     // this collection is an object of two cases one is to coadmin and other is to member and the array stores [from where the data should be spliced,to where the data should be pushed]
     const collections = {
-      coAdmin: ["members", "coAdmins"], // promote member → coAdmin
-      member: ["coAdmins", "members"], // demote coAdmin → member
+      coAdmin: ["member", "coAdmin"], // promote member → coAdmin
+      member: ["coAdmin", "member"], // demote coAdmin → member
     };
 
     const [from, toField] = collections[to];
 
     // Find member index in the "from" group
-    const fromIdx = project[from].findIndex(
-      (id) => id.toString() === member._id.toString()
+    const memberExists = project.members.findIndex(
+      (m) => m.member.toString() === member._id.toString()
     );
 
-    if (fromIdx === -1)
+    if (memberExists === -1)
       return res.status(400).json({
         message:
           "Member not found in the specified role or cannot be promoted/demoted.",
       });
-
-    // Move member between groups
-    project[from].splice(fromIdx, 1);
-    project[toField].push(member._id);
+    project.member.splice({
+      member:member._id,
+      role:to
+    })
     member.projects.splice(projectidx, 1, {
       project: projectid,
       status: to,

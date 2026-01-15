@@ -38,7 +38,6 @@ const CreateTask = ({ setCreateTask, enumValues, CreateTaskHandler }) => {
           <h2 className="text-2xl font-semibold text-white mb-6">
             Create New Task
           </h2>
-
           <p>Loading Essential Things for creating task</p>
         </div>
       </div>
@@ -113,14 +112,17 @@ const CreateTask = ({ setCreateTask, enumValues, CreateTaskHandler }) => {
             <label className="block text-slate-300 text-sm mb-1">
               Assigned To
             </label>
-            <input
-              type="text"
+         
+            <select
               name="assignedTo"
               value={formData.assignedTo}
               onChange={handleChange}
+              multiple
               className="w-full bg-slate-800 text-white rounded-lg px-3 py-2 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Assignee name"
-            />
+            >
+              <option value="">Select task members</option>
+             
+            </select>
           </div>
 
           {/* Issue Type */}
@@ -191,8 +193,13 @@ const CreateTask = ({ setCreateTask, enumValues, CreateTaskHandler }) => {
 
           {/* Labels */}
           <div className="md:col-span-2">
-            <label className="block text-slate-300 text-sm mb-1">Labels <sub className="text-xs text-slate-300/30">seperate using comma ,</sub></label>
-            
+            <label className="block text-slate-300 text-sm mb-1">
+              Labels{" "}
+              <sub className="text-xs text-slate-300/30">
+                seperate using comma ,
+              </sub>
+            </label>
+
             <input
               type="text"
               name="labels"

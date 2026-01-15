@@ -86,8 +86,9 @@ export default function KanbanBoard({ projectId, currentUser }) {
   );
   useEffect(() => {
     socket.emit("getAllTasks", projectId);
-    socket.emit("getAllEnums");
+    socket.emit("getAllEnums",projectId);
     socket.on("allEnums", (enumvalues) => {
+      console.log("got enumvalues",enumvalues)
       setEnumValues(enumvalues)
     });
     socket.on("allTasks", (AllTasks) => {

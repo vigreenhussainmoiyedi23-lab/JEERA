@@ -14,7 +14,7 @@ const userRoutes = require("./routes/main/user.routes");
 const taskRoutes = require("./routes/task/task.routes");
 const commentRoutes = require("./routes/main/comment.routes");
 const projectRoutes = require("./routes/main/project.routes");
-const postRoutes=require("./routes/main/post.routes")
+const postRoutes = require("./routes/main/post.routes")
 // requiring Middlewares
 const { UserIsLoggedIn } = require("./middlewares/UserAuth.middleware");
 
@@ -43,11 +43,16 @@ app.use(
     credentials: true,
   })
 );
+app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+  next();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // routes using multipart form
-app.use("/api/post",UserIsLoggedIn,postRoutes) 
+app.use("/api/post", UserIsLoggedIn, postRoutes)
 //_______routes_______
 app.use("/api/user", userRoutes);
 app.use("/api/project", UserIsLoggedIn, projectRoutes);

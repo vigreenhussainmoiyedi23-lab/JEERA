@@ -145,18 +145,27 @@ function taskSocket(io, socket, socketIdMap) {
   });
   socket.on("getAllEnums", async (projectId) => {
     try {
-
+      console.log("socket hit hogaya")
       const schema = taskModel.schema;
       const enumFields = ["priority", "category", "taskStatus", "issueType"]; // fields you care about
       const enumValues = {};
-      const assigntoFelds =["members","coAdmins","admin"]
       for (const field of enumFields) {
         const path = schema.path(field); // ✅ use dynamic field name
         if (path && path.enumValues && path.enumValues.length > 0) {
           enumValues[field] = path.enumValues;
         }
       }
+      const project = await projectModel.findById(projectId)
+        .populate("admin", "username email profilePic")
+        .populate("members", "username email profilePic")
+        .populate("coAdmins", "username email profilePic")
 
+      const assignedToEnum = {}
+      assignedToEnum.admin = project.admin
+      assignedToEnum.members = project.members
+      assignedToEnum.coAdmins = project.coAdmins
+
+      enumValues.assignedTo = assignedToEnum
       socket.emit("allEnums", enumValues);
     } catch (err) {
       console.error(err);

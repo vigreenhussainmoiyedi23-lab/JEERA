@@ -4,28 +4,24 @@ const projectSchema = mongoose.Schema(
   {
     title: String,
     description: { type: String, default: "" },
-    admin: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "user",
-    },
-    members: [{member:
+    members: [{
+      member:
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
-      },}
-    ],
-    coAdmins: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "user",
+      },
+      role: {
+        type: String,
+        default: "member"
       }
+    }
     ],
     chats: [
       {
-        type:mongoose.Schema.Types.ObjectId,ref:"chat"
+        type: mongoose.Schema.Types.ObjectId, ref: "chat"
       },
     ],
-    Excluded: [
+    Banned: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
