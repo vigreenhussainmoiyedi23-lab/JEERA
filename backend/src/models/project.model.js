@@ -12,7 +12,8 @@ const projectSchema = mongoose.Schema(
       },
       role: {
         type: String,
-        default: "member"
+        default: "member",
+        enum:["admin","coAdmin","member"]
       }
     }
     ],

@@ -1,27 +1,31 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
+import DarkMultiSelect from "./DarkMultiSelect";
 
 const CreateTask = ({ setCreateTask, enumValues, CreateTaskHandler }) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     dueDate: "",
-    assignedTo: "",
+    assignedTo: [],
     issueType: "",
     priority: "",
     category: "",
     storyPoints: "",
     labels: "",
   });
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Task Created:", formData);
-    setCreateTask(null); // close modal after submission
+  const handleMultiChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setFormData({
+      ...formData,
+      assignedTo: typeof value === "string" ? value.split(",") : value,
+      // On autofill we get a stringified value
+    });
   };
   if (!enumValues) {
     return (
@@ -43,6 +47,7 @@ const CreateTask = ({ setCreateTask, enumValues, CreateTaskHandler }) => {
       </div>
     );
   }
+
   return (
     <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50">
       <div className="relative bg-slate-900 w-full max-w-2xl p-6 rounded-2xl shadow-2xl border border-slate-700">
@@ -59,7 +64,21 @@ const CreateTask = ({ setCreateTask, enumValues, CreateTaskHandler }) => {
         </h2>
 
         <form
-          onSubmit={handleSubmit}
+          onSubmit={function (e) {
+            e.preventDefault();
+            CreateTaskHandler(formData);
+            setFormData({
+              title: "",
+              description: "",
+              dueDate: "",
+              assignedTo: [],
+              issueType: "",
+              priority: "",
+              category: "",
+              storyPoints: "",
+              labels: "",
+            });
+          }}
           className="grid grid-cols-1 md:grid-cols-2 gap-4"
         >
           {/* Title */}
@@ -108,23 +127,11 @@ const CreateTask = ({ setCreateTask, enumValues, CreateTaskHandler }) => {
           </div>
 
           {/* Assigned To */}
-          <div>
-            <label className="block text-slate-300 text-sm mb-1">
-              Assigned To
-            </label>
-         
-            <select
-              name="assignedTo"
-              value={formData.assignedTo}
-              onChange={handleChange}
-              multiple
-              className="w-full bg-slate-800 text-white rounded-lg px-3 py-2 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select task members</option>
-             
-            </select>
-          </div>
-
+          <DarkMultiSelect
+            names={enumValues.assignedTo}
+            changehandler={handleMultiChange}
+            assignedTo={formData.assignedTo}
+          />
           {/* Issue Type */}
           <div>
             <label className="block text-slate-300 text-sm mb-1">
@@ -165,7 +172,7 @@ const CreateTask = ({ setCreateTask, enumValues, CreateTaskHandler }) => {
               Category
             </label>
             <select
-              name="Category"
+              name="category"
               value={formData.category}
               onChange={handleChange}
               className="w-full bg-slate-800 text-white rounded-lg px-3 py-2 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"

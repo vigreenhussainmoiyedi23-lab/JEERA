@@ -141,6 +141,7 @@ const ProjectDetails = () => {
       },
     ]);
   }
+  
   return (
     <>
       <Navbar />

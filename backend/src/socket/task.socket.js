@@ -9,9 +9,7 @@ function taskSocket(io, socket, socketIdMap) {
     if (!project) return false;
 
     return (
-      project.admin.toString() === userId.toString() ||
-      project.coAdmins.some((id) => id.toString() === userId.toString()) ||
-      project.members.some((id) => id.toString() === userId.toString())
+      project.members.some(m => m.member._id === userId.toString())
     );
   }
 
@@ -44,8 +42,10 @@ function taskSocket(io, socket, socketIdMap) {
   });
 
   // CREATE TASK - now accepts taskStatus from client
-  socket.on("createTask", async ({ projectId, title, description, assignedTo = [], taskStatus }) => {
+  socket.on("createTask", async ({ taskDets, projectId }) => {
     try {
+      console.log("taskdets",taskDets)
+      console.log("projectId",projectId)
       const createdBy = socket.user;
       const project = await projectModel.findById(projectId);
       if (!project) {
@@ -156,14 +156,9 @@ function taskSocket(io, socket, socketIdMap) {
         }
       }
       const project = await projectModel.findById(projectId)
-        .populate("admin", "username email profilePic")
-        .populate("members", "username email profilePic")
-        .populate("coAdmins", "username email profilePic")
+        .populate("members.member", "username email profilePic")
 
-      const assignedToEnum = {}
-      assignedToEnum.admin = project.admin
-      assignedToEnum.members = project.members
-      assignedToEnum.coAdmins = project.coAdmins
+      const assignedToEnum = [...project.members]
 
       enumValues.assignedTo = assignedToEnum
       socket.emit("allEnums", enumValues);

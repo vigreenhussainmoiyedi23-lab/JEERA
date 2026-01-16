@@ -10,7 +10,7 @@ const columns = [
 ];
 
 export default function KanbanBoard({ projectId, currentUser }) {
-  const [enumValues, setEnumValues] = useState(null)
+  const [enumValues, setEnumValues] = useState(null);
   const [tasks, setTasks] = useState({
     todo: [],
     done: [],
@@ -46,7 +46,10 @@ export default function KanbanBoard({ projectId, currentUser }) {
   const handleDragLeave = useCallback(() => {
     setDropIndicator(null);
   }, []);
-  const createTaskHandler = useCallback(() => {}, []);
+  const createTaskHandler = useCallback((TaskDets) => {
+   console.log(TaskDets)
+   socket.emit("createTask",{taskDets:TaskDets,projectId})
+  }, []);
 
   const handleDrop = useCallback(
     (e, targetColumnId) => {
@@ -86,10 +89,9 @@ export default function KanbanBoard({ projectId, currentUser }) {
   );
   useEffect(() => {
     socket.emit("getAllTasks", projectId);
-    socket.emit("getAllEnums",projectId);
+    socket.emit("getAllEnums", projectId);
     socket.on("allEnums", (enumvalues) => {
-      console.log("got enumvalues",enumvalues)
-      setEnumValues(enumvalues)
+      setEnumValues(enumvalues);
     });
     socket.on("allTasks", (AllTasks) => {
       const tasksByStatus = {

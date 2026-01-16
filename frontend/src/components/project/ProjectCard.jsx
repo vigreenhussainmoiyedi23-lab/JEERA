@@ -2,6 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const ProjectCard = ({ project, status }) => {
+  const admin=project.members.find(m=>m.role==="admin")
+  const coAdmins=project.members.filter(m=>m.role==="coAdmin")
+  const members=project.members.filter(m=>m.role==="member")
+  console.log(admin,members,coAdmins)
   return (
     <div className="group block max-w-4xl mx-auto bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-2xl shadow-lg hover:shadow-yellow-300/20 hover:scale-[1.02] transition-transform duration-300 p-6 md:p-8">
       {/* Header */}
@@ -32,9 +36,9 @@ const ProjectCard = ({ project, status }) => {
         {/* Admin Info */}
         <div>
           <h3 className="font-semibold text-yellow-400 mb-1">Admin</h3>
-          <p>{project.admin?.username || "Username"}</p>
+          <p>{admin?.username || "Username"}</p>
           <p className="text-xs text-gray-400">
-            {project.admin?.email || "admin@email.com"}
+            {admin?.email || "admin@email.com"}
           </p>
         </div>
 
