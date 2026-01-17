@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { X } from "lucide-react";
 import DarkMultiSelect from "./DarkMultiSelect";
 
-const CreateTask = ({ setCreateTask, enumValues, CreateTaskHandler }) => {
+const CreateTask = ({ setCreateTask, enumValues, CreateTaskHandler,status,refetch }) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -66,7 +66,7 @@ const CreateTask = ({ setCreateTask, enumValues, CreateTaskHandler }) => {
         <form
           onSubmit={function (e) {
             e.preventDefault();
-            CreateTaskHandler(formData);
+            CreateTaskHandler(formData,status);
             setFormData({
               title: "",
               description: "",

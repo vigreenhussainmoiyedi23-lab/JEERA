@@ -4,6 +4,7 @@ import CreatePost from "../../components/profile/CreatePost";
 import AllPosts from "../../components/profile/AllPosts";
 import PostSuggestions from "../../components/profile/PostSuggestions";
 import axiosInstance from "../../utils/axiosInstance";
+import Navbar from "../../components/Navbar";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -27,19 +28,23 @@ const Profile = () => {
   }, []);
 
   return (
-    <div className="min-h-screen w-screen overflow-x-hidden bg-gradient-to-b  from-zinc-800 via-slate-950 to-gray-900 text-yellow-300 px-4 sm:px-8 py-10 space-y-10">
-      {/* User Information */}
-      <Information user={user} />
+    <>
+    <Navbar/>
+      <div className="min-h-screen w-screen overflow-x-hidden bg-gradient-to-b  from-zinc-800 via-slate-950 to-gray-900 text-yellow-300 px-4 sm:px-8 py-10 space-y-10">
+        {/* User Information */}
+        <div className="w-full h-[10vh]"></div>
+        <Information user={user} />
 
-      {/* Create Post */}
-      <CreatePost setPosts={setPosts} />
+        {/* Create Post */}
+        <CreatePost setPosts={setPosts} />
 
-      {/* User’s All Posts */}
-      <AllPosts posts={posts} user={user}/>
+        {/* User’s All Posts */}
+        <AllPosts posts={posts} user={user} />
 
-      {/* Suggested Posts */}
-      <PostSuggestions posts={suggestedPosts} user={user}/>
-    </div>
+        {/* Suggested Posts */}
+        <PostSuggestions posts={suggestedPosts} user={user} />
+      </div>
+    </>
   );
 };
 

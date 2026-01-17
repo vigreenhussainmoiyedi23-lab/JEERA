@@ -2,6 +2,8 @@ const projectModel = require("../models/project.model");
 const taskModel = require("../models/task.model");
 const TaskModel = require("../models/task.model");
 const UserModel = require("../models/user.model");
+const runSocketValidator = require("../services/runSocketvalidator");
+const { TaskValidator } = require("../utils/express-validator");
 
 function taskSocket(io, socket, socketIdMap) {
   async function isProjectMember(projectId, userId) {
@@ -9,7 +11,7 @@ function taskSocket(io, socket, socketIdMap) {
     if (!project) return false;
 
     return (
-      project.members.some(m => m.member._id === userId.toString())
+      project.members.some(m => m.member._id.toString() === userId.toString())
     );
   }
 
@@ -42,10 +44,20 @@ function taskSocket(io, socket, socketIdMap) {
   });
 
   // CREATE TASK - now accepts taskStatus from client
-  socket.on("createTask", async ({ taskDets, projectId }) => {
+  socket.on("createTask", async ({ taskDets, projectId }, ack) => {
     try {
-      console.log("taskdets",taskDets)
-      console.log("projectId",projectId)
+      // Validate status
+      const validStatuses = ["toDo", "Inprogress", "Inreview", "done", "Failed"];
+      const finalStatus = validStatuses.includes(taskDets?.taskStatus) ? taskDets?.taskStatus : "toDo";
+      taskDets.taskStatus = finalStatus
+      const errors = await runSocketValidator(TaskValidator, taskDets);
+
+      if (errors) {
+        return ack({
+          success: false,
+          errors
+        });
+      }
       const createdBy = socket.user;
       const project = await projectModel.findById(projectId);
       if (!project) {
@@ -55,37 +67,34 @@ function taskSocket(io, socket, socketIdMap) {
       if (!(await isProjectMember(projectId, createdBy._id))) {
         return socket.emit("errorMessage", { message: "Not authorized" });
       }
-
-      // Validate status
-      const validStatuses = ["toDo", "inProgress", "review", "done"];
-      const finalStatus = validStatuses.includes(taskStatus) ? taskStatus : "toDo";
-
       const newTask = await TaskModel.create({
-        title: title.trim(),
-        description: description?.trim() || "",
-        assignedTo: assignedTo.length ? assignedTo : [createdBy._id],
+        ...taskDets,
         createdBy: createdBy._id,
-        project: projectId,
-        taskStatus: finalStatus,
+        project:projectId
       });
-
       await UserModel.updateMany(
         { _id: { $in: newTask.assignedTo } },
         { $push: { tasks: newTask._id } }
       );
-
       project.allTasks.push(newTask._id);
       await project.save();
-
       const populatedTask = await TaskModel.findById(newTask._id)
         .populate("createdBy", "username email profilePic")
         .populate("assignedTo", "username email profilePic");
 
       io.to(projectId).emit("newTask", populatedTask);
-      socket.emit("taskCreated", populatedTask);
+      socket.broadcast.emit("taskCreated", populatedTask);
+      // 🔁 respond ONLY via ack
+      ack({
+        success: true,
+        newTask
+      });
+
     } catch (err) {
-      console.error("Create task error:", err);
-      socket.emit("errorMessage", { message: "Failed to create task" });
+      return ack({
+        success: false,
+        errors: err
+      });
     }
   });
 
@@ -145,7 +154,6 @@ function taskSocket(io, socket, socketIdMap) {
   });
   socket.on("getAllEnums", async (projectId) => {
     try {
-      console.log("socket hit hogaya")
       const schema = taskModel.schema;
       const enumFields = ["priority", "category", "taskStatus", "issueType"]; // fields you care about
       const enumValues = {};

@@ -3,8 +3,8 @@ import KanbanColumn from "./KanbanColumn.jsx";
 import socket from "../../../socket/socket.js";
 const columns = [
   { id: "toDo", label: "To Do" },
-  { id: "inProgress", label: "In Progress" },
-  { id: "review", label: "Review" },
+  { id: "Inprogress", label: "In Progress" },
+  { id: "Inreview", label: "Review" },
   { id: "done", label: "Done" },
   { id: "Failed", label: "Failed" },
 ];
@@ -12,20 +12,19 @@ const columns = [
 export default function KanbanBoard({ projectId, currentUser }) {
   const [enumValues, setEnumValues] = useState(null);
   const [tasks, setTasks] = useState({
-    todo: [],
+    toDo: [],
     done: [],
-    review: [],
-    inProgress: [],
+    Inreview: [],
+    Inprogress: [],
     Failed: [],
   });
   //stores the tasks from backend
 
-  const [dragState, setDragState] = useState(null);
   //stores the task being dragged , its coloumn ,its index
+  const [dragState, setDragState] = useState(null);
 
-  const [dropIndicator, setDropIndicator] = useState(null);
   //STORES THE COLOUMN ID WHERE THE TASK NEEDS TO BE DROPPED AND THE INDEX
-
+  const [dropIndicator, setDropIndicator] = useState(null);
   const handleDragStart = useCallback((task, columnId, index) => {
     setDragState({ task, fromColumnId: columnId, fromIndex: index });
   }, []);
@@ -46,9 +45,26 @@ export default function KanbanBoard({ projectId, currentUser }) {
   const handleDragLeave = useCallback(() => {
     setDropIndicator(null);
   }, []);
-  const createTaskHandler = useCallback((TaskDets) => {
-   console.log(TaskDets)
-   socket.emit("createTask",{taskDets:TaskDets,projectId})
+  const createTaskHandler = useCallback((TaskDets, status) => {
+    try {
+      TaskDets.taskStatus = status;
+      TaskDets.labels = TaskDets.labels.split(",");
+      console.log(TaskDets)
+      socket.emit(
+        "createTask",
+        { taskDets: TaskDets, projectId },
+        (response) => {
+          if (!response.success) {
+            console.error(response.errors);
+            return;
+          }
+          setTasks({...tasks,[status]:[...tasks[status],response.task]})
+          console.log("Task created:", response.task);
+        }
+      );
+    } catch (error) {
+      console.log(error);
+    }
   }, []);
 
   const handleDrop = useCallback(
@@ -92,6 +108,7 @@ export default function KanbanBoard({ projectId, currentUser }) {
     socket.emit("getAllEnums", projectId);
     socket.on("allEnums", (enumvalues) => {
       setEnumValues(enumvalues);
+      console.log("got enum values")
     });
     socket.on("allTasks", (AllTasks) => {
       const tasksByStatus = {

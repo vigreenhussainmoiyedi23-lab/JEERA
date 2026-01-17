@@ -5,9 +5,10 @@ import CreateTask from "./CreateTask.jsx";
 
 const columnAccentColors = {
   toDo: "border-t-yellow-500",
-  inProgress: "border-t-blue-500",
-  review: "border-t-purple-500",
+  Inprogress: "border-t-blue-500",
+  Inreview: "border-t-purple-500",
   done: "border-t-green-500",
+  Failed: "border-t-red-500",
 };
 
 export default function KanbanColumn({
@@ -113,7 +114,7 @@ export default function KanbanColumn({
     </div>
 
       {
-        createTask && <CreateTask  setCreateTask={setCreateTask} CreateTaskHandler={createTaskHandler} enumValues={enumValues}/>
+        createTask && <CreateTask  setCreateTask={setCreateTask} CreateTaskHandler={createTaskHandler} enumValues={enumValues} status={column.id}/>
       }  
       </>
   );

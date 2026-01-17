@@ -1,11 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import MemberInfo from "./MemberInfo";
 
 const ProjectCard = ({ project, status }) => {
-  const admin=project.members.find(m=>m.role==="admin")
-  const coAdmins=project.members.filter(m=>m.role==="coAdmin")
-  const members=project.members.filter(m=>m.role==="member")
-  console.log(admin,members,coAdmins)
   return (
     <div className="group block max-w-4xl mx-auto bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-2xl shadow-lg hover:shadow-yellow-300/20 hover:scale-[1.02] transition-transform duration-300 p-6 md:p-8">
       {/* Header */}
@@ -31,43 +28,7 @@ const ProjectCard = ({ project, status }) => {
         {project.description}
       </p>
 
-      {/* Info Grid */}
-      <div className="grid sm:grid-cols-2 gap-6 text-gray-300">
-        {/* Admin Info */}
-        <div>
-          <h3 className="font-semibold text-yellow-400 mb-1">Admin</h3>
-          <p>{admin?.username || "Username"}</p>
-          <p className="text-xs text-gray-400">
-            {admin?.email || "admin@email.com"}
-          </p>
-        </div>
-
-        {/* Members Info */}
-        <div>
-          <h3 className="font-semibold text-yellow-400 mb-1">Members</h3>
-          <div className="flex flex-wrap gap-2">
-            {project.members.length > 0 &&
-              project.members.splice(1, 2).map((m, idx) => (
-                <span
-                  key={m._id}
-                  className="bg-gray-700 px-2 py-1 rounded-md text-sm"
-                >
-                  {m.username}
-                </span>
-              ))}
-          </div>
-        </div>
-
-        {/* Co-Admins */}
-        <div>
-          <h3 className="font-semibold text-yellow-400 mb-1">Co-Admins</h3>
-          {project.coAdmins.length > 0 &&
-            project.coAdmins
-              .splice(1, 2)
-              .map((a) => <p key={a._id}>{a.username}</p>)}
-        </div>
-      </div>
-
+      <MemberInfo project={project}/>
       {/* Footer Section */}
       <div className="mt-8 border-t border-gray-700 pt-4 text-right">
         <button className="text-yellow-400 font-medium hover:underline">

@@ -59,8 +59,104 @@ const ProjectValidator = [
     .escape()
     .isLength({ max: 500 })
     .withMessage("Description must be less than 500 characters"),
-];
 
+  body("category")
+    .notEmpty().withMessage("category cant be empty")
+    .trim()
+    .escape()
+    .isLength({ max: 500 })
+    .withMessage("Description must be less than 500 characters"),
+
+  body("description")
+    .optional()
+    .trim()
+    .escape()
+    .isLength({ max: 500 })
+    .withMessage("Description must be less than 500 characters"),
+
+  body("description")
+    .optional()
+    .trim()
+    .escape()
+    .isLength({ max: 500 })
+    .withMessage("Description must be less than 500 characters"),
+
+  body("description")
+    .optional()
+    .trim()
+    .escape()
+    .isLength({ max: 500 })
+    .withMessage("Description must be less than 500 characters"),
+];
+const TaskValidator = [
+  // 🔹 Title
+  body("title")
+    .trim()
+    .notEmpty()
+    .withMessage("Title is required")
+    .isLength({ min: 3 })
+    .withMessage("Title must be at least 3 characters long"),
+
+  // 🔹 Description
+  body("description")
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage("Description must be less than 500 characters"),
+
+  // 🔹 Issue Type
+  body("issueType")
+    .optional()
+    .isIn(["task", "bug", "story", "epic"])
+    .withMessage("Invalid issue type"),
+
+  // 🔹 Priority
+  body("priority")
+    .optional()
+    .isIn(["low", "medium", "high", "critical", "highest"])
+    .withMessage("Invalid priority"),
+
+  // 🔹 Task Status
+  body("taskStatus")
+    .optional()
+    .isIn(["toDo", "Inprogress", "Inreview", "done", "Failed"])
+    .withMessage("Invalid task status"),
+
+  // 🔹 Category
+  body("category")
+    .optional()
+    .isIn(["frontend", "backend", "devops", "debugging", "other"])
+    .withMessage("Invalid category"),
+
+  // 🔹 Story Points
+  body("storyPoints")
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage("Story points must be a positive number"),
+
+  // 🔹 Labels
+  body("labels")
+    .optional()
+    .isArray()
+    .withMessage("Labels must be an array"),
+
+  body("labels.*")
+    .optional()
+    .isString()
+    .withMessage("Each label must be a string"),
+
+  // 🔹 Assigned To (array of ObjectIds)
+  body("assignedTo")
+    .optional()
+    .isArray()
+    .withMessage("AssignedTo must be an array"),
+
+  // 🔹 Due Date
+  body("dueDate")
+    .optional()
+    .isISO8601()
+    .withMessage("Invalid due date format"),
+];
 
 /* ======================================================
    🧩 CHAT VALIDATOR (for message sending)
@@ -117,4 +213,5 @@ module.exports = {
   ProjectValidator,
   ChatMessageValidator,
   validate,
+  TaskValidator
 };
