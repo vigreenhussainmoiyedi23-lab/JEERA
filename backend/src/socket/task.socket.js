@@ -70,7 +70,7 @@ function taskSocket(io, socket, socketIdMap) {
       const newTask = await TaskModel.create({
         ...taskDets,
         createdBy: createdBy._id,
-        project:projectId
+        project: projectId
       });
       await UserModel.updateMany(
         { _id: { $in: newTask.assignedTo } },
@@ -101,9 +101,10 @@ function taskSocket(io, socket, socketIdMap) {
   // UPDATE TASK (status + other fields)
   socket.on("updateTask", async ({ taskId, status, assignedTo }) => {
     try {
+      console.log("socket reached", taskId, status)
       const task = await TaskModel.findById(taskId);
       if (!task) return socket.emit("errorMessage", { message: "Task not found" });
-
+      console.log(task.taskStatus)
       if (!(await isProjectMember(task.project, socket.user._id))) {
         return socket.emit("errorMessage", { message: "Not authorized" });
       }
@@ -126,9 +127,10 @@ function taskSocket(io, socket, socketIdMap) {
         const updatedTask = await TaskModel.findById(taskId)
           .populate("createdBy", "username email profilePic")
           .populate("assignedTo", "username email profilePic");
-
+        console.log(updatedTask, status)
         io.to(task.project.toString()).emit("taskUpdated", updatedTask);
       }
+      console.log("reached socket endPoint")
     } catch (err) {
       console.error("Update task error:", err);
       socket.emit("errorMessage", { message: "Failed to update task" });
@@ -154,6 +156,7 @@ function taskSocket(io, socket, socketIdMap) {
   });
   socket.on("getAllEnums", async (projectId) => {
     try {
+      console.log("Enum value dena hai")
       const schema = taskModel.schema;
       const enumFields = ["priority", "category", "taskStatus", "issueType"]; // fields you care about
       const enumValues = {};

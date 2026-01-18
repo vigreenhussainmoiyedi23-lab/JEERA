@@ -49,7 +49,7 @@ export default function KanbanBoard({ projectId, currentUser }) {
     try {
       TaskDets.taskStatus = status;
       TaskDets.labels = TaskDets.labels.split(",");
-      console.log(TaskDets)
+      console.log(TaskDets);
       socket.emit(
         "createTask",
         { taskDets: TaskDets, projectId },
@@ -58,9 +58,9 @@ export default function KanbanBoard({ projectId, currentUser }) {
             console.error(response.errors);
             return;
           }
-          setTasks({...tasks,[status]:[...tasks[status],response.task]})
+          setTasks({ ...tasks, [status]: [...tasks[status], response.task] });
           console.log("Task created:", response.task);
-        }
+        },
       );
     } catch (error) {
       console.log(error);
@@ -74,13 +74,13 @@ export default function KanbanBoard({ projectId, currentUser }) {
         handleDragEnd(); //resets value to null
         return;
       }
-      console.log(targetColumnId);
+      const { task, fromColumnId, fromIndex } = dragState;
+      console.log("ebery", targetColumnId, task);
       socket.emit("updateTask", {
         taskId: task._id,
         status: targetColumnId,
         assignedTo: task.assignedTo,
       });
-      const { task, fromColumnId, fromIndex } = dragState;
       let targetIndex = dropIndicator.index;
 
       const newTasks = { ...tasks };
@@ -94,38 +94,45 @@ export default function KanbanBoard({ projectId, currentUser }) {
       newTasks[targetColumnId] = [...newTasks[targetColumnId]];
       targetIndex = Math.max(
         0,
-        Math.min(targetIndex, newTasks[targetColumnId].length)
+        Math.min(targetIndex, newTasks[targetColumnId].length),
       );
       newTasks[targetColumnId].splice(targetIndex, 0, task);
 
       setTasks(newTasks);
       handleDragEnd();
     },
-    [dragState, dropIndicator, tasks, handleDragEnd]
+    [dragState, dropIndicator, tasks, handleDragEnd],
   );
   useEffect(() => {
     socket.emit("getAllTasks", projectId);
+
     socket.emit("getAllEnums", projectId);
     socket.on("allEnums", (enumvalues) => {
       setEnumValues(enumvalues);
-      console.log("got enum values")
+      console.log("got enum values");
     });
+    socket.on("errorMessage", (message) => {
+      console.log("error fetching enum", message);
+    });
+
     socket.on("allTasks", (AllTasks) => {
       const tasksByStatus = {
-        todo: [],
+        toDo: [],
         done: [],
-        review: [],
-        inProgress: [],
+        Inreview: [],
+        Inprogress: [],
         Failed: [],
       };
       AllTasks.map((t) => {
         tasksByStatus[t.taskStatus].push(t);
       });
-      console.log(tasksByStatus);
+      setTasks(tasksByStatus);
     });
-    return () => {};
-  }, []);
 
+    return () => {
+      
+    };
+  }, [projectId]);
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 p-6 lg:p-8">
       <header className="mb-8">
