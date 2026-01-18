@@ -12,7 +12,6 @@ const ProjectDetails = () => {
   useEffect(() => {
     // ✅ Listen for tasks (before connecting or emitting)
     const handleTasks = (tasks) => {
-      console.log("📦 Got some tasks:", tasks);
       setTasks(tasks);
     };
     socket.emit("getAllTasks", projectid);
@@ -20,7 +19,6 @@ const ProjectDetails = () => {
 
     // ✅ On connect
     socket.on("connect", () => {
-      console.log("✅ Connected:", socket.id);
       socket.emit("joinProject", projectid);
       socket.emit("get-all-tasks", projectid);
     });
@@ -62,7 +60,6 @@ const ProjectDetails = () => {
     );
   const project = data?.project;
   const user = data?.user;
-  console.log(project);
   return (
     <>
       <Navbar />

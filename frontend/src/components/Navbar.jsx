@@ -46,7 +46,7 @@ const Navbar = () => {
           })}
         </div>
       </nav>
-      <div className="fixed md:hidden px-5 flex items-center justify-between w-screen bottom-0 h-[10vh] bg-linear-to-br from-[#1e032e] to-[#16012730] text-2xl text-white">
+      <div className="fixed  md:hidden px-5 flex items-center justify-between w-screen bottom-0 h-[10vh] bg-linear-to-br from-[#1e032e] to-[#16012730] text-2xl text-white">
         {links.map((l, idx) => {
           return (
             <NavLink

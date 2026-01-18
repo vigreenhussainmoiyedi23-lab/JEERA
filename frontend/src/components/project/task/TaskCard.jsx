@@ -1,22 +1,27 @@
 const columnColors = {
   toDo: "bg-yellow-500",
-  inProgress: "bg-blue-500",
-  review: "bg-purple-500",
+  Inprogress: "bg-blue-500",
+  Inreview: "bg-purple-500",
   done: "bg-green-500",
+  Failed: "bg-red-500",
 };
 
 const columnLabels = {
   toDo: "To Do",
-  inProgress: "In Progress",
-  review: "Review",
+  Inprogress: "In Progress",
+  Inreview: "In Review",
   done: "Done",
+  Failed: "Failed",
 };
 
 const priorityColors = {
-  high: "text-red-400",
-  medium: "text-amber-400",
   low: "text-green-400",
+  medium: "text-amber-400",
+  high: "text-red-400",
+  critical: "text-orange-500",
+  highest: "text-red-600",
 };
+
 
 export default function TaskCard({ task, columnId, index, isDragging, onDragStart, onDragEnd }) {
   return (

@@ -75,7 +75,7 @@ export default function KanbanColumn({
             const isBeingDragged =
             isDraggingFromThis && dragState?.fromIndex === index;
             return (
-              <React.Fragment key={task.id}>
+              <React.Fragment key={task._id}>
                 <div
                   onDragOver={(e) => {
                     e.preventDefault();

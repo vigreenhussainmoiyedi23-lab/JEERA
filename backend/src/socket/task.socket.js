@@ -27,13 +27,8 @@ function taskSocket(io, socket, socketIdMap) {
 
       const project = await projectModel
         .findById(projectId)
-        .populate("members", "username email profilePic")
-        .populate("coAdmins", "username email profilePic")
-        .populate("admin", "username email profilePic");
-
+        .populate("members.member", "username email profilePic")
       const members = [
-        project.admin,
-        ...project.coAdmins,
         ...project.members,
       ].filter(Boolean);
 
@@ -82,8 +77,7 @@ function taskSocket(io, socket, socketIdMap) {
         .populate("createdBy", "username email profilePic")
         .populate("assignedTo", "username email profilePic");
 
-      io.to(projectId).emit("newTask", populatedTask);
-      socket.broadcast.emit("taskCreated", populatedTask);
+      io.to(projectId).emit("taskCreated", {task:populatedTask,status:populatedTask.taskStatus});
       // 🔁 respond ONLY via ack
       ack({
         success: true,
@@ -101,17 +95,17 @@ function taskSocket(io, socket, socketIdMap) {
   // UPDATE TASK (status + other fields)
   socket.on("updateTask", async ({ taskId, status, assignedTo }) => {
     try {
-      console.log("socket reached", taskId, status)
       const task = await TaskModel.findById(taskId);
+      const from=task.taskStatus
       if (!task) return socket.emit("errorMessage", { message: "Task not found" });
-      console.log(task.taskStatus)
+    
       if (!(await isProjectMember(task.project, socket.user._id))) {
         return socket.emit("errorMessage", { message: "Not authorized" });
       }
 
       let changed = false;
 
-      if (status && ["toDo", "inProgress", "review", "done"].includes(status)) {
+      if (status &&  ["toDo", "Inprogress", "Inreview", "done", "Failed"].includes(status)) {
         task.taskStatus = status;
         changed = true;
       }
@@ -127,10 +121,8 @@ function taskSocket(io, socket, socketIdMap) {
         const updatedTask = await TaskModel.findById(taskId)
           .populate("createdBy", "username email profilePic")
           .populate("assignedTo", "username email profilePic");
-        console.log(updatedTask, status)
-        io.to(task.project.toString()).emit("taskUpdated", updatedTask);
+        io.to(task.project.toString()).emit("taskUpdated", {task:updatedTask,from,to:status});
       }
-      console.log("reached socket endPoint")
     } catch (err) {
       console.error("Update task error:", err);
       socket.emit("errorMessage", { message: "Failed to update task" });
@@ -156,7 +148,6 @@ function taskSocket(io, socket, socketIdMap) {
   });
   socket.on("getAllEnums", async (projectId) => {
     try {
-      console.log("Enum value dena hai")
       const schema = taskModel.schema;
       const enumFields = ["priority", "category", "taskStatus", "issueType"]; // fields you care about
       const enumValues = {};

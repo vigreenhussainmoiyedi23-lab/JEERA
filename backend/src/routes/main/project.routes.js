@@ -13,7 +13,7 @@ Router.post("/create", ProjectValidator, validate, async (req, res) => {
   try {
     const { title, description } = req.body;
     const user = req.user;
-
+    console.log("what happened")
     const project = await projectModel.create({
       title,
       description: description || "",

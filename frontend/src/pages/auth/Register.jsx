@@ -16,8 +16,6 @@ const Register = () => {
         { withCredentials: true }
       );
 
-      console.log("Registered user:", res.data);
-      localStorage.setItem("token", res.data.token);
       window.location.href = "/projects";
     } catch (err) {
       const data = err?.response?.data;

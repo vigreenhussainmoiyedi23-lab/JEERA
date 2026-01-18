@@ -60,33 +60,6 @@ const ProjectValidator = [
     .isLength({ max: 500 })
     .withMessage("Description must be less than 500 characters"),
 
-  body("category")
-    .notEmpty().withMessage("category cant be empty")
-    .trim()
-    .escape()
-    .isLength({ max: 500 })
-    .withMessage("Description must be less than 500 characters"),
-
-  body("description")
-    .optional()
-    .trim()
-    .escape()
-    .isLength({ max: 500 })
-    .withMessage("Description must be less than 500 characters"),
-
-  body("description")
-    .optional()
-    .trim()
-    .escape()
-    .isLength({ max: 500 })
-    .withMessage("Description must be less than 500 characters"),
-
-  body("description")
-    .optional()
-    .trim()
-    .escape()
-    .isLength({ max: 500 })
-    .withMessage("Description must be less than 500 characters"),
 ];
 const TaskValidator = [
   // 🔹 Title

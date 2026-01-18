@@ -49,7 +49,6 @@ export default function KanbanBoard({ projectId, currentUser }) {
     try {
       TaskDets.taskStatus = status;
       TaskDets.labels = TaskDets.labels.split(",");
-      console.log(TaskDets);
       socket.emit(
         "createTask",
         { taskDets: TaskDets, projectId },
@@ -58,8 +57,10 @@ export default function KanbanBoard({ projectId, currentUser }) {
             console.error(response.errors);
             return;
           }
-          setTasks({ ...tasks, [status]: [...tasks[status], response.task] });
-          console.log("Task created:", response.task);
+          setTasks((prev) => ({
+            ...prev,
+            [status]: [...prev[status], response.newTask],
+          }));
         },
       );
     } catch (error) {
@@ -75,7 +76,6 @@ export default function KanbanBoard({ projectId, currentUser }) {
         return;
       }
       const { task, fromColumnId, fromIndex } = dragState;
-      console.log("ebery", targetColumnId, task);
       socket.emit("updateTask", {
         taskId: task._id,
         status: targetColumnId,
@@ -98,18 +98,19 @@ export default function KanbanBoard({ projectId, currentUser }) {
       );
       newTasks[targetColumnId].splice(targetIndex, 0, task);
 
-      setTasks(newTasks);
       handleDragEnd();
     },
     [dragState, dropIndicator, tasks, handleDragEnd],
   );
   useEffect(() => {
     socket.emit("getAllTasks", projectId);
+    socket.on("taskCreated", ({ task, status }) => {
+      setTasks({ ...tasks, [status]: [...tasks[status], task] });
+    });
 
     socket.emit("getAllEnums", projectId);
     socket.on("allEnums", (enumvalues) => {
       setEnumValues(enumvalues);
-      console.log("got enum values");
     });
     socket.on("errorMessage", (message) => {
       console.log("error fetching enum", message);
@@ -126,11 +127,27 @@ export default function KanbanBoard({ projectId, currentUser }) {
       AllTasks.map((t) => {
         tasksByStatus[t.taskStatus].push(t);
       });
+
       setTasks(tasksByStatus);
     });
+    socket.on("taskUpdated", ({ task, from, to }) => {
+      setTasks((prev) => {
+        const next = { ...prev };
+        next[from] = [...next[from]];
+        next[to] = [...next[to]];
+        let idx = next[from].findIndex(t=>t._id.toString()==task._id.toString());
+        next[from].splice(idx, 1);
+        next[to].push(task);
 
+        return next;
+      });
+    });
     return () => {
-      
+      socket.off("taskCreated");
+      socket.off("taskUpdated");
+      socket.off("allTasks");
+      socket.off("allEnums");
+      socket.off("errorMessage");
     };
   }, [projectId]);
   return (
