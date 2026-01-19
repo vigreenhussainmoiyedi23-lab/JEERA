@@ -6,29 +6,27 @@ import Navbar from "../../components/Navbar";
 import socket from "../../socket/socket";
 import KanbanBoard from "../../components/project/task/KanbanBoard";
 import MemberInfo from "../../components/project/MemberInfo";
+import ChatBox from "../chat/ChatBox";
 
 const ProjectDetails = () => {
   const { projectid } = useParams();
   useEffect(() => {
-    // ✅ Listen for tasks (before connecting or emitting)
-    const handleTasks = (tasks) => {
-      setTasks(tasks);
-    };
+    if (!socket) return;
+
+    // --- Join the project room ---
+    socket.emit("joinProject", projectid);
+
+    // --- Fetch tasks ---
     socket.emit("getAllTasks", projectid);
+    const handleTasks = (tasks) => setTasks(tasks);
     socket.on("allTasks", handleTasks);
 
-    // ✅ On connect
-    socket.on("connect", () => {
-      socket.emit("joinProject", projectid);
-      socket.emit("get-all-tasks", projectid);
-    });
-
-    // Cleanup when component unmounts
+    // --- Leave project on unmount ---
     return () => {
-      socket.off("all-tasks", handleTasks);
-      socket.off("connect");
+      socket.emit("leaveProject", projectid);
+      socket.off("allTasks", handleTasks);
     };
-  }, [projectid]);
+  }, [projectid, socket]); // runs whenever projectid changes
   const [current, setCurrent] = useState("tasks");
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["project-details", projectid],
@@ -120,28 +118,7 @@ const ProjectDetails = () => {
           )}
           {/* Notifications / New Messages */}
           {current == "chats" && (
-            <div className="bg-gray-900/60 p-5 rounded-xl border border-gray-700 mb-5">
-              <h2 className="text-2xl  font-semibold text-yellow-400 mb-3">
-                Recent Updates
-              </h2>
-              {project?.newMessages?.length > 0 ? (
-                <ul className="space-y-3">
-                  {project.newMessages.map((msg, i) => (
-                    <li
-                      key={i}
-                      className="border border-gray-700 bg-gray-800 rounded-lg px-4 py-2"
-                    >
-                      <p className="font-medium text-white">{msg.title}</p>
-                      <p className="text-xs text-gray-400">
-                        {new Date(msg.CreatedAt).toLocaleString()}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-500">No new updates.</p>
-              )}
-            </div>
+           <ChatBox projectId={projectid} currentUser={user}/>
           )}
           {/* Users Panel */}
           {tasks == "panel" && (

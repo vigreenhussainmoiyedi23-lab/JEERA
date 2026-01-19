@@ -18,7 +18,7 @@ function setupSocket(io) {
 
     try {
       const decoded = VerifyToken(token);
-      const user=await UserModel.findById(decoded.id)
+      const user = await UserModel.findById(decoded.id)
       socket.user = user; // attach user info
       next();
     } catch (error) {
@@ -34,19 +34,27 @@ function setupSocket(io) {
       socket.disconnect();
       return;
     }
-    // Save user in the map
-    socketIdMap.set(user._id.toString(), socket.id);
-    
+    const userId = user._id.toString();
 
+    if (!socketIdMap.has(userId)) {
+      socketIdMap.set(userId, new Set());
+    }
+
+    socketIdMap.get(userId).add(socket.id);
     // Feature modules
     chatSocket(io, socket, socketIdMap);
     taskSocket(io, socket, socketIdMap);
 
     // Handle disconnect
     socket.on("disconnect", () => {
-      socketIdMap.delete(user._id.toString());
+      const set = socketIdMap.get(userId);
+      if (!set) return;
+
+      set.delete(socket.id);
+      if (set.size === 0) {
+        socketIdMap.delete(userId);
+      }
     });
   });
 }
-module.exports= setupSocket
-  
+module.exports = setupSocket

@@ -11,6 +11,7 @@ import Profile from './pages/Profile/Profile';
 
 const App = () => {
   return (
+<>
    <Routes>
     <Route path='/' element={<Home/>}/>
     <Route path='/login' element={<Login/>}/>
@@ -22,6 +23,8 @@ const App = () => {
 
      <Route path="*" element={<NotFound />} />
    </Routes>
+   <div className='w-full h-[10vh] md:hidden bg-slate-900'></div>
+   </>
   )
 }
 

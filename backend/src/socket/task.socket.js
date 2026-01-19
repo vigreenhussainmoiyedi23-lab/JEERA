@@ -37,6 +37,17 @@ function taskSocket(io, socket, socketIdMap) {
       socket.emit("errorMessage", { message: "Failed to join project" });
     }
   });
+  socket.on("leaveProject", async (projectId) => {
+    try {
+      const user = socket.user;
+      if (!(await isProjectMember(projectId, user._id))) {
+        return socket.emit("errorMessage", { message: "Access denied" });
+      }
+      socket.leave(projectId);
+    } catch (err) {
+      socket.emit("errorMessage", { message: "Failed to join project" });
+    }
+  });
 
   // CREATE TASK - now accepts taskStatus from client
   socket.on("createTask", async ({ taskDets, projectId }, ack) => {
@@ -77,7 +88,22 @@ function taskSocket(io, socket, socketIdMap) {
         .populate("createdBy", "username email profilePic")
         .populate("assignedTo", "username email profilePic");
 
-      io.to(projectId).emit("taskCreated", {task:populatedTask,status:populatedTask.taskStatus});
+      task.assignedTo.forEach(userId => {
+        const socketIds = socketIdMap.get(userId.toString());
+        if (!socketIds) return;
+
+        socketIds.forEach(sid => {
+          const targetSocket = io.sockets.sockets.get(sid);
+          if (!targetSocket) return;
+
+          if (targetSocket.rooms.has(`${projectId}`)) {
+            targetSocket.emit("taskCreated", {
+              task: newTask,
+              status: newTask.taskStatus
+            });
+          }
+        });
+      });
       // 🔁 respond ONLY via ack
       ack({
         success: true,
@@ -93,19 +119,19 @@ function taskSocket(io, socket, socketIdMap) {
   });
 
   // UPDATE TASK (status + other fields)
-  socket.on("updateTask", async ({ taskId, status, assignedTo }) => {
+  socket.on("updateTask", async ({ taskId, status, assignedTo, projectId }) => {
     try {
-      const task = await TaskModel.findById(taskId);
-      const from=task.taskStatus
+      const task = await TaskModel.findById(taskId)
+      const from = task.taskStatus
       if (!task) return socket.emit("errorMessage", { message: "Task not found" });
-    
+
       if (!(await isProjectMember(task.project, socket.user._id))) {
         return socket.emit("errorMessage", { message: "Not authorized" });
       }
 
       let changed = false;
 
-      if (status &&  ["toDo", "Inprogress", "Inreview", "done", "Failed"].includes(status)) {
+      if (status && ["toDo", "Inprogress", "Inreview", "done", "Failed"].includes(status)) {
         task.taskStatus = status;
         changed = true;
       }
@@ -121,7 +147,24 @@ function taskSocket(io, socket, socketIdMap) {
         const updatedTask = await TaskModel.findById(taskId)
           .populate("createdBy", "username email profilePic")
           .populate("assignedTo", "username email profilePic");
-        io.to(task.project.toString()).emit("taskUpdated", {task:updatedTask,from,to:status});
+        task.assignedTo.forEach(userId => {
+          const socketIds = socketIdMap.get(userId.toString());
+          if (!socketIds) return;
+
+          socketIds.forEach(sid => {
+            const targetSocket = io.sockets.sockets.get(sid);
+            if (!targetSocket) return;
+
+            if (targetSocket.rooms.has(`${projectId}`)) {
+              targetSocket.emit("taskUpdated", {
+                task: updatedTask,
+                from,
+                to: status
+              });
+            }
+          });
+        });
+
       }
     } catch (err) {
       console.error("Update task error:", err);

@@ -80,6 +80,7 @@ export default function KanbanBoard({ projectId, currentUser }) {
         taskId: task._id,
         status: targetColumnId,
         assignedTo: task.assignedTo,
+        projectId,
       });
       let targetIndex = dropIndicator.index;
 
@@ -102,6 +103,7 @@ export default function KanbanBoard({ projectId, currentUser }) {
     },
     [dragState, dropIndicator, tasks, handleDragEnd],
   );
+  
   useEffect(() => {
     socket.emit("getAllTasks", projectId);
     socket.on("taskCreated", ({ task, status }) => {
@@ -135,7 +137,9 @@ export default function KanbanBoard({ projectId, currentUser }) {
         const next = { ...prev };
         next[from] = [...next[from]];
         next[to] = [...next[to]];
-        let idx = next[from].findIndex(t=>t._id.toString()==task._id.toString());
+        let idx = next[from].findIndex(
+          (t) => t._id.toString() == task._id.toString(),
+        );
         next[from].splice(idx, 1);
         next[to].push(task);
 
