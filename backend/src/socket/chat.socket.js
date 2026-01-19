@@ -1,3 +1,4 @@
+const chatModel = require("../models/chat.modal");
 const projectModel = require("../models/project.model");
 const UserModel = require("../models/user.model");
 
@@ -5,46 +6,29 @@ function chatSocket(io, socket, socketIdMap) {
   // ✅ Listen for messages
 
   socket.on("sendMessage", async ({ projectId, message }) => {
-    const senderId = socket.user.id;
-    const user = await UserModel.aggregate([
-      {
-        $match: {
-          _id: senderId,
-        },
-      },
-      { $unwind: { path: "$projects", preserveNullAndEmptyArrays: true } },
-      {
-        $match: {
-          "projects.project": projectId,
-        },
-      },
-      {
-        $project: {
-          post: "$projects.status",
-          username: 0
-        },
-      },
-    ]);
-
+    const senderId = socket.user._id;
     const project = await projectModel.findById(projectId);
+    const status = project.members.find(m => m.member.toString() == senderId).status
     // Save to DB
-    const chat = {
-      Username: user[0].username,
+    const Newchat = await chatModel.create({
+      user: senderId,
       message,
-      post: user[0].post,
-    };
-    project.chats.push(chat);
+      project: projectId,
+      status
+    })
+    const chat =await Newchat.populate({ path: "user", select: "username profilePic" })
+    project.chats.push(chat._id);
     await project.save()
-    // Broadcast message to everyone in the same project room
-    io.to(projectId).emit("newMessage", chat);
+  
+    io.to(projectId.toString()).emit("newMessage", chat);
   });
   socket.on("get-all-chats", async ({ projectId, message }) => {
-    const senderId = socket.user.id;
+    const senderId = socket.user._id;
 
-    const project = await projectModel.findById(projectId);
+    const project = await projectModel.findById(projectId).populate({ path: "chats", populate: { path: "user", select: "username profilePic" } });
 
     // Broadcast message to everyone in the same project room
-    io.to(socketIdMap.get(senderId)).emit("all-chats", { chats: project.chats });
+    io.to(projectId.toString()).emit("all-chats", { chats: project.chats });
   });
 }
 

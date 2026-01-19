@@ -13,7 +13,7 @@ const AllChatsLayout = ({ chats, currentUser }) => {
         <div key={index} ref={scrollRef}>
           <ChatCard
             chat={chat}
-            isOwn={chat.Username === currentUser.username}
+            isOwn={chat.user.username === currentUser.username}
           />
         </div>
       ))}

@@ -12,11 +12,17 @@ const chatSchema = mongoose.Schema(
             default: "member",
             enum: ["admin", "coAdmin", "member"],
         },
-        project:{type:mongoose.Schema.Types.ObjectId,ref:"project"},
-        isPinned:{type:Boolean,default:false},
-        reactions:[],
+        project: { type: mongoose.Schema.Types.ObjectId, ref: "project" },
+        isPinned: { type: Boolean, default: false },
+        reactions: [{
+            emoji: String,
+            user: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "user"
+            }
+        }],
+        replies: [{ type: mongoose.Schema.Types.ObjectId, ref: "chat" }],
         createdAt: { type: Date, default: Date.now },
-
     },
     {
         toJSON: { virtuals: true }, // 👈 important
