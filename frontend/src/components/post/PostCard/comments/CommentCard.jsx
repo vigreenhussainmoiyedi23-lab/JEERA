@@ -28,7 +28,6 @@ const CommentCard = ({
     enabled: showReplies,
     staleTime: 1000 * 60 * 5,
   });
-  const [replies, setReplies] = useState(data || []);
   return (
     <div className="bg-[#1b1b1f] rounded-xl border border-gray-800 p-4 hover:border-gray-700 transition-all duration-200">
       <div className="flex justify-between items-start">

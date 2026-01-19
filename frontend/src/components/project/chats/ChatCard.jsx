@@ -10,8 +10,10 @@ const ChatCard = ({ chat, isOwn }) => {
             : "bg-[#1E293B] text-gray-300"
         }`}
       >
-        {!isOwn && <div className="font-semibold text-yellow-400">{chat.Username}</div>}
-        <div>{chat.message}</div>
+        {!isOwn && <div className="font-semibold text-yellow-400">{chat.user?.username || "username"}</div>}
+        <div>
+          {chat.message}
+          </div>
       </div>
     </div>
   );

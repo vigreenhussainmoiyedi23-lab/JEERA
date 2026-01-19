@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const chatSchema = mongoose.Schema(
     {
         message: String,
-        User: {
+        user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "user",
         },
@@ -13,6 +13,8 @@ const chatSchema = mongoose.Schema(
             enum: ["admin", "coAdmin", "member"],
         },
         project:{type:mongoose.Schema.Types.ObjectId,ref:"project"},
+        isPinned:{type:Boolean,default:false},
+        reactions:[],
         createdAt: { type: Date, default: Date.now },
 
     },
