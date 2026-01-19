@@ -73,14 +73,15 @@ export default function KanbanBoard({ projectId, currentUser }) {
         return;
       }
       const { task, fromColumnId, fromIndex } = dragState;
-      socket.emit("updateTask", {
-        taskId: task._id,
-        status: targetColumnId,
-        assignedTo: task.assignedTo,
-        projectId,
-      });
+      if (targetColumnId !== fromColumnId) {
+        socket.emit("updateTask", {
+          taskId: task._id,
+          status: targetColumnId,
+          assignedTo: task.assignedTo,
+          projectId,
+        });
+      }
       let targetIndex = dropIndicator.index;
-
       const newTasks = { ...tasks };
       newTasks[fromColumnId] = [...newTasks[fromColumnId]];
       newTasks[fromColumnId].splice(fromIndex, 1);
@@ -95,7 +96,7 @@ export default function KanbanBoard({ projectId, currentUser }) {
         Math.min(targetIndex, newTasks[targetColumnId].length),
       );
       newTasks[targetColumnId].splice(targetIndex, 0, task);
-
+      setTasks(newTasks);
       handleDragEnd();
     },
     [dragState, dropIndicator, tasks, handleDragEnd],
@@ -139,6 +140,12 @@ export default function KanbanBoard({ projectId, currentUser }) {
         const next = { ...prev };
         next[from] = [...next[from]];
         next[to] = [...next[to]];
+        let AlreadyExists = next[to].findIndex(
+          (t) => t._id.toString() == task._id.toString(),
+        );
+        if (AlreadyExists) {
+          return prev;
+        }
         let idx = next[from].findIndex(
           (t) => t._id.toString() == task._id.toString(),
         );
@@ -161,7 +168,8 @@ export default function KanbanBoard({ projectId, currentUser }) {
       <header className="mb-8">
         <h1 className="text-3xl font-bold text-gray-100 mb-2">Project Board</h1>
         <p className="text-gray-400">
-          Drag and drop tasks to manage your workflow
+          Drag and drop tasks to manage your workflow <br />
+          [Only for desktop and laptops]
         </p>
       </header>
       <div className="flex flex-nowrap overflow-x-auto ">
