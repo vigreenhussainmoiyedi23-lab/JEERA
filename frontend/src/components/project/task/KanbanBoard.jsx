@@ -54,13 +54,10 @@ export default function KanbanBoard({ projectId, currentUser }) {
         { taskDets: TaskDets, projectId },
         (response) => {
           if (!response.success) {
-            console.error(response.errors);
+            console.error("an error occured" + response.errors);
+            alert(response.errors[0]?.message);
             return;
           }
-          setTasks((prev) => ({
-            ...prev,
-            [status]: [...prev[status], response.newTask],
-          }));
         },
       );
     } catch (error) {
@@ -103,11 +100,16 @@ export default function KanbanBoard({ projectId, currentUser }) {
     },
     [dragState, dropIndicator, tasks, handleDragEnd],
   );
-  
+
   useEffect(() => {
     socket.emit("getAllTasks", projectId);
     socket.on("taskCreated", ({ task, status }) => {
-      setTasks({ ...tasks, [status]: [...tasks[status], task] });
+      setTasks((prev) => {
+        return {
+          ...prev,
+          [status]: [...prev[status], task],
+        };
+      });
     });
 
     socket.emit("getAllEnums", projectId);

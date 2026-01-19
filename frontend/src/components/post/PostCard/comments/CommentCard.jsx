@@ -29,7 +29,6 @@ const CommentCard = ({
     staleTime: 1000 * 60 * 5,
   });
   const [replies, setReplies] = useState(data || []);
-  console.log(replies, data, "replies and data");
   return (
     <div className="bg-[#1b1b1f] rounded-xl border border-gray-800 p-4 hover:border-gray-700 transition-all duration-200">
       <div className="flex justify-between items-start">
@@ -47,7 +46,7 @@ const CommentCard = ({
           </div>
         </div>
 
-        <div className="flex gap-2">
+      {c?.user?._id?.toString()==user?._id?.toString() && (  <div className="flex gap-2">
           <button
             onClick={() => {
               setEditingId(c._id);
@@ -63,7 +62,7 @@ const CommentCard = ({
           >
             <Trash size={16} />
           </button>
-        </div>
+        </div>)}
       </div>
 
       {editingId === c._id ? (

@@ -23,7 +23,7 @@ function taskSocket(io, socket, socketIdMap) {
         return socket.emit("errorMessage", { message: "Access denied" });
       }
 
-      socket.join(projectId);
+      socket.join(projectId.toString());
 
       const project = await projectModel
         .findById(projectId)
@@ -43,7 +43,7 @@ function taskSocket(io, socket, socketIdMap) {
       if (!(await isProjectMember(projectId, user._id))) {
         return socket.emit("errorMessage", { message: "Access denied" });
       }
-      socket.leave(projectId);
+      socket.leave(projectId.toString());
     } catch (err) {
       socket.emit("errorMessage", { message: "Failed to join project" });
     }
@@ -87,16 +87,14 @@ function taskSocket(io, socket, socketIdMap) {
       const populatedTask = await TaskModel.findById(newTask._id)
         .populate("createdBy", "username email profilePic")
         .populate("assignedTo", "username email profilePic");
-
-      task.assignedTo.forEach(userId => {
-        const socketIds = socketIdMap.get(userId.toString());
+      newTask.assignedTo.forEach(userId => {
+        const socketIds = [...socketIdMap.get(userId.toString())];
         if (!socketIds) return;
-
         socketIds.forEach(sid => {
           const targetSocket = io.sockets.sockets.get(sid);
           if (!targetSocket) return;
 
-          if (targetSocket.rooms.has(`${projectId}`)) {
+          if (targetSocket.rooms.has(projectId.toString())) {
             targetSocket.emit("taskCreated", {
               task: newTask,
               status: newTask.taskStatus
@@ -111,6 +109,7 @@ function taskSocket(io, socket, socketIdMap) {
       });
 
     } catch (err) {
+      console.log("error occured", err)
       return ack({
         success: false,
         errors: err
@@ -154,8 +153,7 @@ function taskSocket(io, socket, socketIdMap) {
           socketIds.forEach(sid => {
             const targetSocket = io.sockets.sockets.get(sid);
             if (!targetSocket) return;
-
-            if (targetSocket.rooms.has(`${projectId}`)) {
+            if (targetSocket.rooms.has(projectId.toString())) {
               targetSocket.emit("taskUpdated", {
                 task: updatedTask,
                 from,
