@@ -35,7 +35,7 @@ const Profile = () => {
       <Navbar />
       <div className="bg-linear-to-br overflow-x-hidden pt-5  text-white min-h-screen w-full relative from-zinc-800 via-slate-950 to-gray-900 px-5">
         {/* User Information */}
-        <div className="flex flex-col items-center justify-start w-full max-w-4xl absolute md:left-[10vw] left-0 px-5 gap-5">
+        <div className="flex flex-col items-center justify-start w-full max-w-4xl absolute lg:left-10 xl:left-[10vw] md:left-1 left-0 px-5 gap-5">
           <Information user={user} />
           {/* Create Post */}
           <CreatePost setPosts={setPosts} />

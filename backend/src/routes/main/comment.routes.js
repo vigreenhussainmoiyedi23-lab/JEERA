@@ -96,27 +96,56 @@ Router.post("/create/:postId", async function (req, res) {
 })
 Router.delete("/:postId/:commentId", async function (req, res) {
     try {
-        const { message } = req.body
-        const { postId, commentId } = req.params
-        const post = await postModel.findById(postId)
-        if (!message || !post) return res.status(400).json({ message: "Either postId is incorrect or message is empty" })
-        const comment = await commentModel.findByIdAndUpdate(commentId, {
-            message,
-        })
-        const pindex = post.comments.findIndex(p => p.toString() == postId.toString())
-        post.comments.splice(pindex, 1)
-        await post.save()
+        const { postId, commentId } = req.params;
+        const post = await postModel.findById(postId);
+        if (!post) return res.status(400).json({ message: "Invalid postId" });
+        const comment = await commentModel.findById(commentId).populate("replies");
+        if (!comment) return res.status(404).json({ message: "Comment not found" });
+        if (req.user._id.toString() !== comment.user._id.toString()) {
+            return res.status(403).json({
+                message: "u cant delete it"
+            })
+        }
+
+        // Recursive deletion helper (awaited)
+        async function deleteRepliesRecursively(comment) {
+            for (const reply of comment.replies) {
+                const replyDoc = await commentModel.findById(reply._id).populate("replies");
+                if (replyDoc) {
+                    if (replyDoc.replies.length > 0) {
+                        await deleteRepliesRecursively(replyDoc);
+                    }
+                    await commentModel.findByIdAndDelete(replyDoc._id);
+                }
+            }
+        }
+
+        // Delete nested replies first
+        await deleteRepliesRecursively(comment);
+
+        // Delete main comment
+        await commentModel.findByIdAndDelete(commentId);
+
+        // If it was a direct comment (not reply), remove from post.comments
+        if (!comment.isReply) {
+            post.comments = post.comments.filter(
+                (c) => c._id.toString() !== commentId.toString()
+            );
+            await post.save();
+        }
+
         return res.status(200).json({
-            message: "comment deleted succesfully",
-            comment
-        })
+            message: "Comment and its replies deleted successfully",
+        });
     } catch (error) {
+        console.error(error);
         return res.status(500).json({
-            message: "Something Went Wrong",
-            error
-        })
+            message: "Something went wrong",
+            error: error.message,
+        });
     }
-})
+});
+
 Router.patch("/like/:commentId", async (req, res) => {
     try {
         const user = req.user;

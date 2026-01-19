@@ -1,15 +1,37 @@
-const CreateReply = () => {
+
+import React, { useState } from "react";
+import { SendHorizonalIcon } from "lucide-react";
+import axiosInstance from "../../../../utils/axiosInstance";
+
+const CreateReply = ({ parentId, refetch }) => {
+  const [newReply, setNewReply] = useState("");
+
+  const handleReply = async () => {
+    if (!newReply.trim()) return;
+    await axiosInstance.post(`/comment/reply/${parentId}`, {
+      message: newReply,
+    });
+    setNewReply("");
+    refetch();
+  };
+
   return (
-    <div className="flex flex-col sm:flex-row gap-2 mb-6">
-      {/* ➕ Add Comment */}
-      Reply
+    <div className="mt-3 flex gap-2">
       <textarea
-        placeholder="Write a comment..."
-        className="flex-1 resize-none bg-transparent border border-gray-600 rounded-lg p-2 text-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+        placeholder="Write a reply..."
+        className="flex-1 bg-[#0f0f12] border border-gray-700 rounded-lg p-2 text-gray-200 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        value={newReply}
+        onChange={(e) => setNewReply(e.target.value)}
       />
-      <button className="bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg hover:bg-yellow-500 transition disabled:opacity-50"></button>
+      <button
+        onClick={handleReply}
+        className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition"
+      >
+        <SendHorizonalIcon size={18} />
+      </button>
     </div>
   );
 };
 
 export default CreateReply;
+

@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   Edit2,
   Heart,
-  Reply,
   ReplyIcon,
   SendHorizonalIcon,
   Trash,
@@ -16,193 +15,156 @@ const CommentCard = ({
   likeCommentMutation,
   deleteCommentMutation,
   editCommentMutation,
-  refetch,
 }) => {
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
   const [newReply, setNewReply] = useState("");
   const [reply, setReply] = useState(false);
-  const [replies, setReplies] = useState([]);
   const [showReplies, setShowReplies] = useState(false);
-  const { data, isLoading, isFetching, isError, error } = useQuery({
-    queryKey: ["replies"],
-    queryFn: async () => {
-      let data= (await axiosInstance.get(`/comment/replies/${c._id}`)).data.replies
-      return data;
-    },
-    enabled: showReplies, // 🚫 Don't fetch automatically
+  const { data, refetch } = useQuery({
+    queryKey: ["replies", c._id],
+    queryFn: async () =>
+      (await axiosInstance.get(`/comment/replies/${c._id}`)).data.replies,
+    enabled: showReplies,
     staleTime: 1000 * 60 * 5,
   });
-
-  const handleShowReplies = async () => {
-    setShowReplies((prev) => !prev);
-
-    if (!showReplies && !data) {
-      await refetch();
-    }
-  };
-  const handleCreateReply = async () => {
-    setShowReplies((prev) => !prev);
-    setReplies(data);
-    // ✅ Only fetch when opening replies
-    if (!showReplies && !data) {
-      await refetch();
-    }
-  };
-
+  const [replies, setReplies] = useState(data || []);
+  console.log(replies, data, "replies and data");
   return (
-    <div
-      key={c._id}
-      className="mb-4 border-b relative border-gray-800 pb-3 flex flex-col rounded-3xl px-5 py-2 bg-cyan-950"
-    >
-      {/* User name and pfp with optional edit button */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center justify-center gap-3">
+    <div className="bg-[#1b1b1f] rounded-xl border border-gray-800 p-4 hover:border-gray-700 transition-all duration-200">
+      <div className="flex justify-between items-start">
+        <div className="flex items-center gap-3">
           <img
             src={c.createdBy?.profilePic?.url || "/user.png"}
-            className="md:h-10 h-5 object-center object-cover rounded-full"
+            className="h-9 w-9 rounded-full object-cover border border-gray-700"
             alt="pfp"
           />
-          <span className="font-semibold text-nowrap  overflow-hidden text-sm tracking-tighter font-mono sm:text-lg lg:text-xl text-yellow-300">
-            {c.user?.username || "User"}
-          </span>{" "}
+          <div>
+            <p className="text-gray-100 font-medium text-sm">
+              {c.user?.username || "User"}
+            </p>
+            <p className="text-gray-400 text-xs">{c.createdAt?.slice(0, 10)}</p>
+          </div>
         </div>
-        <div className="flex gap-2 items-center justify-center">
+
+        <div className="flex gap-2">
           <button
             onClick={() => {
               setEditingId(c._id);
               setEditText(c.message);
             }}
-            className="text-blue-500 hover:text-blue-600"
+            className="text-gray-400 hover:text-blue-400"
           >
-            <Edit2 />
+            <Edit2 size={16} />
           </button>
           <button
             onClick={() => deleteCommentMutation.mutate(c._id)}
-            className="text-red-600 hover:text-red-500"
+            className="text-gray-400 hover:text-red-400"
           >
-            <Trash />
+            <Trash size={16} />
           </button>
         </div>
       </div>
-      {/* ✏️ Editing */}
+
       {editingId === c._id ? (
-        <div className="mt-2 flex flex-col gap-2">
+        <div className="mt-3 space-y-2">
           <textarea
-            className="resize-none bg-black/50 border border-gray-600 p-2 rounded-lg text-gray-200"
+            className="w-full bg-[#0f0f12] border border-gray-700 rounded-lg p-2 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             value={editText}
             onChange={(e) => setEditText(e.target.value)}
           />
           <div className="flex gap-2">
             <button
-              onClick={async () => {
-                editCommentMutation.mutate({
-                  id: c._id,
-                  message: editText,
-                });
-                await refetch();
+              onClick={() => {
+                editCommentMutation.mutate({ id: c._id, message: editText });
                 setEditingId(null);
               }}
-              className="bg-green-500 text-black px-3 py-1 rounded-lg text-sm font-semibold"
+              className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded-md text-sm"
             >
               Save
             </button>
             <button
               onClick={() => setEditingId(null)}
-              className="bg-gray-600 text-white px-3 py-1 rounded-lg text-sm"
+              className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-md text-sm"
             >
               Cancel
             </button>
           </div>
         </div>
       ) : (
-        <>
-          <p className="mt-1 text-gray-300 text-sm">{c.message}</p>
-        </>
+        <p className="text-gray-300 text-sm mt-2 leading-relaxed">
+          {c.message}
+        </p>
       )}
-      <div className="flex items-center justify-start gap-3">
-        <button
-          onClick={async () => {
-            likeCommentMutation.mutate(c._id);
-            await refetch();
-          }}
-          className="text-gray-400 hover:text-yellow-300 flex items-center justify-center gap-2"
-        >
-          {!c.likedBy.includes(user._id) ? <Heart /> : <span>❤️</span>}{" "}
-          {c.likedBy?.length || 0}
-        </button>
-        <button
-          onClick={function () {
-            setReply((prev) => !prev);
-          }}
-          className="text-gray-400 hover:text-yellow-300 flex items-center justify-center gap-2"
-        >
-          <ReplyIcon /> Reply
-        </button>
 
+      <div className="flex gap-5 mt-3 text-sm">
         <button
-          onClick={handleShowReplies}
-          className="text-gray-400 hover:text-yellow-300 flex items-center justify-center gap-2 bg-gray-800 rounded-2xl px-3 py-1"
+          onClick={() => likeCommentMutation.mutate(c._id)}
+          className={`flex items-center gap-2 ${
+            c.likedBy.includes(user._id)
+              ? "text-blue-400"
+              : "text-gray-400 hover:text-blue-400"
+          }`}
         >
-          View Replies
-          <span className="font-light font-stretch-200% text-xs">V</span>
+          <Heart size={16} />
+          <span>{c.likedBy?.length || 0}</span>
         </button>
-      </div>{" "}
+        <button
+          onClick={() => setReply((prev) => !prev)}
+          className="flex items-center gap-2 text-gray-400 hover:text-blue-400"
+        >
+          <ReplyIcon size={16} />
+          Reply
+        </button>
+        <button
+          onClick={() => setShowReplies((prev) => !prev)}
+          className="text-gray-400 hover:text-blue-400"
+        >
+          {showReplies ? "Hide Replies" : "View Replies"}
+        </button>
+      </div>
+
       {reply && (
-        <div className="  flex flex-col sm:flex-row gap-2 mb-6 h-10">
-          {/* ➕ Add Comment */}
+        <div className="mt-3 flex gap-2">
           <textarea
-            placeholder="Write a comment..."
-            className="flex-1 resize-none bg-transparent border border-gray-600 rounded-lg p-2 text-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            placeholder="Write a reply..."
+            className="flex-1 bg-[#0f0f12] border border-gray-700 rounded-lg p-2 text-gray-200 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
             value={newReply}
-            onKeyDown={async (e) => {
-              if (e.key === "Enter") {
-                const res = await axiosInstance.post(
-                  `/comment/reply/${c._id}`,
-                  {
-                    message: newReply,
-                  }
-                );
-                replies.push(res.data.comment);
-                setNewReply("");
-              }
-            }}
             onChange={(e) => setNewReply(e.target.value)}
           />
           <button
-            onClick={async function () {
-              const res = await axiosInstance.post(`/comment/reply/${c._id}`, {
+            onClick={async () => {
+              await axiosInstance.post(`/comment/reply/${c._id}`, {
                 message: newReply,
               });
-              replies.push(res.data.comment);
               setNewReply("");
+              setShowReplies(true);
+              refetch();
             }}
-            className="bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg hover:bg-yellow-500 transition disabled:opacity-50"
+            className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg"
           >
-            <SendHorizonalIcon />
+            <SendHorizonalIcon size={18} />
           </button>
         </div>
       )}
-      {showReplies && (
-        <>
-          {data?.length == 0 ? (
-            <p>No replies yet</p>
+
+      {showReplies && data && (
+        <div className="mt-4 border-l border-gray-700 pl-4 space-y-3">
+          {data.length === 0 ? (
+            <p className="text-gray-500 text-xs">No replies yet</p>
           ) : (
-            data &&
-            data?.map((r) => {
-              return (
-                <CommentCard
-                  c={r}
-                  user={user}
-                  likeCommentMutation={likeCommentMutation}
-                  editCommentMutation={editCommentMutation}
-                  deleteCommentMutation={deleteCommentMutation}
-                  refetch={refetch}
-                />
-              );
-            })
+            data.map((r) => (
+              <CommentCard
+                key={r._id}
+                c={r}
+                user={r.user}
+                likeCommentMutation={likeCommentMutation}
+                editCommentMutation={editCommentMutation}
+                deleteCommentMutation={deleteCommentMutation}
+              />
+            ))
           )}
-        </>
+        </div>
       )}
     </div>
   );
