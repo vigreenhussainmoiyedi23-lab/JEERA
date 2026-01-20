@@ -81,6 +81,7 @@ export default function KanbanBoard({ projectId, currentUser }) {
           projectId,
         });
       }
+      
       let targetIndex = dropIndicator.index;
       const newTasks = { ...tasks };
       newTasks[fromColumnId] = [...newTasks[fromColumnId]];
@@ -144,6 +145,7 @@ export default function KanbanBoard({ projectId, currentUser }) {
           (t) => t._id.toString() == task._id.toString(),
         );
         if (AlreadyExists) {
+          console.log("already exist")
           return prev;
         }
         let idx = next[from].findIndex(

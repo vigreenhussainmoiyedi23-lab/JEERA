@@ -1,6 +1,6 @@
 import React from "react";
 
-const PinnedChats = ({ pinnedChats }) => {
+const PinnedChats = ({ pinnedChats,socket }) => {
   if (!pinnedChats.length) return null;
 
   return (

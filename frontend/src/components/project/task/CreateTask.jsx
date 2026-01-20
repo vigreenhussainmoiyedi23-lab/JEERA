@@ -83,10 +83,10 @@ const CreateTask = ({
     const requiredFields = [
       "title",
       "description",
-      "dueDate", 
+      "dueDate",
       "issueType",
       "priority",
-      "assignedTo", 
+      "assignedTo",
       "category",
       "storyPoints",
       "labels",
@@ -208,18 +208,18 @@ const CreateTask = ({
                 className=" py-2 md:mb-3 mb-4 flex items-start
                justify-start flex-col"
               >
-                <p className="block text-slate-300 text-sm mb-1">Assigned To</p>
+                {/* <p className="block text-slate-300 text-sm mb-1">Assigned To</p> */}
                 <DarkMultiSelect
                   names={enumValues.assignedTo}
                   changehandler={handleMultiChange}
                   assignedTo={formData.assignedTo}
                 />
               </div>
-              <div>
+              <div className="flex md:flex-col gap-3 items-center justify-between">
                 {/* priority & issueType*/}
                 {/* Issue Type */}
-                <div>
-                  <label className="block text-slate-300 text-sm mb-1">
+                <div className="md:w-full w-1/2">
+                  <label className="block  text-slate-300 text-sm mb-1">
                     Issue Type
                   </label>
                   <select
@@ -237,7 +237,7 @@ const CreateTask = ({
                 </div>
 
                 {/* Priority */}
-                <div>
+                <div className="md:w-full w-1/2">
                   <label className="block text-slate-300 text-sm mb-1">
                     Priority
                   </label>
