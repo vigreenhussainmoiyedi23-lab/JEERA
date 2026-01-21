@@ -57,11 +57,6 @@ const taskSchema = new mongoose.Schema(
       required: true
     },
 
-    sprint: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "sprint"
-    },
-
     history: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "taskHistory"

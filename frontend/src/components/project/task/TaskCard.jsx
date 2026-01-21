@@ -22,10 +22,20 @@ const priorityColors = {
   highest: "text-red-600",
 };
 
-
-export default function TaskCard({ task, columnId, index, isDragging, onDragStart, onDragEnd }) {
+export default function TaskCard({
+  task,
+  columnId,
+  index,
+  isDragging,
+  onDragStart,
+  onDragEnd,
+  setTaskMore,
+}) {
   return (
     <div
+      onClick={() => {
+        setTaskMore(task._id);
+      }}
       draggable
       onDragStart={(e) => {
         e.dataTransfer.effectAllowed = "move";
@@ -35,14 +45,20 @@ export default function TaskCard({ task, columnId, index, isDragging, onDragStar
       className={`bg-gray-800/90 border border-gray-700 rounded-xl p-4 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-lg hover:border-gray-500/80 transition-all duration-200 hover:-translate-y-0.5 ${isDragging ? "opacity-50 scale-95" : ""}`}
     >
       <div className="flex justify-between items-center mb-2">
-        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${columnColors[columnId]} text-black`}>
+        <span
+          className={`text-xs font-semibold px-2.5 py-1 rounded-full ${columnColors[columnId]} text-black`}
+        >
           {columnLabels[columnId]}
         </span>
-        <span className={`text-xs font-medium capitalize ${priorityColors[task.priority]}`}>
+        <span
+          className={`text-xs font-medium capitalize ${priorityColors[task.priority]}`}
+        >
           {task.priority}
         </span>
       </div>
-      <h3 className="text-gray-100 font-semibold text-[15px] mb-1">{task.title}</h3>
+      <h3 className="text-gray-100 font-semibold text-[15px] mb-1">
+        {task.title}
+      </h3>
       <p className="text-gray-400 text-sm leading-snug">{task.description}</p>
     </div>
   );

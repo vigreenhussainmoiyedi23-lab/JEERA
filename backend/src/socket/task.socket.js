@@ -1,6 +1,7 @@
 const projectModel = require("../models/project.model");
 const taskModel = require("../models/task.model");
 const TaskModel = require("../models/task.model");
+const taskHistoryModel = require("../models/taskHistory.model");
 const UserModel = require("../models/user.model");
 const runSocketValidator = require("../services/runSocketvalidator");
 const { TaskValidator } = require("../utils/express-validator");
@@ -128,25 +129,41 @@ function taskSocket(io, socket, socketIdMap) {
       if (!(await isProjectMember(task.project, socket.user._id))) {
         return socket.emit("errorMessage", { message: "Not authorized" });
       }
-
+      let action = ""
       let changed = false;
+      let oldValue, newValue;
 
       if (status && ["toDo", "Inprogress", "Inreview", "done", "Failed"].includes(status)) {
+        oldValue = task.taskStatus;
+        newValue = status;
         task.taskStatus = status;
+        action = "Updated Status"
         changed = true;
       }
 
       if (assignedTo && Array.isArray(assignedTo)) {
+        oldValue = task.assignedTo.join(",")
+        newValue = assignedTo.join(",")
         task.assignedTo = assignedTo;
+        action = "Updated assignedTo";
         changed = true;
       }
 
       if (changed) {
+        const history = await taskHistoryModel.create({
+          task: taskId,
+          user: socket.user._id,
+          action,
+          oldValue,
+          newValue,
+        })
+        task.history.push(history._id)
         await task.save();
 
         const updatedTask = await TaskModel.findById(taskId)
           .populate("createdBy", "username email profilePic")
-          .populate("assignedTo", "username email profilePic");
+          .populate("assignedTo", "username email profilePic")
+          .populate({ path: "history", populate: { path: "user", select: "username email profilePic" } });
         task.assignedTo.forEach(userId => {
           const socketIds = socketIdMap.get(userId.toString());
           if (!socketIds) return;
@@ -182,6 +199,7 @@ function taskSocket(io, socket, socketIdMap) {
       const tasks = await TaskModel.find({ project: projectId })
         .populate("createdBy", "username email profilePic")
         .populate("assignedTo", "username email profilePic")
+        .populate({ path: "history", populate: { path: "user", select: "username email profilePic" } })
         .sort({ createdAt: -1 });
 
       socket.emit("allTasks", tasks);

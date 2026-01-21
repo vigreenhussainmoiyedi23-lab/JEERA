@@ -77,11 +77,10 @@ export default function KanbanBoard({ projectId, currentUser }) {
         socket.emit("updateTask", {
           taskId: task._id,
           status: targetColumnId,
-          assignedTo: task.assignedTo,
           projectId,
         });
       }
-      
+
       let targetIndex = dropIndicator.index;
       const newTasks = { ...tasks };
       newTasks[fromColumnId] = [...newTasks[fromColumnId]];
@@ -145,7 +144,7 @@ export default function KanbanBoard({ projectId, currentUser }) {
           (t) => t._id.toString() == task._id.toString(),
         );
         if (AlreadyExists) {
-          console.log("already exist")
+          console.log("already exist");
           return prev;
         }
         let idx = next[from].findIndex(
@@ -169,10 +168,18 @@ export default function KanbanBoard({ projectId, currentUser }) {
     <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 p-6 lg:p-8">
       <header className="mb-8">
         <h1 className="text-3xl font-bold text-gray-100 mb-2">Project Board</h1>
-        <p className="text-gray-400">
-          Drag and drop tasks to manage your workflow <br />
-          [Only for desktop and laptops]
-        </p>
+        <div className="text-slate-300 justify-around items-center flex gap-2 ">
+          <div className="flex gap-0 flex-col items-start justify-start">
+            <b>Drag and drop</b>
+            <span> tasks to manage your workflow</span>
+            <span> [Only for desktop and laptops]</span>
+          </div>
+          <div className="flex  gap-0 flex-col items-end justify-end">
+            <b>click task</b>
+            <span>to open taskMore and update task</span>
+            <span> from there on mobile and tablet</span>
+          </div>
+        </div>
       </header>
       <div className="flex flex-nowrap overflow-x-auto ">
         {columns.map((column) => (
