@@ -105,6 +105,7 @@ export default function KanbanBoard({ projectId, currentUser }) {
   useEffect(() => {
     socket.emit("getAllTasks", projectId);
     socket.on("taskCreated", ({ task, status }) => {
+      // console.log("new task")
       setTasks((prev) => {
         return {
           ...prev,
@@ -168,16 +169,39 @@ export default function KanbanBoard({ projectId, currentUser }) {
     <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 p-6 lg:p-8">
       <header className="mb-8">
         <h1 className="text-3xl font-bold text-gray-100 mb-2">Project Board</h1>
-        <div className="text-slate-300 justify-around items-center flex gap-2 ">
-          <div className="flex gap-0 flex-col items-start justify-start">
-            <b>Drag and drop</b>
-            <span> tasks to manage your workflow</span>
-            <span> [Only for desktop and laptops]</span>
+        <div className="flex flex-col gap-4 text-slate-200">
+          {/* Step 1 */}
+          <div className="flex items-start gap-3 rounded-xl bg-slate-800/60 p-4 shadow-sm">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-400 text-black font-bold">
+              1
+            </div>
+
+            <div>
+              <p className="font-semibold text-slate-100">Drag & Drop Tasks</p>
+              <p className="text-sm text-slate-400">
+                Organize and manage your workflow easily using drag and drop.
+                <span className="block text-xs text-slate-500 mt-1">
+                  Available on desktop & laptops only
+                </span>
+              </p>
+            </div>
           </div>
-          <div className="flex  gap-0 flex-col items-end justify-end">
-            <b>click task</b>
-            <span>to open taskMore and update task</span>
-            <span> from there on mobile and tablet</span>
+
+          {/* Step 2 */}
+          <div className="flex items-start gap-3 rounded-xl bg-slate-800/60 p-4 shadow-sm">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-400 text-black font-bold">
+              2
+            </div>
+
+            <div>
+              <p className="font-semibold text-slate-100">Tap a Task to Edit</p>
+              <p className="text-sm text-slate-400">
+                Open detailed task view to update status, priority, or details.
+                <span className="block text-xs text-slate-500 mt-1">
+                  Best for mobile & tablets
+                </span>
+              </p>
+            </div>
           </div>
         </div>
       </header>

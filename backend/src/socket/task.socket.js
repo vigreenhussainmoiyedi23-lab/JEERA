@@ -92,7 +92,7 @@ function taskSocket(io, socket, socketIdMap) {
         const socketIds = [...socketIdMap.get(userId.toString())];
         if (!socketIds) return;
         socketIds.forEach(sid => {
-          if (sid === socket.id) return;
+          // if (sid === socket.id) return;
           const targetSocket = io.sockets.sockets.get(sid);
           if (!targetSocket) return;
 

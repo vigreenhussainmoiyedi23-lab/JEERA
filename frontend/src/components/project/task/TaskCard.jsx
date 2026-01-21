@@ -30,6 +30,7 @@ export default function TaskCard({
   onDragStart,
   onDragEnd,
   setTaskMore,
+  columnAccentColors
 }) {
   return (
     <div
@@ -42,7 +43,7 @@ export default function TaskCard({
         onDragStart(task, columnId, index);
       }}
       onDragEnd={onDragEnd}
-      className={`bg-gray-800/90 border border-gray-700 rounded-xl p-4 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-lg hover:border-gray-500/80 transition-all duration-200 hover:-translate-y-0.5 ${isDragging ? "opacity-50 scale-95" : ""}`}
+      className={`bg-gray-800/90 ${priorityColors[task.priority]} border border-t-4 ${columnAccentColors} border-gray-700 rounded-xl p-4 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-lg hover:border-gray-500/80 transition-all duration-200 hover:-translate-y-0.5 ${isDragging ? "opacity-50 scale-95" : ""}`}
     >
       <div className="flex justify-between items-center mb-2">
         <span
@@ -51,7 +52,7 @@ export default function TaskCard({
           {columnLabels[columnId]}
         </span>
         <span
-          className={`text-xs font-medium capitalize ${priorityColors[task.priority]}`}
+          className={`text-xs bg-slate-900 rounded-2xl capitalize font-bold px-3 py-1  ${priorityColors[task.priority]}`}
         >
           {task.priority}
         </span>

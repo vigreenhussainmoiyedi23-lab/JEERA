@@ -3,6 +3,7 @@ import TaskCard from "./TaskCard";
 import DropIndicator from "./DropIndicator.jsx";
 import CreateTask from "./CreateTask.jsx";
 import TaskMore from "./TaskMore.jsx";
+import { PlusCircle } from "lucide-react";
 
 const columnAccentColors = {
   toDo: "border-t-yellow-500",
@@ -36,6 +37,7 @@ export default function KanbanColumn({
     tasks = [];
   }
   const [taskMore, setTaskMore] = useState(null);
+ console.log(taskMore)
   return (
     <>
       <div
@@ -61,15 +63,16 @@ export default function KanbanColumn({
             {tasks?.length || 0}
           </span>
         </div>
-        <button
-          onClick={function (e) {
-            setCreateTask(column.id);
-          }}
-          className="bg-slate-700 rounded-3xl px-3 w-max capitalize py-2 self-end mx-5"
-        >
-          add task
-        </button>
+
         <div className="flex flex-col gap-2 p-4 pt-2 flex-1 min-h-[200px]">
+          <button
+            onClick={function (e) {
+              setCreateTask(column.id);
+            }}
+            className="bg-slate-950/90 border-slate-300 border h-25 flex items-center justify-center text-4xl font-bold rounded-3xl px-3 w-full capitalize py-2 "
+          >
+            <PlusCircle/>
+          </button>
           <DropIndicator
             isVisible={
               dropIndicator?.columnId === column.id &&
@@ -84,7 +87,6 @@ export default function KanbanColumn({
               return (
                 <React.Fragment key={task._id}>
                   <div
-                    
                     onDragOver={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -102,6 +104,7 @@ export default function KanbanColumn({
                       onDragStart={onDragStart}
                       onDragEnd={onDragEnd}
                       setTaskMore={setTaskMore}
+                      columnAccentColors={columnAccentColors[column.id]}
                     />
                   </div>
                   <DropIndicator
@@ -130,7 +133,9 @@ export default function KanbanColumn({
           status={column.id}
         />
       )}
-      {taskMore && <TaskMore task={taskMore} onClose={onClose} />}
+      {taskMore && (
+        <TaskMore taskId={taskMore} onClose={onClose} enumValues={enumValues} />
+      )}
     </>
   );
 }
