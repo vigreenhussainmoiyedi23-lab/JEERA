@@ -8,6 +8,8 @@ import ProjectDetails from "./pages/projects/ProjectDetails";
 import NotFound from "./pages/NotFound";
 import CreateProject from "./pages/projects/CreateProject";
 import Profile from "./pages/Profile/Profile";
+import Posts from "./pages/posts/Posts";
+import Tasks from "./pages/tasks/Tasks";
 import { ReactLenis, useLenis } from "lenis/react";
 const App = () => {
   const lenis = useLenis((lenis) => {
@@ -33,6 +35,8 @@ const App = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/posts" element={<Posts />} />
+        <Route path="/tasks" element={<Tasks />} />
         <Route path="/createProject" element={<CreateProject />} />
         <Route path="/project/:projectid" element={<ProjectDetails />} />
 
