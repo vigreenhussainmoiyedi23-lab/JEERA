@@ -33,46 +33,48 @@ const PostCard = ({ post, user }) => {
   };
 
   return (
-    <div className="bg-[#1b1f23] border border-gray-700 rounded-xl pt-3 pb-1 shadow-sm mb-4  transition-all">
+    <div className="relative mb-5">
+      <div className="absolute inset-0 rounded-3xl bg-linear-to-br from-white/8 via-white/4 to-transparent" />
+      <div className="relative rounded-3xl border border-white/10 bg-slate-950/30 backdrop-blur-md shadow-[0_18px_60px_rgba(0,0,0,0.35)] hover:shadow-[0_22px_70px_rgba(0,0,0,0.45)] transition-shadow overflow-hidden">
       {/* 1. Top Header Section (MainHead should contain Avatar, Name, Headline) */}
-      <div className="px-4">
+      <div className="px-5 pt-4">
         <MainHead post={post} user={user} />
       </div>
 
       {/* 2. Post Description */}
-      <div className="px-4 py-3 text-gray-200 text-sm md:text-[15px] leading-relaxed">
+      <div className="px-5 py-3 text-gray-200/90 text-sm md:text-[15px] leading-relaxed">
         {post.description}
       </div>
 
       {/* 3. Media Section */}
       {post.images && post.images.length > 0 && (
-        <div className="border-y border-gray-800 bg-black/20">
+        <div className="border-y border-white/10 bg-black/20">
           <ImageSwiper post={post} />
         </div>
       )}
 
       {/* 4. Social Stats (Like count, Comment count) */}
-      <div className="px-4 py-2 flex items-center justify-between border-b border-gray-800">
+      <div className="px-5 py-2.5 flex items-center justify-between border-b border-white/10">
         <div className="flex items-center gap-1 group cursor-pointer">
           <div className="flex -space-x-1">
-            <div className="bg-blue-500 rounded-full p-0.5 border border-[#1b1f23]">
+            <div className="bg-blue-500 rounded-full p-0.5 border border-black/30">
               <ThumbsUp size={10} className="text-white fill-white" />
             </div>
           </div>
-          <span className="text-xs text-gray-400 hover:text-blue-400 hover:underline">
+          <span className="text-xs text-gray-200/70 hover:text-blue-300 hover:underline">
             {likeCount}
           </span>
         </div>
-        <div className="text-xs text-gray-400 hover:text-blue-400 hover:underline cursor-pointer">
+        <div className="text-xs text-gray-200/70 hover:text-blue-300 hover:underline cursor-pointer">
           {post.comments?.length || 0} comments
         </div>
       </div>
 
       {/* 5. Interaction Bar */}
-      <div className="px-2 py-1 flex items-center justify-between">
+      <div className="px-2 py-1.5 flex items-center justify-between">
         <button
           onClick={handleLike}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-md hover:bg-white/5 transition-colors ${
+          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl hover:bg-white/5 transition-colors ${
             liked ? "text-blue-400" : "text-gray-400"
           }`}
         >
@@ -82,7 +84,7 @@ const PostCard = ({ post, user }) => {
 
         <button
           onClick={() => setOpenComments(!openComments)}
-          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-md hover:bg-white/5 transition-colors text-gray-400"
+          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl hover:bg-white/5 transition-colors text-gray-400"
         >
           <MessageSquare size={20} />
           <span className="font-semibold text-sm">Comment</span>
@@ -95,10 +97,18 @@ const PostCard = ({ post, user }) => {
 
       {/* 6. Collapsible Comments Section */}
       {openComments && (
-        <div className="px-4 pb-4 animate-in fade-in slide-in-from-top-2">
-          <Comments post={post} user={user} />
+        <div className="px-5 pb-5 animate-in fade-in slide-in-from-top-2">
+          <div
+            data-lenis-prevent
+            data-lenis-prevent-wheel
+            data-lenis-prevent-touch
+            className="max-h-[65vh] overflow-y-auto overscroll-auto pr-1 [scrollbar-gutter:stable] touch-pan-y [-webkit-overflow-scrolling:touch]"
+          >
+            <Comments post={post} user={user} />
+          </div>
         </div>
       )}
+      </div>
     </div>
   );
 };
@@ -127,7 +137,7 @@ const ShareButton = ({ postId }) => {
       {open && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center">
           {/* Share Panel */}
-          <div className="bg-gray-900 w-full sm:w-[400px] rounded-t-2xl sm:rounded-2xl p-5 animate-slideUp">
+          <div className="bg-gray-900 w-full sm:w-100 rounded-t-2xl sm:rounded-2xl p-5 animate-slideUp">
             {/* Header */}
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-white">Share post</h3>

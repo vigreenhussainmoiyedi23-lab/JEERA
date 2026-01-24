@@ -6,12 +6,16 @@ const PostSuggestions = ({ posts ,user}) => {
     return <p className="text-gray-400 text-center">No suggested posts yet.</p>;
 
   return (
-    <div className="bg-[#1b1f23] border border-gray-700 rounded-xl overflow-hidden shadow-sm  w-full max-w-4xl mx-auto">
-
-      <h3 className="text-2xl font-bold text-yellow-300">Suggested Posts</h3>
-      {posts.map((p) => (
-        <PostCard post={p} user={user}/>
-      ))}
+    <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md shadow-[0_18px_60px_rgba(0,0,0,0.35)] w-full overflow-hidden">
+      <div className="px-5 py-4 border-b border-white/10">
+        <h3 className="text-base sm:text-lg font-semibold text-white tracking-tight">Suggested posts</h3>
+        <p className="mt-1 text-xs sm:text-sm text-gray-200/60">Based on your interests</p>
+      </div>
+      <div className="p-5 space-y-5">
+        {posts.map((p) => (
+          <PostCard post={p} user={user}/>
+        ))}
+      </div>
     </div>
   );
 };

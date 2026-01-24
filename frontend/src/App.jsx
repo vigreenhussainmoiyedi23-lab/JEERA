@@ -15,7 +15,18 @@ const App = () => {
   });
   return (
     <>
-      <ReactLenis root />
+      <ReactLenis
+        root
+        options={{
+          prevent: (node) => {
+            if (!node) return false;
+            const el = node instanceof HTMLElement ? node : null;
+            return !!el?.closest?.(
+              "[data-lenis-prevent],[data-lenis-prevent-wheel],[data-lenis-prevent-touch]",
+            );
+          },
+        }}
+      />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />

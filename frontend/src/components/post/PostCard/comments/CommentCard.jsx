@@ -29,12 +29,12 @@ const CommentCard = ({
     staleTime: 1000 * 60 * 5,
   });
   return (
-    <div className="bg-[#1b1b1f] rounded-xl border border-gray-800 p-4 hover:border-gray-700 transition-all duration-200">
+    <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-4 hover:bg-white/8 hover:border-white/15 transition-all duration-200">
       <div className="flex justify-between items-start">
         <div className="flex items-center gap-3">
           <img
             src={c.createdBy?.profilePic?.url || "/user.png"}
-            className="h-9 w-9 rounded-full object-cover border border-gray-700"
+            className="h-9 w-9 rounded-full object-cover border border-white/10 bg-black/20"
             alt="pfp"
           />
           <div>
@@ -67,7 +67,7 @@ const CommentCard = ({
       {editingId === c._id ? (
         <div className="mt-3 space-y-2">
           <textarea
-            className="w-full bg-[#0f0f12] border border-gray-700 rounded-lg p-2 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            className="w-full bg-black/25 border border-white/10 rounded-xl p-2 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
             value={editText}
             onChange={(e) => setEditText(e.target.value)}
           />
@@ -83,7 +83,7 @@ const CommentCard = ({
             </button>
             <button
               onClick={() => setEditingId(null)}
-              className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-md text-sm"
+              className="bg-black/30 hover:bg-black/40 border border-white/10 text-white px-3 py-1 rounded-md text-sm"
             >
               Cancel
             </button>
@@ -126,7 +126,7 @@ const CommentCard = ({
         <div className="mt-3 flex gap-2">
           <textarea
             placeholder="Write a reply..."
-            className="flex-1 bg-[#0f0f12] border border-gray-700 rounded-lg p-2 text-gray-200 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="flex-1 bg-black/25 border border-white/10 rounded-xl p-2 text-gray-200 text-sm focus:ring-2 focus:ring-blue-500/50 focus:outline-none"
             value={newReply}
             onChange={(e) => setNewReply(e.target.value)}
           />

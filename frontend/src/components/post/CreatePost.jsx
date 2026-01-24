@@ -38,9 +38,14 @@ const CreatePost = ({ setPosts }) => {
     <form
       onSubmit={handleSubmit}
       encType="multipart/form-data"
-      className="bg-[#1b1f23] border border-gray-700 rounded-xl overflow-hidden shadow-sm max-w-4xl w-full mx-auto"
+      className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md shadow-[0_18px_60px_rgba(0,0,0,0.35)] w-full overflow-hidden"
     >
-      <h3 className="text-2xl font-bold text-yellow-300">Create Post</h3>
+      <div className="px-5 pt-5 pb-4 border-b border-white/10">
+        <h3 className="text-base sm:text-lg font-semibold text-white tracking-tight">Create a post</h3>
+        <p className="mt-1 text-xs sm:text-sm text-gray-200/60">Share an update with your network</p>
+      </div>
+
+      <div className="p-5 space-y-4">
 
       {/* Title */}
       <input
@@ -48,7 +53,7 @@ const CreatePost = ({ setPosts }) => {
         placeholder="Post title"
         value={formData.title}
         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-        className="w-full bg-transparent border border-gray-600 rounded-md px-3 py-2 text-yellow-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+        className="w-full bg-black/20 border border-white/10 rounded-2xl px-4 py-3 text-gray-100 placeholder-gray-400/80 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent transition"
       />
 
       {/* Description */}
@@ -58,7 +63,7 @@ const CreatePost = ({ setPosts }) => {
         onChange={(e) =>
           setFormData({ ...formData, description: e.target.value })
         }
-        className="w-full bg-transparent border border-gray-600 rounded-md px-3 py-2 text-yellow-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 min-h-[120px]"
+        className="w-full bg-black/20 border border-white/10 rounded-2xl px-4 py-3 text-gray-100 placeholder-gray-400/80 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent transition min-h-30"
       />
 
       {/* Image Upload */}
@@ -82,7 +87,7 @@ const CreatePost = ({ setPosts }) => {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-yellow-400 text-black py-2 rounded-full font-semibold hover:bg-yellow-500 transition flex justify-center items-center gap-2"
+        className="w-full bg-yellow-400 text-black py-3 rounded-2xl font-semibold hover:bg-yellow-500 transition flex justify-center items-center gap-2 shadow-[0_12px_30px_rgba(250,204,21,0.16)] disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {loading ? (
           <>
@@ -92,6 +97,7 @@ const CreatePost = ({ setPosts }) => {
           "Post"
         )}
       </button>
+      </div>
     </form>
   );
 };

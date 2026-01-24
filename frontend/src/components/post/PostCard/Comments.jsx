@@ -72,8 +72,8 @@ const Comments = ({ post, user }) => {
   const comments = data || [];
 
   return (
-    <div className="mt-6 w-full bg-[#0e0e10] border border-gray-800 rounded-2xl p-4 text-gray-200 shadow-lg shadow-black/40 transition-all duration-300">
-      <h2 className="text-gray-100 font-semibold text-lg mb-4 tracking-tight">
+    <div className="mt-6 w-full rounded-2xl border border-white/10 bg-black/20 backdrop-blur-md p-4 text-gray-200 shadow-[0_12px_40px_rgba(0,0,0,0.35)] transition-all duration-300">
+      <h2 className="text-white font-semibold text-base sm:text-lg mb-4 tracking-tight">
         Comments
       </h2>
 
@@ -86,7 +86,7 @@ const Comments = ({ post, user }) => {
       {comments.length === 0 ? (
         <p className="text-gray-500 text-sm text-center">No comments yet.</p>
       ) : (
-        <div className="space-y-4 mt-3">
+        <div className="space-y-3 mt-3">
           {comments.map((c) => (
             <CommentCard
               key={c._id}

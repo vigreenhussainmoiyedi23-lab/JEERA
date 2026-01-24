@@ -43,24 +43,26 @@ export default function TaskCard({
         onDragStart(task, columnId, index);
       }}
       onDragEnd={onDragEnd}
-      className={`bg-gray-800/90 ${priorityColors[task.priority]} border border-t-4 ${columnAccentColors} border-gray-700 rounded-xl p-4 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-lg hover:border-gray-500/80 transition-all duration-200 hover:-translate-y-0.5 ${isDragging ? "opacity-50 scale-95" : ""}`}
+      className={`bg-white/5 ${priorityColors[task.priority]} border border-white/10 border-t-4 ${columnAccentColors} rounded-2xl p-4 cursor-grab active:cursor-grabbing shadow-[0_10px_30px_rgba(0,0,0,0.25)] hover:shadow-[0_14px_40px_rgba(0,0,0,0.35)] hover:border-white/15 transition-all duration-200 hover:-translate-y-0.5 ${isDragging ? "opacity-50 scale-95" : ""}`}
     >
-      <div className="flex justify-between items-center mb-2">
+      <div className="flex justify-between items-center mb-3">
         <span
-          className={`text-xs font-semibold px-2.5 py-1 rounded-full ${columnColors[columnId]} text-black`}
+          className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${columnColors[columnId]} text-black shadow-sm`}
         >
           {columnLabels[columnId]}
         </span>
         <span
-          className={`text-xs bg-slate-900 rounded-2xl capitalize font-bold px-3 py-1  ${priorityColors[task.priority]}`}
+          className={`text-[11px] bg-black/25 border border-white/10 rounded-full capitalize font-semibold px-3 py-1 ${priorityColors[task.priority]}`}
         >
           {task.priority}
         </span>
       </div>
-      <h3 className="text-gray-100 font-semibold text-xl mb-1">
+      <h3 className="text-white font-semibold text-base sm:text-lg leading-snug mb-1">
         {task.title}
       </h3>
-      <p className="text-gray-400!  leading-snug text-xs! ">{task.description}</p>
+      <p className="text-gray-200/70 leading-relaxed text-xs sm:text-sm">
+        {task.description}
+      </p>
     </div>
   );
 }

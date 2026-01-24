@@ -88,74 +88,63 @@ const Profile = () => {
   return (
     <>
       <Navbar />
-      <div className="bg-gradient-to-br from-zinc-800  via-slate-950 to-gray-900  pt-5 flex md:flex-row flex-col text-white min-h-screen h-max w-full relative px-5 gap-6">
-        {/* Left Section - Main Content */}
-        <div className="flex flex-col items-center justify-start w-full md:w-2/3 max-w-4xl px-5 gap-5">
-          <Information user={user} />
-          <CreatePost setPosts={setPosts} />
-          <AllPosts posts={posts} user={user} />
-          <PostSuggestions posts={suggestedPosts} user={user} />
+      <div className="min-h-screen w-full relative text-white overflow-x-hidden">
+        <div className="fixed top-0 z-0 inset-0 bg-slate-950" />
+        <div className="fixed top-0 z-0 inset-0 bg-linear-to-b from-slate-950 via-slate-950 to-black" />
+        <div className="fixed top-0 z-0 inset-0 pointer-events-none">
+          <div className="absolute -top-36 left-1/2 h-112 w-240 -translate-x-1/2 rounded-full bg-indigo-500/10 blur-3xl" />
+          <div className="absolute top-28 left-1/2 h-88 w-176 -translate-x-1/2 rounded-full bg-yellow-400/10 blur-3xl" />
+          <div className="absolute -bottom-40 left-1/2 h-112 w-240 -translate-x-1/2 rounded-full bg-sky-500/10 blur-3xl" />
+          <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] bg-size-[18px_18px] opacity-20" />
         </div>
 
-        {/* Right Section - Advertises */}
-        <div className="hidden md:flex flex-col w-1/3 max-w-sm  h-max sticky top-[10vh] gap-4 p-4 rounded-xl bg-[#111827]/60 border border-gray-700 shadow-lg backdrop-blur-md">
-          <h2 className="text-lg font-semibold mb-2 text-gray-200">
-            Sponsored
-          </h2>
-
-          <div className="flex items-center gap-3 p-3 hover:bg-gray-800/50 rounded-lg cursor-pointer transition">
-            <img
-              src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=80&h=80&fit=crop"
-              alt="Build your brand"
-              className="w-12 h-12 rounded-md object-cover"
-            />
-            <div>
-              <h3 className="text-sm font-medium text-gray-100">
-                Build your brand
-              </h3>
-              <p className="text-xs text-gray-400">
-                Learn how to grow your online presence.
-              </p>
+        <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-8 flex flex-col gap-6">
+              <Information user={user} />
+              <CreatePost setPosts={setPosts} />
+              <AllPosts posts={posts} user={user} />
+              <PostSuggestions posts={suggestedPosts} user={user} />
             </div>
-          </div>
 
-          <div className="flex items-center gap-3 p-3 hover:bg-gray-800/50 rounded-lg cursor-pointer transition">
-            <img
-              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=80&h=80&fit=crop"
-              alt="Hire top talent"
-              className="w-12 h-12 rounded-md object-cover"
-            />
-            <div>
-              <h3 className="text-sm font-medium text-gray-100">
-                Hire top talent
-              </h3>
-              <p className="text-xs text-gray-400">
-                Find professionals for your next project.
-              </p>
-            </div>
-          </div>
+            <aside className="hidden lg:flex lg:col-span-4 flex-col gap-4 h-max sticky top-[10vh]">
+              <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md shadow-[0_18px_60px_rgba(0,0,0,0.35)] p-5">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-white tracking-tight">Sponsored</h2>
+                  <span className="text-xs text-gray-200/60">Ad</span>
+                </div>
 
-          <div className="flex items-center gap-3 p-3 hover:bg-gray-800/50 rounded-lg cursor-pointer transition">
-            <img
-              src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=80&h=80&fit=crop"
-              alt="Learn React & GSAP"
-              className="w-12 h-12 rounded-md object-cover"
-            />
-            <div>
-              <h3 className="text-sm font-medium text-gray-100">
-                Learn React & GSAP
-              </h3>
-              <p className="text-xs text-gray-400">
-                Master frontend animation and effects.
-              </p>
-            </div>
-          </div>
+                <div className="mt-4 space-y-3">
+                  <div className="flex items-center gap-3 p-3 rounded-2xl border border-white/10 bg-black/20 hover:bg-white/5 transition">
+                    <div className="h-10 w-10 rounded-2xl bg-linear-to-br from-yellow-400/20 to-amber-500/10 border border-white/10" />
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-white truncate">Build your brand</div>
+                      <div className="text-xs text-gray-200/70">Grow your online presence</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 rounded-2xl border border-white/10 bg-black/20 hover:bg-white/5 transition">
+                    <div className="h-10 w-10 rounded-2xl bg-linear-to-br from-indigo-500/20 to-sky-500/10 border border-white/10" />
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-white truncate">Hire top talent</div>
+                      <div className="text-xs text-gray-200/70">Find your next teammate</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 rounded-2xl border border-white/10 bg-black/20 hover:bg-white/5 transition">
+                    <div className="h-10 w-10 rounded-2xl bg-linear-to-br from-emerald-500/20 to-teal-500/10 border border-white/10" />
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-white truncate">Level up skills</div>
+                      <div className="text-xs text-gray-200/70">Learn faster with projects</div>
+                    </div>
+                  </div>
+                </div>
 
-          <p className="text-xs text-gray-500 text-center mt-4">
-            © {new Date().getFullYear()} YourCompany · Privacy · Terms · Ads
-          </p>
+                <p className="mt-5 text-xs text-gray-300/60 text-center">
+                  © {new Date().getFullYear()} Jeera · Privacy · Terms · Ads
+                </p>
+              </div>
+            </aside>
+          </div>
         </div>
-
       </div>
     </>
   );

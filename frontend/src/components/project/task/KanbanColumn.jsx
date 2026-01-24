@@ -43,7 +43,7 @@ export default function KanbanColumn({
   return (
     <>
       <div
-        className={`flex flex-col shrink-0 xl:w-1/5 sm:w-1/3 w-1/2 bg-gray-900/80 rounded-2xl border border-gray-700 shadow-lg border-t-4 transition-all duration-200 ${
+        className={`flex flex-col shrink-0 xl:w-1/5 sm:w-1/3 w-1/2 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md shadow-[0_18px_60px_rgba(0,0,0,0.35)] border-t-4 transition-all duration-200 ${
           columnAccentColors[column.id]
         } ${isColumnHighlighted ? "ring-2 ring-blue-500/40 bg-gray-900" : ""}`}
         onDragOver={(e) => {
@@ -58,22 +58,22 @@ export default function KanbanColumn({
         onDrop={(e) => onDrop(e, column.id)}
       >
         <div className="flex items-center justify-between p-4 pb-2">
-          <h2 className="font-semibold text-lg text-gray-200 tracking-wide">
+          <h2 className="font-semibold text-base sm:text-lg text-white tracking-tight">
             {column.label}
           </h2>
-          <span className="text-xs font-medium text-gray-400 bg-gray-800 px-2 py-1 rounded-full">
+          <span className="text-xs font-semibold text-gray-200/80 bg-black/25 border border-white/10 px-2.5 py-1 rounded-full">
             {tasks?.length || 0}
           </span>
         </div>
 
-        <div className="flex flex-col gap-2 p-4 pt-2 flex-1 min-h-[200px]">
+        <div className="flex flex-col gap-2 p-4 pt-2 flex-1 min-h-50">
           <button
             onClick={function (e) {
               setCreateTask(column.id);
             }}
-            className="bg-slate-950/90 border-slate-300 border h-25 flex items-center justify-center text-4xl font-bold rounded-3xl px-3 w-full capitalize py-2 "
+            className="group bg-black/25 border border-white/10 hover:bg-white/10 active:bg-white/5 h-24 flex items-center justify-center text-4xl font-bold rounded-3xl px-3 w-full capitalize py-2 transition"
           >
-            <PlusCircle />
+            <PlusCircle className="text-gray-200/80 group-hover:text-white transition" />
           </button>
           <DropIndicator
             isVisible={
