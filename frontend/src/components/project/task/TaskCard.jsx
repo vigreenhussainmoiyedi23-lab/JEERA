@@ -57,10 +57,10 @@ export default function TaskCard({
           {task.priority}
         </span>
       </div>
-      <h3 className="text-gray-100 font-semibold text-[15px] mb-1">
+      <h3 className="text-gray-100 font-semibold text-xl mb-1">
         {task.title}
       </h3>
-      <p className="text-gray-400 text-sm leading-snug">{task.description}</p>
+      <p className="text-gray-400!  leading-snug text-xs! ">{task.description}</p>
     </div>
   );
 }

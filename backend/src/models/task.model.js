@@ -11,13 +11,13 @@ const taskSchema = new mongoose.Schema(
 
     issueType: {
       type: String,
-      enum: ["task", "bug", "story", "epic"],
+      enum: ["task", "bug", "story", "epic",""],
       default: "task"
     },
 
     priority: {
       type: String,
-      enum: ["low", "medium", "high", "critical", "highest"],
+      enum: ["low", "medium", "high", "critical", "highest",""],
       default: "medium"
     },
 
@@ -29,7 +29,7 @@ const taskSchema = new mongoose.Schema(
 
     category: {
       type: String,
-      enum: ["frontend", "backend", "devops", "debugging", "other"],
+      enum: ["frontend", "backend", "devops", "debugging", "other",""],
       default: "other"
     },
 

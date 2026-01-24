@@ -1,126 +1,11 @@
-// import { useQuery } from "@tanstack/react-query";
-// import axiosInstance from "../../../utils/axiosInstance";
-// const TaskMore = ({ task, onClose, socket ,enumValues }) => {
-//   // enumValues are the all enum values like category= enumvalues.category assignedto and status
-
-//   const { data, isLoading, isError, error, refetch } = useQuery({
-//     // queryKey: ["taskMore",task],
-//     queryFn: async () => (await axiosInstance.get(`/task/more/${task}`)).data.task,
-//     staleTime: 1000 * 60 * 5, // 5 minutes
-//     enabled: !!task,
-
-//   });
-//   if (isLoading || isError) {
-//     return (
-//       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-//         {isLoading && <p>Loading Task Details</p>}
-//         {isError && (
-//           <>
-//             <p>Loading Task Details</p>
-//             <button onClick={refetch}>Retry</button>
-//           </>
-//         )}
-//       </div>
-//     );
-//   }
-//   return (
-//     <div
-//       className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
-//       onClick={onClose}
-//     >
-//       <div
-//         className="bg-[#0F1726] text-white rounded-2xl shadow-xl w-[600px] max-w-[95%] max-h-[90vh] overflow-y-auto p-6"
-//         onClick={(e) => e.stopPropagation()}
-//       >
-//         <div className="flex justify-between items-center mb-4">
-//           <h2 className="text-2xl font-semibold">{data?.title}</h2>
-//           <button
-//             onClick={onClose}
-//             className="text-gray-400 hover:text-white text-xl"
-//           >
-//             ✕
-//           </button>
-//         </div>
-
-//         <p className="text-gray-300 mb-4">{data?.description}</p>
-
-//         <div className="grid grid-cols-2 gap-3 mb-6">
-//           <div>
-//             <p className="text-sm text-gray-400">Issue Type</p>
-//             <p className="font-medium capitalize">{data?.issueType}</p>
-//           </div>
-//           <div>
-//             <p className="text-sm text-gray-400">Priority</p>
-//             <p className="font-medium capitalize">{data?.priority}</p>
-//           </div>
-//           <div>
-//             <p className="text-sm text-gray-400">Status</p>
-//             <p className="font-medium capitalize">{data?.taskStatus}</p>
-//           </div>
-//           <div>
-//             <p className="text-sm text-gray-400">Category</p>
-//             <p className="font-medium capitalize">{data?.category}</p>
-//           </div>
-//           <div>
-//             <p className="text-sm text-gray-400">Story Points</p>
-//             <p className="font-medium">{data?.storyPoints ?? "-"}</p>
-//           </div>
-//           <div>
-//             <p className="text-sm text-gray-400">Due Date</p>
-//             <p className="font-medium">
-//               {data?.dueDate
-//                 ? new Date(data.dueDate).toLocaleDateString()
-//                 : "-"}
-//             </p>
-//           </div>
-//         </div>
-
-//         {/* History Section */}
-//         <div>
-//           <h3 className="text-lg font-semibold mb-2">History</h3>
-//           {data?.history?.length > 0 ? (
-//             <ul className="space-y-2">
-//               {data.history.map((entry, idx) => {
-//                 console.log(entry);
-//                 return (
-//                   <li
-//                     key={idx}
-//                     className="bg-[#1a253a] p-3 rounded-lg text-sm text-gray-300"
-//                   >
-//                     <p>
-//                       <span className="text-gray-400">Action:</span>{" "}
-//                       {entry.action}
-//                     </p>
-//                     <p>
-//                       <span className="text-gray-400">By:</span>{" "}
-//                       {entry.user?.username}
-//                     </p>
-//                     <p>
-//                       <span className="text-gray-400">Date:</span>{" "}
-//                       {new Date(entry.createdAt).toLocaleString()}
-//                     </p>
-//                   </li>
-//                 );
-//               })}
-//             </ul>
-//           ) : (
-//             <p className="text-gray-400 italic">No history recorded</p>
-//           )}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default TaskMore;
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../../utils/axiosInstance";
 import MultipleSelectCheckmarks from "./DarkMultiSelect";
 
-function TaskMore({ taskId, onClose, socket, enumValues }) {
+function TaskMore({ taskId, onClose, socket, enumValues, setTasks }) {
   const queryClient = useQueryClient();
-  console.log(enumValues, taskId);
+
   const {
     data: task,
     isLoading,
@@ -133,79 +18,190 @@ function TaskMore({ taskId, onClose, socket, enumValues }) {
       return data.task;
     },
     enabled: !!taskId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
-  // Optimistic UI state
-  const [status, setStatus] = useState(task?.taskStatus ?? "toDo");
-  const [category, setCategory] = useState(task?.category ?? "");
-  const [assignees, setAssignees] = useState(
-    task?.assignedTo?.map((u) => u._id) ?? [],
-  );
+  const [status, setStatus] = useState("toDo");
+  const [category, setCategory] = useState("");
+  const [assignees, setAssignees] = useState([]);
+  const [priority, setPriority] = useState("");
+  const [issueType, setIssueType] = useState("");
 
+  // Sync form state when task data arrives / updates
   useEffect(() => {
-    if (task) {
-      setStatus(task.taskStatus ?? "toDo");
-      setCategory(task.category ?? "");
-      setAssignees(task.assignedTo?.map((u) => u._id) ?? []);
-    }
+    if (!task) return;
+    console.log(`status ${task.taskStatus}`);
+    setStatus(task.taskStatus ?? "toDo");
+    setCategory(task.category ?? "");
+    setPriority(task.priority ?? "");
+    setIssueType(task.issueType ?? "");
+    setAssignees(task.assignedTo?.map((u) => u._id) ?? []);
   }, [task]);
 
-  // Listen to real-time updates
+  // ────────────────────────────────────────────────
+  //  Helper: optimistic update in kanban columns
+  // ────────────────────────────────────────────────
+  const optimisticKanbanUpdate = (updaterFn) => {
+    setTasks((prevColumns) => {
+      const columns = { ...prevColumns };
+
+      // Find where the task currently lives
+      let currentStatus = null;
+      let taskIndex = -1;
+
+      for (const [colStatus, tasks] of Object.entries(columns)) {
+        const idx = tasks.findIndex(
+          (t) => t?._id?.toString() === taskId?.toString(),
+        );
+        if (idx !== -1) {
+          currentStatus = colStatus;
+          taskIndex = idx;
+          break;
+        }
+      }
+
+      if (currentStatus === null || taskIndex === -1) {
+        return columns; // task not found in kanban → skip
+      }
+
+      // Create updated version (never mutate original)
+      const oldTask = { ...columns[currentStatus][taskIndex] };
+      const updatedTask = updaterFn(oldTask);
+
+      // Remove from current column
+      columns[currentStatus] = [
+        ...columns[currentStatus].slice(0, taskIndex),
+        ...columns[currentStatus].slice(taskIndex + 1),
+      ];
+
+      // Target status (usually same unless status changed)
+      const targetStatus = updatedTask.taskStatus ?? currentStatus;
+
+      // Add / replace in target column
+      const targetList = columns[targetStatus] ?? [];
+      const existingIdx = targetList.findIndex(
+        (t) => t._id?.toString() === taskId?.toString(),
+      );
+
+      if (existingIdx !== -1) {
+        // replace
+        columns[targetStatus] = [
+          ...targetList.slice(0, existingIdx),
+          updatedTask,
+          ...targetList.slice(existingIdx + 1),
+        ];
+      } else {
+        // append
+        columns[targetStatus] = [...targetList, updatedTask];
+      }
+
+      return columns;
+    });
+  };
+
+  // ────────────────────────────────────────────────
+  //  Real-time socket listener
+  // ────────────────────────────────────────────────
   useEffect(() => {
     if (!socket || !taskId) return;
 
-    const handleTaskUpdated = ({ task: updatedTask }) => {
-      if (updatedTask._id === taskId) {
-        queryClient.setQueryData(["task", taskId], updatedTask);
-      }
+    const handleTaskUpdated = ({ task: updatedServerTask }) => {
+      if (updatedServerTask._id !== taskId) return;
+
+      // Update detail view cache
+      queryClient.setQueryData(["task", taskId], updatedServerTask);
+
+      // Also reflect in kanban (authoritative source)
+      optimisticKanbanUpdate(() => updatedServerTask);
     };
 
     socket.on("taskUpdated", handleTaskUpdated);
-
-    return () => {
-      socket.off("taskUpdated", handleTaskUpdated);
-    };
+    return () => socket.off("taskUpdated", handleTaskUpdated);
   }, [socket, taskId, queryClient]);
 
   const sendUpdate = (changes) => {
-    if (!socket || !task) return;
+    if (!socket || !task?._id) {
+      console.warn("Cannot send update: missing socket or task");
+      return;
+    }
     socket.emit("updateTask", {
       taskId: task._id,
       projectId: task.project,
       ...changes,
     });
   };
-  const handleMultiChange = (event) => {
-    const {
-      target: { value },
-    } = event;
 
-    setAssignees((prev) => {
-      const assigned = typeof value === "string" ? value.split(",") : value;
-      const newData = [...prev, assigned];
-      checkSubmission(newData); // ← fresh data
-      return newData;
-    });
-  };
+  // ────────────────────────────────────────────────
+  //  Handlers
+  // ────────────────────────────────────────────────
   const handleStatusChange = (e) => {
-    const value = e.target.value;
-    setStatus(value);
-    sendUpdate({ status: value });
+    const newStatus = e.target.value;
+    setStatus(newStatus);
+
+    optimisticKanbanUpdate((old) => ({
+      ...old,
+      taskStatus: newStatus,
+    }));
+
+    sendUpdate({ status: newStatus }); // backend accepts "status"
   };
 
   const handleCategoryChange = (e) => {
     const value = e.target.value;
     setCategory(value);
+
+    optimisticKanbanUpdate((old) => ({
+      ...old,
+      category: value,
+    }));
+
     sendUpdate({ category: value });
   };
 
-  const handleAssigneesChange = (e) => {
-    const selected = Array.from(e.target.selectedOptions, (opt) => opt.value);
-    setAssignees(selected);
-    sendUpdate({ assignedTo: selected });
+  const handlePriorityChange = (e) => {
+    const value = e.target.value;
+    setPriority(value);
+
+    optimisticKanbanUpdate((old) => ({
+      ...old,
+      priority: value,
+    }));
+
+    sendUpdate({ priority: value });
   };
 
+  const handleIssueChange = (e) => {
+    const value = e.target.value;
+    setIssueType(value);
+
+    optimisticKanbanUpdate((old) => ({
+      ...old,
+      issueType: value,
+    }));
+
+    sendUpdate({ issueType: value });
+  };
+
+  const handleMultiChange = (event) => {
+    const value =
+      typeof event.target.value === "string"
+        ? event.target.value.split(",")
+        : event.target.value;
+
+    setAssignees(value);
+
+    optimisticKanbanUpdate((old) => ({
+      ...old,
+      assignedTo: value, // assuming backend wants array of user IDs
+    }));
+
+    sendUpdate({ assignedTo: value });
+  };
+
+  // ────────────────────────────────────────────────
+  //  Render
+  // ────────────────────────────────────────────────
   if (isLoading) {
     return (
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
@@ -275,7 +271,7 @@ function TaskMore({ taskId, onClose, socket, enumValues }) {
           </div>
 
           {/* Fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2  gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm text-slate-400 mb-1.5">
                 Status
@@ -311,7 +307,8 @@ function TaskMore({ taskId, onClose, socket, enumValues }) {
               </select>
             </div>
 
-            <div className="mb-4 md:mb-0">
+            <div className="flex flex-col items-start justify-center mb-5">
+             
               <MultipleSelectCheckmarks
                 changehandler={handleMultiChange}
                 names={enumValues.assignedTo}
@@ -323,18 +320,34 @@ function TaskMore({ taskId, onClose, socket, enumValues }) {
               <label className="block text-sm text-slate-400 mb-1.5">
                 Issue Type
               </label>
-              <div className="bg-slate-800 border border-slate-700 rounded px-3 py-2 text-slate-200 capitalize">
-                {task.issueType || "—"}
-              </div>
+              <select
+                value={issueType}
+                onChange={handleIssueChange}
+                className="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {enumValues.issueType.map((s) => (
+                  <option key={s} value={s}>
+                    {s === "" ? "select" : s}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
               <label className="block text-sm text-slate-400 mb-1.5">
                 Priority
               </label>
-              <div className="bg-slate-800 border border-slate-700 rounded px-3 py-2 text-slate-200 capitalize">
-                {task.priority || "—"}
-              </div>
+              <select
+                value={priority}
+                onChange={handlePriorityChange}
+                className="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {enumValues.priority.map((s) => (
+                  <option key={s} value={s}>
+                    {s === "" ? "select" : s}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -350,7 +363,6 @@ function TaskMore({ taskId, onClose, socket, enumValues }) {
           {/* Activity */}
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Activity</h3>
-
             {task.history?.length > 0 ? (
               <div className="space-y-4">
                 {task.history.map((entry) => (

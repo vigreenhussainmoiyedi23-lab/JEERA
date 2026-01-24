@@ -91,6 +91,7 @@
 // export default GettingStarted;
 import React, { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import FeatureCard from "./FeatureCard";
 
 const GettingStarted = () => {
   const sectionRef = useRef(null);
@@ -98,85 +99,99 @@ const GettingStarted = () => {
     target: sectionRef,
     offset: ["start start", "end end"],
   });
-  const opacity=useTransform(scrollYProgress,[0.9,1],[1,0])
-  const GettingStarted = [
-    {
-      title: "Create Project",
-      desc: "Go to Projects page and create your first project.",
-      bg: "bg-blue-400",
-    },
-    {
-      title: "Create Your First Task",
-      desc: "Tailor dashboards, workflows, and themes to perfectly fit your team’s needs.",
-      bg: "bg-cyan-400",
-    },
-    {
-      title: "Manage Tasks",
-      desc: "Drag and drop tasks to update their state effortlessly.",
-      bg: "bg-teal-300",
-    },
-    {
-      title: "Cloud Synced",
-      desc: "Access your data anywhere, anytime — with real-time syncing across all devices.",
-      bg: "bg-lime-300",
-    },
-    {
-      title: "Chat Support",
-      desc: "Chat with anyone anytime — either in a project or through their profile.",
-      bg: "bg-yellow-300",
-    },
-  ];
+  const opacity = useTransform(scrollYProgress, [0.9, 1], [1, 0]);
+  // const GettingStarted = [
+  //   {
+  //     title: "Create Project",
+  //     desc: "Go to Projects page and create your first project.",
+  //     bg: "bg-sky-800",
+  //   },
+  //   {
+  //     title: "Create Your First Task",
+  //     desc: "Tailor dashboards, workflows, and themes to perfectly fit your team’s needs.",
+  //     bg: "bg-cyan-800",
+  //   },
+  //   {
+  //     title: "Manage Tasks",
+  //     desc: "Drag and drop tasks to update their state effortlessly.",
+  //     bg: "bg-teal-800",
+  //   },
+  //   {
+  //     title: "Chat Support",
+  //     desc: "Chat with anyone anytime — either in a project or through their profile.",
+  //     bg: "bg-yellow-800",
+  //   },
+  //   {
+  //     title: "Post Like LinkedIn",
+  //     desc: "Post your thougths just like LinkedIn. and a profile sytem like LinkedIn",
+  //     bg: "bg-gray-800",
+  //   },
+  //   {
+  //     title: "Cloud Synced",
+  //     desc: "Access your data anywhere, anytime — with real-time syncing across all devices.",
+  //     bg: "bg-slate-800",
+  //   },
+  // ];
+const GettingStarted = [
+  {
+    title: "Create Project",
+    desc: "Go to Projects page and create your first project.",
+    bg: "bg-gradient-to-br from-slate-800 via-slate-900 to-black",
+    image:"/36.jpg.webp"
+  },
+  {
+    title: "Create Your First Task",
+    desc: "Tailor dashboards, workflows, and themes to perfectly fit your team’s needs.",
+    bg: "bg-gradient-to-br from-slate-800 via-slate-950 to-black",
+    image:"/36.jpg.webp"
+  },
+  {
+    title: "Manage Tasks",
+    desc: "Drag and drop tasks to update their state effortlessly.",
+    bg: "bg-gradient-to-br from-slate-900 via-black to-black",
+    image:"/36.jpg.webp"
+  },
+  {
+    title: "Chat Support",
+    desc: "Chat with anyone anytime — either in a project or through their profile.",
+    bg: "bg-gradient-to-br from-black via-slate-950 to-black",
+    image:"/36.jpg.webp"
+  },
+  {
+    title: "Post Like LinkedIn",
+    desc: "Post your thoughts just like LinkedIn, with profiles and feeds.",
+    bg: "bg-gradient-to-br from-black via-slate-900 to-black",
+    image:"/36.jpg.webp"
+  },
+  {
+    title: "Cloud Synced",
+    desc: "Access your data anywhere, anytime — with real-time syncing across all devices.",
+    bg: "bg-slate-900",
+    image:"/36.jpg.webp"
+  },
+];
 
   return (
     <section
       ref={sectionRef}
-      className="relative w-full h-[420vh]  text-center px-4 md:px-8"
+      className="relative w-full min-h-[500vh] h-max text-center"
     >
       {/* Sticky Title */}
-      <motion.h2 style={{opacity}} className="text-5xl z-1 md:text-6xl font-bold text-yellow-400  sticky  top-[10vh] ">
+      <motion.h2
+        style={{ opacity }}
+        className="sticky top-[18vh] z-20 mx-auto w-fit px-5 py-2 rounded-full border border-white/10 bg-black/25 backdrop-blur-md text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white"
+      >
         Getting Started
+        <span className="ml-3 bg-linear-to-r from-yellow-300 to-amber-400 bg-clip-text text-transparent">
+          with Jeera
+        </span>
       </motion.h2>
 
       {/* Cards container */}
-      <div className="relative h-[400vh]">
+      <div className="relative h-[600vh]">
         {GettingStarted.map((feature, i) => {
-          const scale = useTransform(
-            scrollYProgress,
-            [i * 0.15, (i + 1) * 0.15],
-            [1, 0.8+(i*0.02)],
-          );
-          // const opacity = useTransform(scrollYProgress, [i * 0.15, (i + 1) * 0.15], [1, 0.3]);
-          const y = useTransform(
-            scrollYProgress,
-            [i * 0.15, (i + 1) * 0.15],
-            [0, -80+(i*20)],
-          );
-
-          return (
-            <motion.div
-              key={i}
-              className="sticky top-[15vh] h-[70vh] flex items-center justify-center"
-              style={{
-                zIndex: i,
-                scale,
-                // opacity,
-              }}
-            >
-              <motion.div
-                style={{ y }}
-                className={`${feature.bg} rounded-3xl shadow-2xl relative p-12 min-h-50 w-full max-w-4xl text-center transition-all duration-500`}
-              >
-                <div className="absolute top-10 left-4 text-5xl text-slate-800 font-extrabold">{i+1}</div>
-                <h3 className="text-3xl md:text-5xl text-slate-900 font-extrabold mb-6">
-                  {feature.title}
-                </h3>
-                <p className="text-slate-800 text-lg font-medium">
-                  {feature.desc}
-                </p>
-              </motion.div>
-            </motion.div>
-          );
-        })}
+          return <FeatureCard GettingStarted={GettingStarted} i={i} feature={feature} key={i}/>
+       })}
       </div>
     </section>
   );

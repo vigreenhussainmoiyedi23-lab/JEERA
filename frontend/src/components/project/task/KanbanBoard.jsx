@@ -137,6 +137,7 @@ export default function KanbanBoard({ projectId, currentUser }) {
       setTasks(tasksByStatus);
     });
     socket.on("taskUpdated", ({ task, from, to }) => {
+      console.log("task update hua")
       setTasks((prev) => {
         const next = { ...prev };
         next[from] = [...next[from]];
@@ -177,7 +178,7 @@ export default function KanbanBoard({ projectId, currentUser }) {
             </div>
 
             <div>
-              <p className="font-semibold text-slate-100">Drag & Drop Tasks</p>
+              <h1 className="font-semibold text-2xl text-slate-100">Drag & Drop Tasks</h1>
               <p className="text-sm text-slate-400">
                 Organize and manage your workflow easily using drag and drop.
                 <span className="block text-xs text-slate-500 mt-1">
@@ -194,7 +195,7 @@ export default function KanbanBoard({ projectId, currentUser }) {
             </div>
 
             <div>
-              <p className="font-semibold text-slate-100">Tap a Task to Edit</p>
+              <h1 className="font-semibold text-2xl text-slate-100">tap a Task to Edit</h1>
               <p className="text-sm text-slate-400">
                 Open detailed task view to update status, priority, or details.
                 <span className="block text-xs text-slate-500 mt-1">
@@ -220,6 +221,8 @@ export default function KanbanBoard({ projectId, currentUser }) {
             onDrop={handleDrop}
             createTaskHandler={createTaskHandler}
             enumValues={enumValues}
+            socket={socket}
+            setTasks={setTasks}
           />
         ))}
       </div>

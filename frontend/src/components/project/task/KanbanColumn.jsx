@@ -25,6 +25,8 @@ export default function KanbanColumn({
   onDrop,
   createTaskHandler,
   enumValues,
+  socket,
+  setTasks,
 }) {
   const onClose = async () => {
     setTaskMore(null);
@@ -37,7 +39,7 @@ export default function KanbanColumn({
     tasks = [];
   }
   const [taskMore, setTaskMore] = useState(null);
- console.log(taskMore)
+  // console.log(taskMore);
   return (
     <>
       <div
@@ -71,7 +73,7 @@ export default function KanbanColumn({
             }}
             className="bg-slate-950/90 border-slate-300 border h-25 flex items-center justify-center text-4xl font-bold rounded-3xl px-3 w-full capitalize py-2 "
           >
-            <PlusCircle/>
+            <PlusCircle />
           </button>
           <DropIndicator
             isVisible={
@@ -134,7 +136,14 @@ export default function KanbanColumn({
         />
       )}
       {taskMore && (
-        <TaskMore taskId={taskMore} onClose={onClose} enumValues={enumValues} />
+        <TaskMore
+          setTasks={setTasks}
+          tasks={tasks}
+          taskId={taskMore}
+          socket={socket}
+          onClose={onClose}
+          enumValues={enumValues}
+        />
       )}
     </>
   );

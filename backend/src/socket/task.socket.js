@@ -15,7 +15,18 @@ function taskSocket(io, socket, socketIdMap) {
       project.members.some(m => m.member._id.toString() === userId.toString())
     );
   }
-
+  function getEnumValues() {
+    const schema = taskModel.schema;
+    const enumFields = ["priority", "category", "taskStatus", "issueType"]; // fields you care about
+    const enumValues = {};
+    for (const field of enumFields) {
+      const path = schema.path(field); // ✅ use dynamic field name
+      if (path && path.enumValues && path.enumValues.length > 0) {
+        enumValues[field] = path.enumValues;
+      }
+    }
+    return enumValues
+  }
   // Join project & send members
   socket.on("joinProject", async (projectId) => {
     try {
@@ -120,8 +131,11 @@ function taskSocket(io, socket, socketIdMap) {
   });
 
   // UPDATE TASK (status + other fields)
-  socket.on("updateTask", async ({ taskId, status, assignedTo, projectId }) => {
+  socket.on("updateTask", async ({ taskId, status, assignedTo, projectId, category,priority }) => {
     try {
+      // console.log("socket hit hua")
+      // console.log( status, assignedTo, projectId, category)
+      const enumValues = getEnumValues()
       const task = await TaskModel.findById(taskId)
       const from = task.taskStatus
       if (!task) return socket.emit("errorMessage", { message: "Task not found" });
@@ -133,7 +147,7 @@ function taskSocket(io, socket, socketIdMap) {
       let changed = false;
       let oldValue, newValue;
 
-      if (status && ["toDo", "Inprogress", "Inreview", "done", "Failed"].includes(status)) {
+      if (status && enumValues.taskStatus.includes(status)) {
         oldValue = task.taskStatus;
         newValue = status;
         task.taskStatus = status;
@@ -146,6 +160,20 @@ function taskSocket(io, socket, socketIdMap) {
         newValue = assignedTo.join(",")
         task.assignedTo = assignedTo;
         action = "Updated assignedTo";
+        changed = true;
+      }
+      if (priority && enumValues.priority.includes(priority)) {
+        oldValue = task.priority
+        newValue = priority
+        task.priority = priority;
+        action = "Updated Priority";
+        changed = true;
+      }
+      if (category && enumValues.category.includes(category)) {
+        oldValue = task.category
+        newValue = category
+        task.category = category;
+        action = "Updated Category";
         changed = true;
       }
 
@@ -209,15 +237,8 @@ function taskSocket(io, socket, socketIdMap) {
   });
   socket.on("getAllEnums", async (projectId) => {
     try {
-      const schema = taskModel.schema;
-      const enumFields = ["priority", "category", "taskStatus", "issueType"]; // fields you care about
-      const enumValues = {};
-      for (const field of enumFields) {
-        const path = schema.path(field); // ✅ use dynamic field name
-        if (path && path.enumValues && path.enumValues.length > 0) {
-          enumValues[field] = path.enumValues;
-        }
-      }
+      const enumValues = getEnumValues()
+
       const project = await projectModel.findById(projectId)
         .populate("members.member", "username email profilePic")
 
