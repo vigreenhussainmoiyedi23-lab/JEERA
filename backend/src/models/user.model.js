@@ -5,7 +5,6 @@ const userSchema = mongoose.Schema(
     username: String,
     email: String,
     password: String,
-
     profilePic: {
       url: { type: String, default: "" },
       fileId: { type: String, default: "" }
@@ -14,10 +13,15 @@ const userSchema = mongoose.Schema(
       url: { type: String, default: "" },
       fileId: { type: String, default: "" }
     },
-
     bio: String,
     skills: [],
-
+    notifications: [
+      {
+        type: String,
+        createdAt: Date,
+        isRead: { type: Boolean, default: false },
+      }
+    ],
     posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "post" }],
     projects: [
       {
@@ -32,7 +36,6 @@ const userSchema = mongoose.Schema(
       }
     ],
     invites: [{ type: mongoose.Schema.Types.ObjectId, ref: "project" }],
-
     googleId: String,
     authProvider: {
       type: String,

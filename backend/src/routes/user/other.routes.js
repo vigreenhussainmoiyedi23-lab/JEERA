@@ -1,5 +1,6 @@
 const express = require("express");
 const UserModel = require("../../models/user.model");
+const projectModel = require("../../models/project.model");
 const Router = express.Router();
 
 Router.get("/projects", async (req, res) => {
@@ -14,5 +15,26 @@ Router.get("/projects", async (req, res) => {
     if (!user) return res.status(401).json({ message: "try logging in first" })
     return res.status(200).json({ message: "all user related projects", projects: user.projects })
 })
-
+Router.patch("/accept/:projectId", async (req, res) => {
+    try {
+        const { projectId } = req.params
+        const user = req.user
+        if (!user.invites.some(invite => invite.project.toString() === projectId.toString())) {
+            return res.status(400).json({ message: "project not found in invites" })
+        }
+        // TODO: Implement accept project logic
+        const project = await projectModel.findById(projectId)
+        if (!project) return res.status(404).json({ message: "project not found" })
+        if (!project.invited.some(invite => invite.toString() === user._id.toString())) {
+            return res.status(400).json({ message: "user not found in invites" })
+        }
+        project.members.push({ member: user._id, role: "member" });
+        await project.save();
+        user.invites = user.invites.filter(invite => invite.project.toString() !== projectId.toString());
+        await user.save();
+        return res.status(200).json({ message: "project invite accepted" });
+    } catch (error) {
+        return res.status(500).json({ message: "internal server error" });
+    }
+})
 module.exports = Router;
