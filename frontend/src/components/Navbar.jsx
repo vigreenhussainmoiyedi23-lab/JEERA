@@ -107,8 +107,8 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Spacer for fixed navbars */}
-      <div className=" bg-slate-900 block shrink-0 w-full h-16" ></div>
+      {/* Spacer for fixed top navbar */}
+      <div className="block shrink-0 w-full h-16 sm:h-18"></div>
     </>
   );
 }

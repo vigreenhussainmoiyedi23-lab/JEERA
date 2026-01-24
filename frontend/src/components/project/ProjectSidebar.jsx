@@ -12,7 +12,7 @@ const ProjectSidebar = ({
   sidebarOpen,
 }) => {
   return (
-    <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 top-[10dvh] h-[90dvh] lg:sticky fixed inset-y-0 left-0 z-50 w-64 bg-slate-800/30 backdrop-blur-sm border-r border-slate-700/50 transition-transform duration-300 ease-in-out mt-16 lg:mt-0 lg:h-screen`}>
+    <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:sticky top-[10dvh]  inset-y-0 left-0 z-50 w-64 bg-slate-800/30 backdrop-blur-sm border-r border-slate-700/50 transition-transform duration-300 ease-in-out h-[90dvh] `}>
       <div className="p-6 h-full overflow-y-auto data-lenis-prevent-wheel data-lenis-prevent-touch">
         {/* Project Header */}
         <div className="mb-8">

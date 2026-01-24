@@ -241,7 +241,7 @@ const ProjectDetails = () => {
         setSidebarOpen={setSidebarOpen} 
       />
 
-      <div className="flex min-h-screen bg-linear-to-br from-slate-900 via-gray-900 to-slate-950">
+      <div className="flex min-h-screen bg-linear-to-br from-slate-900 via-gray-900 to-slate-950 ">
         {/* Sidebar */}
         <ProjectSidebar 
           project={project}
@@ -256,14 +256,14 @@ const ProjectDetails = () => {
         {/* Overlay for mobile */}
         {sidebarOpen && (
           <div 
-            className="lg:hidden fixed inset-0 bg-black/50 z-40 mt-16" 
+            className="lg:hidden fixed inset-0 bg-black/50 z-40" 
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
         {/* Main Content */}
         <main className="flex-1 min-h-0 overflow-y-auto">
-          <div className="p-6 pb-12">
+          <div className="p-6 pb-20">
             {/* Tasks */}
             {current == "tasks" && (
               <div className="w-full">

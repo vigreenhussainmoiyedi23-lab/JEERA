@@ -210,7 +210,7 @@ export default function KanbanBoard({ projectId, currentUser }) {
           </div>
         </div>
       </header>
-      <div className="flex flex-nowrap overflow-x-auto ">
+      <div className="flex flex-nowrap overflow-x-auto data-lenis-prevent-wheel data-lenis-prevent-touch" data-lenis-prevent>
         {columns.map((column) => (
           <KanbanColumn
             key={column.id}

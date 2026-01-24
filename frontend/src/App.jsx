@@ -14,37 +14,47 @@ import Invites from "./pages/invites/Invites";
 import { ReactLenis, useLenis } from "lenis/react";
 const App = () => {
   const lenis = useLenis((lenis) => {
-  
+    // Optional: Handle lenis events
   });
+  
   return (
     <>
       <ReactLenis
         root
         options={{
+          duration: 1.2,
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          direction: 'vertical',
+          gestureDirection: 'vertical',
+          smooth: true,
+          mouseMultiplier: 1,
+          smoothTouch: false,
+          touchMultiplier: 2,
+          infinite: false,
           prevent: (node) => {
             if (!node) return false;
             const el = node instanceof HTMLElement ? node : null;
             return !!el?.closest?.(
-              "[data-lenis-prevent],[data-lenis-prevent-wheel],[data-lenis-prevent-touch]",
+              "[data-lenis-prevent],[data-lenis-prevent-wheel],[data-lenis-prevent-touch]"
             );
           },
         }}
       />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/projects" element={<Projects />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/posts" element={<Posts />} />
-        <Route path="/invites" element={<Invites />} />
-        <Route path="/tasks" element={<Tasks />} />
-        <Route path="/createProject" element={<CreateProject />} />
-        <Route path="/project/:projectid" element={<ProjectDetails />} />
-
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <div className="w-full h-[10vh] md:hidden bg-slate-900"></div>
+      <div className="flex flex-col min-h-screen">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/posts" element={<Posts />} />
+          <Route path="/invites" element={<Invites />} />
+          <Route path="/tasks" element={<Tasks />} />
+          <Route path="/createProject" element={<CreateProject />} />
+          <Route path="/project/:projectid" element={<ProjectDetails />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </div>
     </>
   );
 };
