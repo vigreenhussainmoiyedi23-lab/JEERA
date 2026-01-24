@@ -138,6 +138,7 @@ const CreateTask = ({
               return;
             }
             CreateTaskHandler(formData, status);
+            setCreateTask(null);
             setFormData({
               title: "",
               description: "",

@@ -38,7 +38,7 @@ Router.post("/create", ProjectValidator, validate, async (req, res) => {
 Router.get("/more/:projectid", async (req, res) => {
   try {
     const { projectid } = req.params
-    const user = await UserModel.findById(req.user._id).populate({ path: "tasks.task", match: { "project": projectid } })
+    const user = await UserModel.findById(req.user._id).populate({ path: "tasks.task" })
     const project = await projectModel.findById(projectid).populate("members.member")
     const status = (user.projects.find(f => f.project.toString() === projectid.toString())).status
     return res.status(200).json({ message: "all user tasks", user, project, status })

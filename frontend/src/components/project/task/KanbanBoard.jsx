@@ -63,7 +63,7 @@ export default function KanbanBoard({ projectId, currentUser }) {
     } catch (error) {
       console.log(error);
     }
-  }, []);
+  }, [projectId]);
 
   const handleDrop = useCallback(
     (e, targetColumnId) => {
@@ -103,6 +103,10 @@ export default function KanbanBoard({ projectId, currentUser }) {
   );
 
   useEffect(() => {
+    // Ensure this view is in the project room so realtime emits (taskCreated/taskUpdated)
+    // reach this socket without requiring a manual refresh.
+    socket.emit("joinProject", projectId);
+
     socket.emit("getAllTasks", projectId);
     socket.on("taskCreated", ({ task, status }) => {
       // console.log("new task")
@@ -145,7 +149,7 @@ export default function KanbanBoard({ projectId, currentUser }) {
         let AlreadyExists = next[to].findIndex(
           (t) => t._id.toString() == task._id.toString(),
         );
-        if (AlreadyExists) {
+        if (AlreadyExists !== -1) {
           console.log("already exist");
           return prev;
         }
@@ -167,7 +171,7 @@ export default function KanbanBoard({ projectId, currentUser }) {
     };
   }, [projectId]);
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 p-6 lg:p-8">
+    <div className="w-full bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 p-6 lg:p-8">
       <header className="mb-8">
         <h1 className="text-3xl font-bold text-gray-100 mb-2">Project Board</h1>
         <div className="flex flex-col gap-4 text-slate-200">

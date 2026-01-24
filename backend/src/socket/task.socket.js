@@ -92,7 +92,7 @@ function taskSocket(io, socket, socketIdMap) {
       });
       await UserModel.updateMany(
         { _id: { $in: newTask.assignedTo } },
-        { $push: { tasks: newTask._id } }
+        { $push: { tasks: { task: newTask._id, project: projectId } } }
       );
       project.allTasks.push(newTask._id);
       await project.save();
@@ -100,8 +100,9 @@ function taskSocket(io, socket, socketIdMap) {
         .populate("createdBy", "username email profilePic")
         .populate("assignedTo", "username email profilePic");
       newTask.assignedTo.forEach(userId => {
-        const socketIds = [...socketIdMap.get(userId.toString())];
-        if (!socketIds) return;
+        const socketIdSet = socketIdMap.get(userId.toString());
+        if (!socketIdSet) return;
+        const socketIds = [...socketIdSet];
         socketIds.forEach(sid => {
           // if (sid === socket.id) return;
           const targetSocket = io.sockets.sockets.get(sid);
@@ -131,7 +132,7 @@ function taskSocket(io, socket, socketIdMap) {
   });
 
   // UPDATE TASK (status + other fields)
-  socket.on("updateTask", async ({ taskId, status, assignedTo, projectId, category,priority }) => {
+  socket.on("updateTask", async ({ taskId, status, assignedTo, projectId, category, priority }) => {
     try {
       // console.log("socket hit hua")
       // console.log( status, assignedTo, projectId, category)
@@ -155,9 +156,15 @@ function taskSocket(io, socket, socketIdMap) {
         changed = true;
       }
 
+      let prevAssignees = null;
       if (assignedTo && Array.isArray(assignedTo)) {
-        oldValue = task.assignedTo.join(",")
-        newValue = assignedTo.join(",")
+        prevAssignees = Array.isArray(task.assignedTo)
+          ? task.assignedTo.map((id) => id.toString())
+          : [];
+        const nextAssignees = assignedTo.map((id) => id.toString());
+
+        oldValue = prevAssignees.join(",");
+        newValue = nextAssignees.join(",");
         task.assignedTo = assignedTo;
         action = "Updated assignedTo";
         changed = true;
@@ -187,6 +194,29 @@ function taskSocket(io, socket, socketIdMap) {
         })
         task.history.push(history._id)
         await task.save();
+
+        if (prevAssignees) {
+          const nextAssignees = Array.isArray(assignedTo)
+            ? assignedTo.map((id) => id.toString())
+            : [];
+
+          const removed = prevAssignees.filter((id) => !nextAssignees.includes(id));
+          const added = nextAssignees.filter((id) => !prevAssignees.includes(id));
+
+          if (removed.length > 0) {
+            await UserModel.updateMany(
+              { _id: { $in: removed } },
+              { $pull: { tasks: { task: task._id } } },
+            );
+          }
+
+          if (added.length > 0) {
+            await UserModel.updateMany(
+              { _id: { $in: added } },
+              { $push: { tasks: { task: task._id, project: task.project } } },
+            );
+          }
+        }
 
         const updatedTask = await TaskModel.findById(taskId)
           .populate("createdBy", "username email profilePic")
