@@ -1,5 +1,5 @@
 import React from "react";
-import { RefreshCcw, Shield, Users, UserPlus } from "lucide-react";
+import { RefreshCcw, Shield, Users, UserPlus, Ban, UserCheck } from "lucide-react";
 
 const ProjectPanel = ({
   status,
@@ -10,6 +10,8 @@ const ProjectPanel = ({
   inviteMemberMutation,
   promoteMutation,
   removeMutation,
+  banMutation,
+  unbanMutation,
   adminAnalytics,
   analyticsLoading,
   analyticsError,
@@ -126,89 +128,151 @@ const ProjectPanel = ({
         <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl border border-slate-700/50 p-6">
           <div className="mb-4">
             <h3 className="text-lg font-semibold text-white">
-              Project Members
+              Team Management
             </h3>
             <p className="text-sm text-gray-400 mt-1">
-              Team roles and management
+              Manage team members and permissions
             </p>
           </div>
 
-          <div className="space-y-2 max-h-64 overflow-y-auto data-lenis-prevent-wheel data-lenis-prevent-touch">
-            {(project?.members || []).map((m) => {
-              const memberId = m?.member?._id;
-              const role = m?.role;
-              const canManage =
-                ["admin", "coAdmin"].includes(status) &&
-                role !== "admin";
+          <div className="space-y-4">
+            {/* Active Members */}
+            <div>
+              <h4 className="text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+                <UserCheck className="w-4 h-4" />
+                Active Members ({project?.members?.length || 0})
+              </h4>
+              <div className="space-y-2 max-h-48 overflow-y-auto data-lenis-prevent-wheel data-lenis-prevent-touch">
+                {(project?.members || []).map((m) => {
+                  const memberId = m?.member?._id;
+                  const role = m?.role;
+                  const canManage = status === "admin" && role !== "admin";
 
-              return (
-                <div
-                  key={memberId}
-                  className="bg-slate-700/30 rounded-lg border border-slate-600/30 p-3"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <img
-                        src={m?.member?.profilePic?.url || "/user.png"}
-                        alt="member"
-                        className="h-8 w-8 rounded-full object-cover border border-slate-600/50"
-                      />
-                      <div className="min-w-0">
-                        <div className="text-sm font-medium text-white truncate">
-                          {m?.member?.username || "User"}
+                  return (
+                    <div
+                      key={memberId}
+                      className="bg-slate-700/30 rounded-lg border border-slate-600/30 p-3"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <img
+                            src={m?.member?.profilePic?.url || "/user.png"}
+                            alt="member"
+                            className="h-8 w-8 rounded-full object-cover border border-slate-600/50"
+                          />
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium text-white truncate">
+                              {m?.member?.username || "User"}
+                            </div>
+                            <div className="text-xs text-gray-400 truncate">
+                              {m?.member?.email || ""}
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-400 truncate">
-                          {m?.member?.email || ""}
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="px-2 py-1 bg-slate-600/50 rounded-full text-xs font-medium text-gray-300">
+                            {role}
+                          </span>
+
+                          {status === "admin" && canManage && (
+                            <>
+                              {role === "member" ? (
+                                <button
+                                  onClick={() =>
+                                    promoteMutation.mutate({
+                                      userid: memberId,
+                                      to: "coAdmin",
+                                    })
+                                  }
+                                  className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs font-medium hover:bg-blue-500/30 transition-colors"
+                                >
+                                  Promote
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() =>
+                                    promoteMutation.mutate({
+                                      userid: memberId,
+                                      to: "member",
+                                    })
+                                  }
+                                  className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded text-xs font-medium hover:bg-orange-500/30 transition-colors"
+                                >
+                                  Demote
+                                </button>
+                              )}
+
+                              <button
+                                onClick={() => banMutation.mutate(memberId)}
+                                className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs font-medium hover:bg-red-500/30 transition-colors flex items-center gap-1"
+                              >
+                                <Ban className="w-3 h-3" />
+                                Ban
+                              </button>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
+                  );
+                })}
+              </div>
+            </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="px-2 py-1 bg-slate-600/50 rounded-full text-xs font-medium text-gray-300">
-                        {role}
-                      </span>
+            {/* Banned Members */}
+            {status === "admin" && (project?.Banned?.length > 0) && (
+              <div>
+                <h4 className="text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+                  <Ban className="w-4 h-4" />
+                  Banned Members ({project?.Banned?.length || 0})
+                </h4>
+                <div className="space-y-2 max-h-32 overflow-y-auto data-lenis-prevent-wheel data-lenis-prevent-touch">
+                  {project?.Banned?.map((bannedUserId) => {
+                    // Find user details from usersData or use placeholder
+                    const bannedUser = usersData?.users?.find(u => u._id === bannedUserId.toString());
+                    
+                    return (
+                      <div
+                        key={bannedUserId}
+                        className="bg-red-900/20 rounded-lg border border-red-600/30 p-3"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <img
+                              src={bannedUser?.profilePic?.url || "/user.png"}
+                              alt="banned user"
+                              className="h-8 w-8 rounded-full object-cover border border-red-600/50 opacity-75"
+                            />
+                            <div className="min-w-0">
+                              <div className="text-sm font-medium text-gray-300 truncate">
+                                {bannedUser?.username || "Unknown User"}
+                              </div>
+                              <div className="text-xs text-gray-500 truncate">
+                                {bannedUser?.email || ""}
+                              </div>
+                            </div>
+                          </div>
 
-                      {status === "admin" && canManage && (
-                        <>
-                          {role === "member" ? (
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="px-2 py-1 bg-red-600/20 text-red-400 rounded-full text-xs font-medium">
+                              Banned
+                            </span>
                             <button
-                              onClick={() =>
-                                promoteMutation.mutate({
-                                  userid: memberId,
-                                  to: "coAdmin",
-                                })
-                              }
-                              className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs font-medium hover:bg-blue-500/30 transition-colors"
+                              onClick={() => unbanMutation.mutate(bannedUserId)}
+                              className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs font-medium hover:bg-green-500/30 transition-colors flex items-center gap-1"
                             >
-                              Promote
+                              <UserCheck className="w-3 h-3" />
+                              Unban
                             </button>
-                          ) : (
-                            <button
-                              onClick={() =>
-                                promoteMutation.mutate({
-                                  userid: memberId,
-                                  to: "member",
-                                })
-                              }
-                              className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded text-xs font-medium hover:bg-orange-500/30 transition-colors"
-                            >
-                              Demote
-                            </button>
-                          )}
-
-                          <button
-                            onClick={() => removeMutation.mutate(memberId)}
-                            className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs font-medium hover:bg-red-500/30 transition-colors"
-                          >
-                            Remove
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
+              </div>
+            )}
           </div>
         </div>
       </div>

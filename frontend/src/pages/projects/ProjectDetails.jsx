@@ -142,14 +142,41 @@ const ProjectDetails = () => {
   });
 
   const removeMutation = useMutation({
-    mutationFn: async (userid) =>
-      (
-        await axiosInstance.delete(`/project/admin/remove/${projectid}/${userid}`)
-      ).data,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["project-details", projectid],
-      });
+    mutationFn: async (userid) => {
+      const { data } = await axiosInstance.delete(
+        `/project/admin/remove/${projectid}/${userid}`
+      );
+      return data;
+    },
+    onSuccess: () => {
+      refetch();
+      queryClient.invalidateQueries({ queryKey: ["admin-analytics", projectid] });
+    },
+  });
+
+  const banMutation = useMutation({
+    mutationFn: async (userid) => {
+      const { data } = await axiosInstance.post(
+        `/project/admin/ban/${projectid}/${userid}`
+      );
+      return data;
+    },
+    onSuccess: () => {
+      refetch();
+      queryClient.invalidateQueries({ queryKey: ["admin-analytics", projectid] });
+    },
+  });
+
+  const unbanMutation = useMutation({
+    mutationFn: async (userid) => {
+      const { data } = await axiosInstance.post(
+        `/project/admin/unban/${projectid}/${userid}`
+      );
+      return data;
+    },
+    onSuccess: () => {
+      refetch();
+      queryClient.invalidateQueries({ queryKey: ["admin-analytics", projectid] });
     },
   });
 
@@ -271,7 +298,7 @@ const ProjectDetails = () => {
                   <h1 className="text-2xl font-bold text-white mb-2">Tasks Board</h1>
                   <p className="text-gray-400">Manage and track project tasks</p>
                 </div>
-                <KanbanBoard projectId={projectid} currentUser={user} />
+                <KanbanBoard projectId={projectid} currentUser={user} userRole={status} userId={user?._id} />
               </div>
             )}
             {/* Notifications / New Messages */}
@@ -301,6 +328,8 @@ const ProjectDetails = () => {
                   inviteMemberMutation={inviteMemberMutation}
                   promoteMutation={promoteMutation}
                   removeMutation={removeMutation}
+                  banMutation={banMutation}
+                  unbanMutation={unbanMutation}
                   adminAnalytics={adminAnalytics}
                   analyticsLoading={analyticsLoading}
                   analyticsError={analyticsError}

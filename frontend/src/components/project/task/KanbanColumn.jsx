@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import TaskCard from "./TaskCard";
 import DropIndicator from "./DropIndicator.jsx";
 import CreateTask from "./CreateTask.jsx";
-import TaskMore from "./TaskMore.jsx";
+import TaskMore from "./TaskMoreJira.jsx";
 import { PlusCircle } from "lucide-react";
 
 const columnAccentColors = {
@@ -27,6 +27,9 @@ export default function KanbanColumn({
   enumValues,
   socket,
   setTasks,
+  currentUser,
+  userRole,
+  userId,
 }) {
   const onClose = async () => {
     setTaskMore(null);
@@ -143,6 +146,8 @@ export default function KanbanColumn({
           socket={socket}
           onClose={onClose}
           enumValues={enumValues}
+          currentUserRole={userRole}
+          currentUserId={userId}
         />
       )}
     </>

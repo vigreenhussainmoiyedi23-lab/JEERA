@@ -52,6 +52,31 @@ const CreateTask = ({
   }
   const [canBeSubmited, setCanBeSubmited] = useState(false);
 
+  // Step validation functions
+  const isStep1Complete = () => {
+    return formData.title.trim() !== "" && 
+           formData.description.trim() !== "" && 
+           formData.dueDate !== "";
+  };
+
+  const isStep2Complete = () => {
+    return formData.assignedTo.length > 0 && 
+           formData.issueType !== "" && 
+           formData.priority !== "";
+  };
+
+  const isStep3Complete = () => {
+    return formData.category !== "" && 
+           formData.storyPoints !== "" && 
+           formData.labels.trim() !== "";
+  };
+
+  const completedSteps = [
+    isStep1Complete(),
+    isStep2Complete(),
+    isStep3Complete()
+  ];
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => {
@@ -120,8 +145,8 @@ const CreateTask = ({
         <div className="mb-3">
           <Box sx={{ width: "100%", color: "white" }}>
             <Stepper activeStep={step - 1} alternativeLabel>
-              {steps.map((label) => (
-                <Step key={label}>
+              {steps.map((label, index) => (
+                <Step key={label} completed={completedSteps[index]}>
                   <StepLabel>
                     <p className="text-slate-300">{label}</p>
                   </StepLabel>
@@ -316,7 +341,7 @@ const CreateTask = ({
           )}
 
           {/* Submit */}
-          <div className="md:col-span-2 flex justify-between items-center mt-4 ">
+          <div className="md:col-span-2 flex justify-between items-center mt-4">
             {step > 1 && (
               <button
                 onClick={() => {
@@ -332,17 +357,45 @@ const CreateTask = ({
             )}
             {step < 3 && (
               <button
+                type="button"
                 onClick={() => {
+                  // Validate current step before proceeding
+                  if (step === 1 && !isStep1Complete()) return;
+                  if (step === 2 && !isStep2Complete()) return;
+                  
                   setStep((prev) => {
                     if (prev == 3) return prev;
                     return prev + 1;
                   });
                 }}
-                className="px-3 py-2 flex rounded-2xl bg-blue-400 active:scale-90"
+                className={`px-3 py-2 flex rounded-2xl transition-colors ${
+                  (step === 1 && !isStep1Complete()) || (step === 2 && !isStep2Complete())
+                    ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+                    : "bg-blue-400 hover:bg-blue-500 text-white active:scale-90"
+                }`}
+                disabled={(step === 1 && !isStep1Complete()) || (step === 2 && !isStep2Complete())}
               >
                 Next <ArrowRight />
               </button>
             )}
+            
+            {/* Validation feedback */}
+            {step === 1 && !isStep1Complete() && (
+              <div className="text-xs text-red-400">
+                Please fill in title, description, and due date
+              </div>
+            )}
+            {step === 2 && !isStep2Complete() && (
+              <div className="text-xs text-red-400">
+                Please select assignees, issue type, and priority
+              </div>
+            )}
+            {step === 3 && !isStep3Complete() && (
+              <div className="text-xs text-red-400">
+                Please fill in category, story points, and labels
+              </div>
+            )}
+            
             {step == 3 && (
               <button
                 type="submit"

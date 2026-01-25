@@ -132,10 +132,8 @@ function taskSocket(io, socket, socketIdMap) {
   });
 
   // UPDATE TASK (status + other fields)
-  socket.on("updateTask", async ({ taskId, status, assignedTo, projectId, category, priority }) => {
+  socket.on("updateTask", async ({ taskId, status, assignedTo, projectId, category, priority, title, description, issueType }) => {
     try {
-      // console.log("socket hit hua")
-      // console.log( status, assignedTo, projectId, category)
       const enumValues = getEnumValues()
       const task = await TaskModel.findById(taskId)
       const from = task.taskStatus
@@ -144,15 +142,39 @@ function taskSocket(io, socket, socketIdMap) {
       if (!(await isProjectMember(task.project, socket.user._id))) {
         return socket.emit("errorMessage", { message: "Not authorized" });
       }
-      let action = ""
+      
       let changed = false;
-      let oldValue, newValue;
+      let updates = [];
+
+      // Handle title update
+      if (title && title !== task.title) {
+        updates.push({
+          action: "Updated Title",
+          oldValue: task.title,
+          newValue: title
+        });
+        task.title = title;
+        changed = true;
+      }
+
+      // Handle description update
+      if (description !== undefined && description !== task.description) {
+        updates.push({
+          action: "Updated Description",
+          oldValue: task.description || "",
+          newValue: description
+        });
+        task.description = description;
+        changed = true;
+      }
 
       if (status && enumValues.taskStatus.includes(status)) {
-        oldValue = task.taskStatus;
-        newValue = status;
+        updates.push({
+          action: "Updated Status",
+          oldValue: task.taskStatus,
+          newValue: status
+        });
         task.taskStatus = status;
-        action = "Updated Status"
         changed = true;
       }
 
@@ -163,36 +185,58 @@ function taskSocket(io, socket, socketIdMap) {
           : [];
         const nextAssignees = assignedTo.map((id) => id.toString());
 
-        oldValue = prevAssignees.join(",");
-        newValue = nextAssignees.join(",");
+        updates.push({
+          action: "Updated assignedTo",
+          oldValue: prevAssignees.join(","),
+          newValue: nextAssignees.join(",")
+        });
         task.assignedTo = assignedTo;
-        action = "Updated assignedTo";
         changed = true;
       }
+      
       if (priority && enumValues.priority.includes(priority)) {
-        oldValue = task.priority
-        newValue = priority
+        updates.push({
+          action: "Updated Priority",
+          oldValue: task.priority,
+          newValue: priority
+        });
         task.priority = priority;
-        action = "Updated Priority";
         changed = true;
       }
+      
       if (category && enumValues.category.includes(category)) {
-        oldValue = task.category
-        newValue = category
+        updates.push({
+          action: "Updated Category",
+          oldValue: task.category,
+          newValue: category
+        });
         task.category = category;
-        action = "Updated Category";
+        changed = true;
+      }
+
+      if (issueType && enumValues.issueType.includes(issueType)) {
+        updates.push({
+          action: "Updated Issue Type",
+          oldValue: task.issueType,
+          newValue: issueType
+        });
+        task.issueType = issueType;
         changed = true;
       }
 
       if (changed) {
-        const history = await taskHistoryModel.create({
-          task: taskId,
-          user: socket.user._id,
-          action,
-          oldValue,
-          newValue,
-        })
-        task.history.push(history._id)
+        // Create history entry for each update
+        for (const update of updates) {
+          const history = await taskHistoryModel.create({
+            task: taskId,
+            user: socket.user._id,
+            action: update.action,
+            oldValue: update.oldValue,
+            newValue: update.newValue,
+          });
+          task.history.push(history._id);
+        }
+        
         await task.save();
 
         if (prevAssignees) {
@@ -222,6 +266,7 @@ function taskSocket(io, socket, socketIdMap) {
           .populate("createdBy", "username email profilePic")
           .populate("assignedTo", "username email profilePic")
           .populate({ path: "history", populate: { path: "user", select: "username email profilePic" } });
+        
         task.assignedTo.forEach(userId => {
           const socketIds = socketIdMap.get(userId.toString());
           if (!socketIds) return;
@@ -239,7 +284,6 @@ function taskSocket(io, socket, socketIdMap) {
             }
           });
         });
-
       }
     } catch (err) {
       console.error("Update task error:", err);
@@ -254,17 +298,98 @@ function taskSocket(io, socket, socketIdMap) {
         return socket.emit("errorMessage", { message: "Not authorized" });
       }
 
-      const tasks = await TaskModel.find({ project: projectId })
-        .populate("createdBy", "username email profilePic")
-        .populate("assignedTo", "username email profilePic")
-        .populate({ path: "history", populate: { path: "user", select: "username email profilePic" } })
-        .sort({ createdAt: -1 });
+      // Get project to check user role
+      const project = await projectModel.findById(projectId);
+      if (!project) {
+        return socket.emit("errorMessage", { message: "Project not found" });
+      }
+
+      // Check if user is admin or coAdmin
+      const userMember = project.members.find(
+        m => m.member._id.toString() === socket.user._id.toString()
+      );
+      const isAdminOrCoAdmin = userMember && ["admin", "coAdmin"].includes(userMember.role);
+
+      let tasks;
+      if (isAdminOrCoAdmin) {
+        // Admin and coAdmin can see all tasks
+        tasks = await TaskModel.find({ project: projectId })
+          .populate("createdBy", "username email profilePic")
+          .populate("assignedTo", "username email profilePic")
+          .populate({ path: "history", populate: { path: "user", select: "username email profilePic" } })
+          .sort({ createdAt: -1 });
+      } else {
+        // Regular users only see tasks assigned to them
+        tasks = await TaskModel.find({ 
+          project: projectId,
+          assignedTo: socket.user._id 
+        })
+          .populate("createdBy", "username email profilePic")
+          .populate("assignedTo", "username email profilePic")
+          .populate({ path: "history", populate: { path: "user", select: "username email profilePic" } })
+          .sort({ createdAt: -1 });
+      }
 
       socket.emit("allTasks", tasks);
     } catch (err) {
       socket.emit("errorMessage", { message: "Failed to load tasks" });
     }
   });
+  // DELETE TASK (admin only)
+  socket.on("deleteTask", async ({ taskId, projectId }, ack) => {
+    try {
+      if (!(await isProjectMember(projectId, socket.user._id))) {
+        return socket.emit("errorMessage", { message: "Not authorized" });
+      }
+
+      // Check if user is admin
+      const project = await projectModel.findById(projectId);
+      if (!project) {
+        return socket.emit("errorMessage", { message: "Project not found" });
+      }
+
+      const userMember = project.members.find(
+        m => m.member._id.toString() === socket.user._id.toString()
+      );
+      const isAdmin = userMember && userMember.role === "admin";
+
+      if (!isAdmin) {
+        return socket.emit("errorMessage", { message: "Only admin can delete tasks" });
+      }
+
+      const task = await TaskModel.findById(taskId);
+      if (!task) {
+        return socket.emit("errorMessage", { message: "Task not found" });
+      }
+
+      // Remove task from project
+      project.allTasks = project.allTasks.filter(id => id.toString() !== taskId);
+      await project.save();
+
+      // Remove task from assigned users' task lists
+      await UserModel.updateMany(
+        { _id: { $in: task.assignedTo } },
+        { $pull: { tasks: { task: taskId } } }
+      );
+
+      // Delete the task
+      await TaskModel.findByIdAndDelete(taskId);
+
+      // Notify all project members
+      io.to(projectId.toString()).emit("taskDeleted", { taskId });
+
+      if (ack) {
+        ack({ success: true });
+      }
+    } catch (err) {
+      console.error("Delete task error:", err);
+      socket.emit("errorMessage", { message: "Failed to delete task" });
+      if (ack) {
+        ack({ success: false, error: err.message });
+      }
+    }
+  });
+
   socket.on("getAllEnums", async (projectId) => {
     try {
       const enumValues = getEnumValues()

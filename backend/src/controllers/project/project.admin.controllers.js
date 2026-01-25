@@ -247,6 +247,63 @@ async function RemoveMemberHandler(req, res) {
     return res.status(500).json({ message: "server error", error });
   }
 }
+async function BanMemberHandler(req, res) {
+  try {
+    const { projectid, userid } = req.params;
+    const project = await projectModel.findById(projectid);
+    const member = await UserModel.findById(userid);
+    if (!project || !member)
+      return res
+        .status(400)
+        .json({ message: "both userid and projectid must be correct" });
+
+    const user = req.user;
+    const me = project.members.find(
+      (m) => m?.member?._id?.toString() === user._id.toString(),
+    );
+    if (!me || me.role !== "admin") {
+      return res
+        .status(403)
+        .json({ message: "Only project admin can ban members" });
+    }
+
+    // Cannot ban another admin
+    const memberEntry = project.members.find(
+      (m) => m.member.toString() === member._id.toString()
+    );
+    if (!memberEntry) {
+      return res.status(400).json({
+        message: "Member not found in project",
+      });
+    }
+
+    if (memberEntry.role === "admin") {
+      return res.status(403).json({ message: "Cannot ban an admin" });
+    }
+
+    // Remove from members and add to Banned
+    project.members = project.members.filter(
+      (m) => m.member.toString() !== member._id.toString()
+    );
+    project.Banned.push(member._id);
+
+    // Update user.projects status to "banned"
+    const projIdx = member.projects.findIndex(
+      (p) => p.project.toString() === projectid.toString()
+    );
+    if (projIdx !== -1) {
+      member.projects[projIdx].status = "banned";
+      await member.save();
+    }
+
+    await project.save();
+
+    return res.status(200).json({ message: "member banned successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: "server error", error });
+  }
+}
+
 async function UnbanMemberHandler(req, res) {
   try {
     const { projectid, userid } = req.params;
@@ -327,6 +384,7 @@ module.exports = {
   EditProjectHandler,
   InviteMemberHandler,
   RemoveMemberHandler,
+  BanMemberHandler,
   UnbanMemberHandler,
   AdminAnalyticsHandler,
 };

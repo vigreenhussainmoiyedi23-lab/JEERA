@@ -9,7 +9,7 @@ const columns = [
   { id: "Failed", label: "Failed" },
 ];
 
-export default function KanbanBoard({ projectId, currentUser }) {
+export default function KanbanBoard({ projectId, currentUser, userRole, userId }) {
   const [enumValues, setEnumValues] = useState(null);
   const [tasks, setTasks] = useState({
     toDo: [],
@@ -126,6 +126,17 @@ export default function KanbanBoard({ projectId, currentUser }) {
       console.log("error fetching enum", message);
     });
 
+    socket.on("taskDeleted", ({ taskId }) => {
+      setTasks((prev) => {
+        const next = { ...prev };
+        // Remove task from all columns
+        Object.keys(next).forEach(status => {
+          next[status] = next[status].filter(task => task._id !== taskId);
+        });
+        return next;
+      });
+    });
+
     socket.on("allTasks", (AllTasks) => {
       const tasksByStatus = {
         toDo: [],
@@ -168,6 +179,7 @@ export default function KanbanBoard({ projectId, currentUser }) {
       socket.off("allTasks");
       socket.off("allEnums");
       socket.off("errorMessage");
+      socket.off("taskDeleted");
     };
   }, [projectId]);
   return (
@@ -210,7 +222,7 @@ export default function KanbanBoard({ projectId, currentUser }) {
           </div>
         </div>
       </header>
-      <div className="flex flex-nowrap overflow-x-auto data-lenis-prevent-wheel data-lenis-prevent-touch" data-lenis-prevent>
+      <div className="flex flex-nowrap gap-4 overflow-x-auto data-lenis-prevent-wheel data-lenis-prevent-touch" data-lenis-prevent>
         {columns.map((column) => (
           <KanbanColumn
             key={column.id}
@@ -227,6 +239,9 @@ export default function KanbanBoard({ projectId, currentUser }) {
             enumValues={enumValues}
             socket={socket}
             setTasks={setTasks}
+            currentUser={currentUser}
+            userRole={userRole}
+            userId={userId}
           />
         ))}
       </div>
