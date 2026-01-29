@@ -1,4 +1,8 @@
-const UserModel = require("../../models/user.model");
+const userModel = require("../../models/user.model");
+const { 
+  createConnectionRequestNotification,
+  createConnectionAcceptedNotification 
+} = require("../notification.controllers");
 
 const sanitizeUser = (u) => {
   if (!u) return u;
@@ -77,7 +81,7 @@ const UpdateHandler = async (req, res) => {
 const ProfileByIdHandler = async (req, res) => {
   try {
     const { userId } = req.params;
-    const target = await UserModel.findById(userId)
+    const target = await userModel.findById(userId)
       .select(
         "username email profilePic profileBanner bio skills headline pronouns location education profileProjects socialLinks contactInfo openToWork followers following connections",
       );
@@ -116,10 +120,10 @@ const ToggleFollowHandler = async (req, res) => {
       return res.status(400).json({ message: "Cannot follow yourself" });
     }
 
-    const target = await UserModel.findById(userId);
+    const target = await userModel.findById(userId);
     if (!target) return res.status(404).json({ message: "User not found" });
 
-    const viewer = await UserModel.findById(req.user._id);
+    const viewer = await userModel.findById(req.user._id);
     const already = (viewer.following || []).some((id) => id.toString() === userId.toString());
 
     if (already) {
@@ -148,10 +152,10 @@ const ToggleConnectHandler = async (req, res) => {
       return res.status(400).json({ message: "Cannot connect with yourself" });
     }
 
-    const target = await UserModel.findById(userId);
+    const target = await userModel.findById(userId);
     if (!target) return res.status(404).json({ message: "User not found" });
 
-    const viewer = await UserModel.findById(req.user._id);
+    const viewer = await userModel.findById(req.user._id);
 
     const isConnected = (viewer.connections || []).some((id) => id.toString() === userId.toString());
     if (isConnected) {
@@ -180,6 +184,8 @@ const ToggleConnectHandler = async (req, res) => {
       target.connections = [...(target.connections || []), viewer._id];
 
       await Promise.all([viewer.save(), target.save()]);
+      await createConnectionAcceptedNotification(viewer._id, target._id);
+      await createConnectionAcceptedNotification(target._id, viewer._id);
       return res.status(200).json({ message: "Connection accepted", isConnected: true });
     }
 
@@ -201,9 +207,42 @@ const ToggleConnectHandler = async (req, res) => {
     viewer.connectionRequestsSent = [...(viewer.connectionRequestsSent || []), target._id];
     target.connectionRequestsReceived = [...(target.connectionRequestsReceived || []), viewer._id];
     await Promise.all([viewer.save(), target.save()]);
+    await createConnectionRequestNotification(viewer._id, target._id);
     return res.status(200).json({ message: "Connection request sent", requestSent: true });
   } catch (error) {
     return res.status(500).json({ message: "Error sending connection request", error });
+  }
+};
+
+const SearchUsersHandler = async (req, res) => {
+  try {
+    const { q } = req.query;
+    
+    if (!q || q.trim().length < 2) {
+      return res.status(400).json({ message: "Search query must be at least 2 characters" });
+    }
+
+    const searchQuery = q.trim();
+    
+    // Search users by username (case-insensitive)
+    const users = await userModel
+      .find({
+        username: { $regex: searchQuery, $options: 'i' }
+      })
+      .select('username profilePic headline followersCount')
+      .limit(10)
+      .lean();
+
+    return res.status(200).json({ 
+      message: "Users found successfully",
+      users: users.map(user => ({
+        ...user,
+        followersCount: user.followersCount || 0
+      }))
+    });
+  } catch (error) {
+    console.error("Error searching users:", error);
+    return res.status(500).json({ message: "Error searching users", error });
   }
 };
 
@@ -213,4 +252,5 @@ module.exports = {
   ProfileByIdHandler,
   ToggleFollowHandler,
   ToggleConnectHandler,
+  SearchUsersHandler,
 };

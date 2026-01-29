@@ -5,6 +5,7 @@ const {
   ProfileByIdHandler,
   ToggleFollowHandler,
   ToggleConnectHandler,
+  SearchUsersHandler,
 } = require("../../controllers/user/profile.controllers");
 const upload = require("../../config/multer");
 const imagekit = require("../../config/Imagekit");
@@ -18,6 +19,7 @@ Router.patch("/update", UpdateHandler);
 Router.get("/view/:userId", ProfileByIdHandler);
 Router.post("/follow/:userId", ToggleFollowHandler);
 Router.post("/connect/:userId", ToggleConnectHandler);
+Router.get("/search", SearchUsersHandler);
 // Router.post("/createPost", upload.fields([
 //     {
 //         name: "images",

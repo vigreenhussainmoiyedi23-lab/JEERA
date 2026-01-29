@@ -131,21 +131,21 @@ const ProfileSectionsModal = ({ isOpen, onClose, user }) => {
 
   return (
     <>
-      <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div className="bg-slate-900 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto my-8">
+      <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+        <div className="bg-slate-900 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto my-4 sm:my-8">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-white/10 sticky top-0 bg-slate-900 z-10">
-            <h2 className="text-xl font-semibold text-white">Profile Sections</h2>
+          <div className="flex items-center justify-between p-4 sm:p-6 border-b border-white/10 sticky top-0 bg-slate-900 z-10">
+            <h2 className="text-lg sm:text-xl font-semibold text-white">Profile Sections</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-white transition-colors"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
 
           {/* Content */}
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {!activeSection ? (
               <div className="space-y-4">
                 <p className="text-gray-400 text-sm mb-6">
@@ -378,22 +378,23 @@ const ProfileSectionsModal = ({ isOpen, onClose, user }) => {
                       e.preventDefault();
                       const formData = new FormData(e.target);
                       handleExperienceSubmit({
-                        title: formData.get('title'),
+                        role: formData.get('role'),
                         company: formData.get('company'),
                         location: formData.get('location'),
+                        description: formData.get('description'),
                         startDate: formData.get('startDate'),
                         endDate: formData.get('endDate'),
-                        description: formData.get('description')
+                        isCurrent: formData.get('isCurrent') === 'on'
                       });
                     }}>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Job Title *
+                            Job Role *
                           </label>
                           <input
                             type="text"
-                            name="title"
+                            name="role"
                             placeholder="Senior Software Engineer"
                             className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50"
                             required
@@ -492,20 +493,19 @@ const ProfileSectionsModal = ({ isOpen, onClose, user }) => {
                       e.preventDefault();
                       const formData = new FormData(e.target);
                       handleCertificationsSubmit({
-                        title: formData.get('title'),
-                        issuer: formData.get('issuer'),
+                        name: formData.get('name'),
+                        organization: formData.get('organization'),
                         issueDate: formData.get('issueDate'),
-                        expiryDate: formData.get('expiryDate'),
-                        credentialId: formData.get('credentialId')
+                        credentialUrl: formData.get('credentialUrl')
                       });
                     }}>
                       <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Certification Title *
+                          Certification Name *
                         </label>
                         <input
                           type="text"
-                          name="title"
+                          name="name"
                           placeholder="AWS Certified Solutions Architect"
                           className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50"
                           required
@@ -518,7 +518,7 @@ const ProfileSectionsModal = ({ isOpen, onClose, user }) => {
                         </label>
                         <input
                           type="text"
-                          name="issuer"
+                          name="organization"
                           placeholder="Amazon Web Services"
                           className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50"
                           required
@@ -538,26 +538,15 @@ const ProfileSectionsModal = ({ isOpen, onClose, user }) => {
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Expiry Date
+                            Credential URL
                           </label>
                           <input
-                            type="month"
-                            name="expiryDate"
+                            type="url"
+                            name="credentialUrl"
+                            placeholder="https://aws.amazon.com/verification"
                             className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50"
                           />
                         </div>
-                      </div>
-                      
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Credential ID
-                        </label>
-                        <input
-                          type="text"
-                          name="credentialId"
-                          placeholder="AWS-ASA-123456"
-                          className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50"
-                        />
                       </div>
                       
                       <div className="flex gap-3">

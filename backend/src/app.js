@@ -17,6 +17,7 @@ const projectRoutes = require("./routes/main/project.routes");
 const postRoutes = require("./routes/main/post.routes")
 const analyticsRoutes = require("./routes/analytics.routes")
 const profileUploadRoutes = require("./routes/user/profileUpload.routes")
+const notificationRoutes = require("./routes/notification.routes")
 // requiring Middlewares
 const { UserIsLoggedIn } = require("./middlewares/UserAuth.middleware");
 
@@ -57,6 +58,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/post", UserIsLoggedIn, postRoutes)
 app.use("/api/analytics", UserIsLoggedIn, analyticsRoutes)
 app.use("/api/user/profile", UserIsLoggedIn, profileUploadRoutes)
+app.use("/api/notifications", UserIsLoggedIn, notificationRoutes)
 //_______routes_______
 app.use("/api/user", userRoutes);
 app.use("/api/project", UserIsLoggedIn, projectRoutes);

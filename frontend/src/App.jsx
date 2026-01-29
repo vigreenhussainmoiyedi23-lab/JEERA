@@ -10,6 +10,7 @@ import CreateProject from "./pages/projects/CreateProject";
 import Profile from "./pages/Profile/Profile";
 import PostAnalytics from "./pages/analytics/PostAnalytics";
 import Posts from "./pages/posts/Posts";
+import SearchResults from "./pages/SearchResults";
 import Tasks from "./pages/tasks/Tasks";
 import Invites from "./pages/invites/Invites";
 import VerifyOtp from "./pages/auth/VerifyOtp";
@@ -53,6 +54,7 @@ const App = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/:userId" element={<Profile />} />
           <Route path="/posts" element={<Posts />} />
+          <Route path="/search" element={<SearchResults />} />
           <Route path="/invites" element={<Invites />} />
           <Route path="/tasks" element={<Tasks />} />
           <Route path="/about" element={<About />} />

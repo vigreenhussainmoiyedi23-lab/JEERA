@@ -18,8 +18,14 @@ const userSchema = mongoose.Schema(
     notifications: [
       {
         type: String,
-        createdAt: Date,
+        title: String,
+        message: String,
+        fromUser: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
+        relatedId: { type: mongoose.Schema.Types.ObjectId },
+        relatedType: String, // 'user', 'task', 'project', 'post'
+        actionUrl: String,
         isRead: { type: Boolean, default: false },
+        createdAt: { type: Date, default: Date.now }
       }
     ],
     posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "post" }],

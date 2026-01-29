@@ -10,6 +10,7 @@ import {
   RefreshCcw,
 } from "lucide-react";
 import Navbar from "../../components/Navbar";
+import UserSearch from "../../components/search/UserSearch";
 import axiosInstance from "../../utils/axiosInstance";
 import LinkedInPostCard from "../../components/post/LinkedInPostCard";
 import LinkedInCreatePost from "../../components/post/LinkedInCreatePost";
@@ -98,30 +99,56 @@ const Posts = () => {
         </div>
 
         <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Explore</h1>
-              <p className="mt-1 text-sm text-gray-200/70">
-                Discover posts across Jeera. A modern feed, LinkedIn-style.
-              </p>
+          {/* Header Section */}
+          <div className="mb-6">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div className="flex-1">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Explore</h1>
+                <p className="mt-1 text-sm text-gray-200/70">
+                  Discover posts across Jeera. A modern feed, LinkedIn-style.
+                </p>
+              </div>
+
+              <div className="hidden sm:flex items-center gap-2">
+                <button
+                  onClick={() => refetchFeed()}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/20 hover:bg-white/5 px-4 py-2 text-sm text-gray-200/80 transition"
+                >
+                  <RefreshCcw className={"h-4 w-4 " + (isFeedFetching ? "animate-spin" : "")} />
+                  Refresh
+                </button>
+
+                <button
+                  onClick={() => setShowCreatePost(true)}
+                  className="inline-flex items-center gap-2 rounded-full bg-linear-to-r from-yellow-300 to-amber-400 px-4 py-2 text-sm font-semibold text-black shadow-[0_12px_35px_rgba(250,204,21,0.22)] hover:brightness-105 transition"
+                >
+                  <Plus className="h-4 w-4" />
+                  Create Post
+                </button>
+              </div>
             </div>
+          </div>
 
-            <div className="hidden sm:flex items-center gap-2">
-              <button
-                onClick={() => refetchFeed()}
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/20 hover:bg-white/5 px-4 py-2 text-sm text-gray-200/80 transition"
-              >
-                <RefreshCcw className={"h-4 w-4 " + (isFeedFetching ? "animate-spin" : "")} />
-                Refresh
-              </button>
-
-              <button
-                onClick={() => setShowCreatePost(true)}
-                className="inline-flex items-center gap-2 rounded-full bg-linear-to-r from-yellow-300 to-amber-400 px-4 py-2 text-sm font-semibold text-black shadow-[0_12px_35px_rgba(250,204,21,0.22)] hover:brightness-105 transition"
-              >
-                <Plus className="h-4 w-4" />
-                Create Post
-              </button>
+          {/* Search and Mobile Actions */}
+          <div className="flex flex-col gap-4 mb-6">
+            {/* User Search Bar */}
+            <UserSearch />
+            
+            {/* Mobile create post */}
+            <div className="sm:hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md shadow-[0_18px_60px_rgba(0,0,0,0.35)] p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-sm font-semibold text-white">Create a post</div>
+                  <div className="text-xs text-gray-200/70">Share updates with your network</div>
+                </div>
+                <button
+                  onClick={() => setShowCreatePost(true)}
+                  className="inline-flex items-center gap-2 rounded-full bg-linear-to-r from-yellow-300 to-amber-400 px-4 py-2 text-xs font-semibold text-black"
+                >
+                  <Plus className="h-4 w-4" />
+                  Create Post
+                </button>
+              </div>
             </div>
           </div>
 
@@ -184,23 +211,6 @@ const Posts = () => {
 
             {/* Center: Feed */}
             <main className="min-w-0">
-              {/* Mobile create post */}
-              <div className="sm:hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md shadow-[0_18px_60px_rgba(0,0,0,0.35)] p-4 mb-5">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <div className="text-sm font-semibold text-white">Create a post</div>
-                    <div className="text-xs text-gray-200/70">Share updates with your network</div>
-                  </div>
-                  <button
-                    onClick={() => setShowCreatePost(true)}
-                    className="inline-flex items-center gap-2 rounded-full bg-linear-to-r from-yellow-300 to-amber-400 px-4 py-2 text-xs font-semibold text-black"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Create Post
-                  </button>
-                </div>
-              </div>
-
               <div className="space-y-5">
                 {isFeedLoading && (
                   <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md p-6 text-gray-200/80">
