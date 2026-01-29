@@ -1,6 +1,9 @@
 const express = require("express");
 const taskModel = require("../../models/task.model");
+const subtaskRoutes = require("../subtask.routes");
+const taskChatRoutes = require("../taskChat.routes");
 const Router = express.Router()
+
 // /api/task
 Router.get("/more/:taskId", async (req, res) => {
     try {
@@ -18,5 +21,11 @@ Router.get("/more/:taskId", async (req, res) => {
     }
 }
 );
+
+// Mount subtask routes
+Router.use("/:taskId/subtasks", subtaskRoutes);
+
+// Mount task chat routes
+Router.use("/:taskId/chat", taskChatRoutes);
 
 module.exports = Router

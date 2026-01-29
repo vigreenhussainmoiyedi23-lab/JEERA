@@ -24,14 +24,14 @@ body {
   width: 100%;
   min-height: 100%;
   box-sizing: border-box;
-  background: #000;
+  background: #101829;
 }
 
 #root {
   width: 100%;
   min-height: 100vh;
   box-sizing: border-box;
-  background: #000;
+  background: #101829;
 }
 /* index.css or App.css */
 ::-webkit-scrollbar {

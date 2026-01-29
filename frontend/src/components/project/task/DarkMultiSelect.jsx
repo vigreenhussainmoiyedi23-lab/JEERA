@@ -14,7 +14,9 @@ const MenuProps = {
   PaperProps: {
     style: {
       maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
+      width: "auto",
+      minWidth: 240,
+      maxWidth: 340,
       backgroundColor: "#1E293B", // dark dropdown background
       color: "white", // text color
     },
@@ -24,7 +26,7 @@ const MenuProps = {
 export default function MultipleSelectCheckmarks({ names, changehandler, assignedTo }) {
   return (
     <div>
-      <FormControl sx={{ m: 1,height:20, width: 300 }}>
+      <FormControl sx={{ m: 0, width: "100%", maxWidth: 340 }}>
         <InputLabel
           id="demo-multiple-checkbox-label"
           sx={{ color: "white" }}
@@ -52,8 +54,15 @@ export default function MultipleSelectCheckmarks({ names, changehandler, assigne
             bgcolor: "#1E293B",
             borderRadius: "8px",
             border: "1px solid #334155",
+            width: "100%",
             "& .MuiSvgIcon-root": {
               color: "white",
+            },
+            "& .MuiSelect-select": {
+              paddingTop: "10px",
+              paddingBottom: "10px",
+              paddingLeft: "12px",
+              paddingRight: "36px",
             },
             "& .MuiOutlinedInput-notchedOutline": {
               borderColor: "#334155",
