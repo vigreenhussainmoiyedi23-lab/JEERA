@@ -46,7 +46,7 @@ export default function KanbanColumn({
   return (
     <>
       <div
-        className={`flex flex-col shrink-0 xl:w-1/5 sm:w-1/3 w-1/2 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md shadow-[0_18px_60px_rgba(0,0,0,0.35)] border-t-4 transition-all duration-200 ${
+        className={`flex flex-col shrink-0 2xl:w-1/5 xl:w-1/4 md:w-1/3 sm:w-1/2 w-full rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md shadow-[0_18px_60px_rgba(0,0,0,0.35)] border-t-4 transition-all duration-200 ${
           columnAccentColors[column.id]
         } ${isColumnHighlighted ? "ring-2 ring-blue-500/40 bg-gray-900" : ""}`}
         onDragOver={(e) => {

@@ -15,6 +15,8 @@ const taskRoutes = require("./routes/task/task.routes");
 const commentRoutes = require("./routes/main/comment.routes");
 const projectRoutes = require("./routes/main/project.routes");
 const postRoutes = require("./routes/main/post.routes")
+const analyticsRoutes = require("./routes/analytics.routes")
+const profileUploadRoutes = require("./routes/user/profileUpload.routes")
 // requiring Middlewares
 const { UserIsLoggedIn } = require("./middlewares/UserAuth.middleware");
 
@@ -53,6 +55,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // routes using multipart form
 app.use("/api/post", UserIsLoggedIn, postRoutes)
+app.use("/api/analytics", UserIsLoggedIn, analyticsRoutes)
+app.use("/api/user/profile", UserIsLoggedIn, profileUploadRoutes)
 //_______routes_______
 app.use("/api/user", userRoutes);
 app.use("/api/project", UserIsLoggedIn, projectRoutes);

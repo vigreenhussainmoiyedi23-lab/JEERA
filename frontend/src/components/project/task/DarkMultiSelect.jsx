@@ -15,7 +15,7 @@ const MenuProps = {
     style: {
       maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
       width: "auto",
-      minWidth: 240,
+      minWidth: 200,
       maxWidth: 340,
       backgroundColor: "#1E293B", // dark dropdown background
       color: "white", // text color
@@ -26,7 +26,7 @@ const MenuProps = {
 export default function MultipleSelectCheckmarks({ names, changehandler, assignedTo }) {
   return (
     <div>
-      <FormControl sx={{ m: 0, width: "100%", maxWidth: 340 }}>
+      <FormControl sx={{ m: 0, width: "100%", minWidth: 200, maxWidth: 340 }}>
         <InputLabel
           id="demo-multiple-checkbox-label"
           sx={{ color: "white" }}

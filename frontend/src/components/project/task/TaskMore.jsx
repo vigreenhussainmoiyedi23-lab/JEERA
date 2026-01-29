@@ -406,7 +406,7 @@ function TaskMore({ taskId, onClose, socket, enumValues, setTasks }) {
     .filter((n) => assignees.includes(n.member._id))
     .map((n) => n.member.username);
 
-  const historySorted = (task.history || []).slice().sort((a, b) => {
+  const historySorted = (task?.history || []).slice().sort((a, b) => {
     const at = a.createdAt ? new Date(a.createdAt).getTime() : 0;
     const bt = b.createdAt ? new Date(b.createdAt).getTime() : 0;
     return historySort === "oldest" ? at - bt : bt - at;

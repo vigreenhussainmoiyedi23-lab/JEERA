@@ -53,9 +53,20 @@ const userSchema = mongoose.Schema(
       default: "", // e.g. "Frontend Developer | React | Tailwind"
     },
 
+    pronouns: {
+      type: String,
+      default: "",
+    },
+
     location: {
       city: String,
       country: String,
+    },
+
+    contactInfo: {
+      email: { type: String, default: "" },
+      phone: { type: String, default: "" },
+      website: { type: String, default: "" },
     },
 
     experience: [
@@ -79,6 +90,14 @@ const userSchema = mongoose.Schema(
       }
     ],
 
+    profileProjects: [
+      {
+        title: String,
+        description: String,
+        url: String,
+      }
+    ],
+
     certifications: [
       {
         name: String,
@@ -99,6 +118,13 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    following: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+
+    connections: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    connectionRequestsSent: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    connectionRequestsReceived: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
 
     profileVisibility: {
       type: String,

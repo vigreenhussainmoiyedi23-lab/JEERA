@@ -1,20 +1,31 @@
 import React from "react";
 import { Trash, Edit2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const MainHead = ({ post, user }) => {
+  const navigate = useNavigate();
+
   return (
     <>
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <img
-            src={post.createdBy.profilePic?.url || "/user.png"}
-            className="w-11 h-11 md:w-14 md:h-14 rounded-full object-center object-cover border border-white/10 bg-black/20"
-            alt="profilePic"
-          />
+          <button
+            onClick={() => navigate(`/profile/${post.createdBy._id}`)}
+            className="hover:opacity-90 transition-opacity"
+          >
+            <img
+              src={post.createdBy.profilePic?.url || "/user.png"}
+              className="w-11 h-11 md:w-14 md:h-14 rounded-full object-center object-cover border border-white/10 bg-black/20"
+              alt="profilePic"
+            />
+          </button>
           <div className="min-w-0">
-            <h1 className="text-sm md:text-base font-semibold text-white leading-tight truncate">
+            <button
+              onClick={() => navigate(`/profile/${post.createdBy._id}`)}
+              className="text-sm md:text-base font-semibold text-white leading-tight truncate hover:text-yellow-400 transition-colors text-left"
+            >
               {post.createdBy.username || "User"}
-            </h1>
+            </button>
             <p className="text-xs text-gray-200/60 truncate">
               {post.title}
             </p>

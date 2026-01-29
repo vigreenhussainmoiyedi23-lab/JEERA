@@ -21,14 +21,12 @@ axiosInstance.interceptors.response.use(
         console.error("Axios error:", error);
         console.error("Error response:", error.response);
         
-        // Temporarily disable redirects to see actual errors
         if (error.response?.status === 401) {
-            console.log("401 error - NOT redirecting to login (debug mode)");
-            // window.location.href = "/login";
-        }
-        if (error.response?.status === 403) {
-            console.log("403 error - NOT going back (debug mode)");
-            // window.history.back()
+            const redirectTo = error.response?.data?.redirectTo;
+            const target = redirectTo || "/login";
+            if (window.location.pathname !== target) {
+                window.location.href = target;
+            }
         }
 
         return Promise.reject(error);

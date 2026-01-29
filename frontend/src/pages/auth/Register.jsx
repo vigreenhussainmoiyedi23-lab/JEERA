@@ -11,7 +11,7 @@ const Register = () => {
 
     try {
       const res = await axiosInstance.post(
-        "/auth/google",
+        "/user/auth/google",
         { token },
         { withCredentials: true }
       );

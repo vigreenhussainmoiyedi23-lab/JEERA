@@ -8,9 +8,12 @@ import ProjectDetails from "./pages/projects/ProjectDetails";
 import NotFound from "./pages/NotFound";
 import CreateProject from "./pages/projects/CreateProject";
 import Profile from "./pages/Profile/Profile";
+import PostAnalytics from "./pages/analytics/PostAnalytics";
 import Posts from "./pages/posts/Posts";
 import Tasks from "./pages/tasks/Tasks";
 import Invites from "./pages/invites/Invites";
+import VerifyOtp from "./pages/auth/VerifyOtp";
+import About from "./pages/About";
 import { ReactLenis, useLenis } from "lenis/react";
 const App = () => {
   const lenis = useLenis((lenis) => {
@@ -45,13 +48,17 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify-otp" element={<VerifyOtp />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/:userId" element={<Profile />} />
           <Route path="/posts" element={<Posts />} />
           <Route path="/invites" element={<Invites />} />
           <Route path="/tasks" element={<Tasks />} />
+          <Route path="/about" element={<About />} />
           <Route path="/createProject" element={<CreateProject />} />
           <Route path="/project/:projectid" element={<ProjectDetails />} />
+          <Route path="/analytics/post/:postId" element={<PostAnalytics />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>

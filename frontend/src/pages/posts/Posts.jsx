@@ -11,11 +11,22 @@ import {
 } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import axiosInstance from "../../utils/axiosInstance";
-import PostCard from "../../components/post/PostCard";
+import LinkedInPostCard from "../../components/post/LinkedInPostCard";
+import LinkedInCreatePost from "../../components/post/LinkedInCreatePost";
+import { getRandomAd } from "../../config/ads";
 
 const Posts = () => {
   const [feedPosts, setFeedPosts] = useState([]);
   const [sentPostIds, setSentPostIds] = useState([]);
+  const [showCreatePost, setShowCreatePost] = useState(false);
+  const [hasReachedEnd, setHasReachedEnd] = useState(false);
+  const [randomAd, setRandomAd] = useState(null);
+
+  // Initialize random ad on component mount
+  useEffect(() => {
+    const ad = getRandomAd('postsAds');
+    setRandomAd(ad);
+  }, []);
 
   const {
     data: profileData,
@@ -25,7 +36,6 @@ const Posts = () => {
   } = useQuery({
     queryKey: ["profile-mini"],
     queryFn: async () => (await axiosInstance.get("/user/profile")).data,
-    staleTime: 1000 * 60 * 5,
   });
 
   const {
@@ -50,8 +60,8 @@ const Posts = () => {
   const user = profileData?.user;
 
   const canLoadMore = useMemo(() => {
-    return Array.isArray(sentPostIds);
-  }, [sentPostIds]);
+    return !hasReachedEnd && Array.isArray(sentPostIds) && sentPostIds.length > 0;
+  }, [sentPostIds, hasReachedEnd]);
 
   const loadMore = async () => {
     try {
@@ -59,8 +69,15 @@ const Posts = () => {
       const posts = res.data?.posts || [];
       const postIds = res.data?.postIds || [];
 
+      if (posts.length === 0) {
+        // No more posts to load
+        setHasReachedEnd(true);
+        setSentPostIds([]); // Clear to hide Load More button
+        return;
+      }
+
       setFeedPosts((prev) => [...prev, ...posts]);
-      setSentPostIds((prev) => [...prev, ...postIds]);
+      setSentPostIds(postIds);
     } catch (e) {
       console.error("Error loading more posts", e);
     }
@@ -98,13 +115,13 @@ const Posts = () => {
                 Refresh
               </button>
 
-              <Link
-                to="/tasks"
+              <button
+                onClick={() => setShowCreatePost(true)}
                 className="inline-flex items-center gap-2 rounded-full bg-linear-to-r from-yellow-300 to-amber-400 px-4 py-2 text-sm font-semibold text-black shadow-[0_12px_35px_rgba(250,204,21,0.22)] hover:brightness-105 transition"
               >
                 <Plus className="h-4 w-4" />
-                Create Task
-              </Link>
+                Create Post
+              </button>
             </div>
           </div>
 
@@ -167,20 +184,20 @@ const Posts = () => {
 
             {/* Center: Feed */}
             <main className="min-w-0">
-              {/* Mobile create task */}
+              {/* Mobile create post */}
               <div className="sm:hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md shadow-[0_18px_60px_rgba(0,0,0,0.35)] p-4 mb-5">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <div className="text-sm font-semibold text-white">Create something</div>
-                    <div className="text-xs text-gray-200/70">Post updates or add tasks</div>
+                    <div className="text-sm font-semibold text-white">Create a post</div>
+                    <div className="text-xs text-gray-200/70">Share updates with your network</div>
                   </div>
-                  <Link
-                    to="/tasks"
+                  <button
+                    onClick={() => setShowCreatePost(true)}
                     className="inline-flex items-center gap-2 rounded-full bg-linear-to-r from-yellow-300 to-amber-400 px-4 py-2 text-xs font-semibold text-black"
                   >
                     <Plus className="h-4 w-4" />
-                    Create Task
-                  </Link>
+                    Create Post
+                  </button>
                 </div>
               </div>
 
@@ -217,15 +234,21 @@ const Posts = () => {
                 )}
 
                 {feedPosts.map((post) => (
-                  <PostCard key={post._id} post={post} user={user} />
+                  <LinkedInPostCard key={post._id} post={post} user={user} />
                 ))}
 
-                {!isFeedLoading && !isFeedError && feedPosts.length > 0 && (
+                {!isFeedLoading && !isFeedError && feedPosts.length > 0 && hasReachedEnd && (
+                  <div className="text-center py-8">
+                    <p className="text-gray-400 text-sm">You've reached the end of the feed</p>
+                    <p className="text-gray-500 text-xs mt-1">Check back later for more posts</p>
+                  </div>
+                )}
+
+                {!isFeedLoading && !isFeedError && feedPosts.length > 0 && canLoadMore && (
                   <div className="flex items-center justify-center pt-2">
                     <button
                       onClick={loadMore}
-                      disabled={!canLoadMore}
-                      className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/20 hover:bg-white/5 px-5 py-2.5 text-sm font-semibold text-gray-100 transition disabled:opacity-60"
+                      className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/20 hover:bg-white/5 px-5 py-2.5 text-sm font-semibold text-gray-100 transition"
                     >
                       Load more
                       <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
@@ -261,13 +284,13 @@ const Posts = () => {
                 <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 p-4">
                   <div className="text-sm font-semibold text-white">Sponsored</div>
                   <p className="mt-2 text-xs text-gray-200/70 leading-relaxed">
-                    Upgrade your workflow with Jeera Teams — manage tasks, projects, and collaboration in one place.
+                    {randomAd?.description}
                   </p>
                   <Link
-                    to="/projects"
+                    to={randomAd?.buttonLink || "/projects"}
                     className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/10 hover:bg-white/15 border border-white/10 px-4 py-2 text-xs font-semibold text-white transition"
                   >
-                    View projects
+                    {randomAd?.buttonText || "View projects"}
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>
@@ -276,6 +299,14 @@ const Posts = () => {
           </div>
         </div>
       </div>
+      
+      {/* Create Post Modal */}
+      {showCreatePost && (
+        <LinkedInCreatePost
+          setPosts={setFeedPosts}
+          onClose={() => setShowCreatePost(false)}
+        />
+      )}
     </>
   );
 };

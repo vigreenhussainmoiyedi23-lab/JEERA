@@ -1,5 +1,11 @@
 const express = require("express");
-const { ProfileIndexHandler, UpdateHandler } = require("../../controllers/user/profile.controllers");
+const {
+  ProfileIndexHandler,
+  UpdateHandler,
+  ProfileByIdHandler,
+  ToggleFollowHandler,
+  ToggleConnectHandler,
+} = require("../../controllers/user/profile.controllers");
 const upload = require("../../config/multer");
 const imagekit = require("../../config/Imagekit");
 const postModel = require("../../models/post.model")
@@ -9,6 +15,9 @@ const Router = express.Router();
 
 Router.get("/", ProfileIndexHandler);
 Router.patch("/update", UpdateHandler);
+Router.get("/view/:userId", ProfileByIdHandler);
+Router.post("/follow/:userId", ToggleFollowHandler);
+Router.post("/connect/:userId", ToggleConnectHandler);
 // Router.post("/createPost", upload.fields([
 //     {
 //         name: "images",
@@ -34,7 +43,7 @@ Router.patch("/update", UpdateHandler);
 //                         const result = await imagekit.upload({
 //                             file: img.buffer,
 //                             fileName: `${Date.now()}-${img.originalname}`,
-//                             folder: "/jeera/projects/images",
+//                             folder: "/JEERA/projects",
 //                         });
 //                         return { url: result.url, fileId: result.fileId };
 //                     })
@@ -88,7 +97,7 @@ Router.patch("/update", UpdateHandler);
 //                         const result = await imagekit.upload({
 //                             file: img.buffer,
 //                             fileName: `${Date.now()}-${img.originalname}`,
-//                             folder: "/jeera/projects/images",
+//                             folder: "/JEERA/projects",
 //                         });
 //                         return { url: result.url, fileId: result.fileId };
 //                     })

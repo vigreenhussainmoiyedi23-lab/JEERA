@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Hero from "../../components/home/Hero";
 import Features from "../../components/home/Features";
@@ -6,6 +7,7 @@ import { motion } from "framer-motion";
 import Footer from "../../components/home/Footer";
 
 const Home = () => {
+  const navigate = useNavigate();
   return (
     <>
       <Navbar />
@@ -84,7 +86,10 @@ const Home = () => {
           transition={{ delay: 0.3, duration: 0.7 }}
           viewport={{ once: true }}
         >
-          <button className="px-8 py-3.5 bg-yellow-400 text-black font-semibold rounded-xl shadow-[0_12px_30px_rgba(250,204,21,0.16)] hover:bg-yellow-500 transition">
+          <button
+            onClick={() => navigate("/about")}
+            className="px-8 py-3.5 bg-yellow-400 text-black font-semibold rounded-xl shadow-[0_12px_30px_rgba(250,204,21,0.16)] hover:bg-yellow-500 transition"
+          >
             Learn More
           </button>
         </motion.div>
