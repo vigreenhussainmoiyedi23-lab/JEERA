@@ -4,7 +4,7 @@ import axiosInstance from "../../utils/axiosInstance";
 import EditProfileModal from "./EditProfileModal";
 import AddProfileSectionModal from "./AddProfileSectionModal";
 import AddProjectModal from "./AddProjectModal";
-import ProfileSectionsModal from "./ProfileSectionsModal";
+import ProfileSectionsModal from "./ProfileSectionAdder/ProfileSectionsModal";
 import ConnectionRequests from "./ConnectionRequests";
 import InviteButton from "./InviteButton";
 

@@ -15,6 +15,18 @@ const userSchema = mongoose.Schema(
     },
     bio: String,
     skills: [],
+    // Social features
+    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    following: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    connections: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    connectionRequests: [
+      {
+        from: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
+        to: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
+        status: { type: String, enum: ['pending', 'accepted', 'rejected'], default: 'pending' },
+        createdAt: { type: Date, default: Date.now }
+      }
+    ],
     notifications: [
       {
         type: String,

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Plus, Briefcase, GraduationCap, Award, BookOpen, Code, Edit, Trash2, X } from "lucide-react";
 import axiosInstance from "../../utils/axiosInstance";
 import AddProjectModal from "./AddProjectModal";
+import SocialButtons from "./SocialButtons";
 
 function ProfileSections({ user, isOwnProfile }) {
   const [activeSection, setActiveSection] = useState(null);

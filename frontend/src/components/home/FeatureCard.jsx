@@ -92,7 +92,7 @@ const FeatureCard = ({ feature, i, GettingStarted }) => {
                 <motion.img
                   src={feature.image}
                   alt={feature.title}
-                  className="w-full h-64 object-cover rounded-xl border border-white/10"
+                  className={`w-full h-64 object-cover rounded-xl border border-white/10 ${feature?.imgProperty || ""}`}
                   initial={{ 
                     rotate: 0, 
                     scale: 0.95,

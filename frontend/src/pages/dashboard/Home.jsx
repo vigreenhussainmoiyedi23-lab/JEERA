@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Hero from "../../components/home/Hero";
 import Features from "../../components/home/Features";
+import Pricing from "../../components/home/Pricing";
 import { motion } from "framer-motion";
 import Footer from "../../components/home/Footer";
 
@@ -25,6 +26,7 @@ const Home = () => {
         {/* 🌅 Stunning Hero Section */}
         <Hero />
         <Features />
+        <Pricing />
 
         {/* 🏢 About Us Section */}
         <section className="relative z-10 flex items-center justify-center px-6 py-24 overflow-hidden">

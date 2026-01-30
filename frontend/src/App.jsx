@@ -15,6 +15,12 @@ import Tasks from "./pages/tasks/Tasks";
 import Invites from "./pages/invites/Invites";
 import VerifyOtp from "./pages/auth/VerifyOtp";
 import About from "./pages/About";
+import Payment from "./pages/Payment";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import FollowersPage from "./pages/profile/FollowersPage";
+import FollowingPage from "./pages/profile/FollowingPage";
+import ConnectionsPage from "./pages/profile/ConnectionsPage";
+import FeaturesPage from "./components/home/FeaturesPage";
 import { ReactLenis, useLenis } from "lenis/react";
 const App = () => {
   const lenis = useLenis((lenis) => {
@@ -53,6 +59,9 @@ const App = () => {
           <Route path="/projects" element={<Projects />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/:userId" element={<Profile />} />
+          <Route path="/profile/:userId/followers" element={<FollowersPage />} />
+          <Route path="/profile/:userId/following" element={<FollowingPage />} />
+          <Route path="/profile/:userId/connections" element={<ConnectionsPage />} />
           <Route path="/posts" element={<Posts />} />
           <Route path="/search" element={<SearchResults />} />
           <Route path="/invites" element={<Invites />} />
@@ -61,6 +70,9 @@ const App = () => {
           <Route path="/createProject" element={<CreateProject />} />
           <Route path="/project/:projectid" element={<ProjectDetails />} />
           <Route path="/analytics/post/:postId" element={<PostAnalytics />} />
+          <Route path="/payment" element={<Payment />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="/features" element={<FeaturesPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>

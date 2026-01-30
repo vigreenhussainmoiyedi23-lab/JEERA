@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { X, Edit2, Plus, Calendar, MapPin, BookOpen, Upload, Image as ImageIcon } from 'lucide-react';
-import axiosInstance from '../../../utils/axiosInstance';
+import axiosInstance from '../../../../utils/axiosInstance';
 
 const EducationSection = ({ user, isOwnProfile, onSectionUpdate }) => {
   const [showEditModal, setShowEditModal] = useState(false);

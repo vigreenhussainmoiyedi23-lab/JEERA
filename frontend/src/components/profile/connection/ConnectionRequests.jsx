@@ -17,6 +17,7 @@ const ConnectionRequests = ({ currentUser, onConnectionUpdate }) => {
   useEffect(() => {
     fetchConnectionRequests();
   }, []);
+  
 
   const fetchConnectionRequests = async () => {
     try {

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { X, Plus, Briefcase, GraduationCap, Award, BookOpen, Code, Edit, Trash2 } from "lucide-react";
-import axiosInstance from "../../utils/axiosInstance";
-import AddProjectModal from "./AddProjectModal";
+import axiosInstance from "../../../utils/axiosInstance";
+import AddProjectModal from "../AddProjectModal";
 
 const ProfileSectionsModal = ({ isOpen, onClose, user }) => {
   const [activeSection, setActiveSection] = useState(null);

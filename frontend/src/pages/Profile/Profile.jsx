@@ -2,19 +2,21 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../../utils/axiosInstance";
 import { getRandomAds } from "../../config/ads";
-import Information from "../../components/profile/Information";
-import ProfileSections from "../../components/profile/ProfileSections";
-import PostsSwiper from "../../components/profile/PostsSwiper";
-import LinkedInCreatePost from "../../components/post/LinkedInCreatePost";
-import LinkedInPostCard from "../../components/post/LinkedInPostCard";
-import PostSuggestions from "../../components/post/PostSuggestions";
+// import Information from "../../components/profile/Information";
+// import ProfileSections from "../../components/profile/ProfileSections";
+// import SocialButtons from "../../components/profile/SocialButtons";
+// import PostsSwiper from "../../components/profile/PostsSwiper";
+// import LinkedInCreatePost from "../../components/post/LinkedInCreatePost";
+// import LinkedInPostCard from "../../components/post/LinkedInPostCard";
 import Navbar from "../../components/Navbar";
 // Import new section components
-import SkillsSection from "../../components/profile/sections/SkillsSection";
-import EducationSection from "../../components/profile/sections/EducationSection";
+import SkillsSection from "../../components/profile/sections/skills/SkillsSection";
+import EducationSection from "../../components/profile/sections/education/EducationSection";
 import ExperienceSection from "../../components/profile/sections/ExperienceSection";
 import CertificationsSection from "../../components/profile/sections/CertificationsSection";
 import ProjectsSection from "../../components/profile/sections/ProjectsSection";
+import SocialButtons from "../../components/profile/connection/SocialButtons";
+import ProfileSections from "../../components/profile/ProfileSectionAdder/ProfileSections";
 
 const Profile = () => {
   const { userId } = useParams();
@@ -79,6 +81,13 @@ const Profile = () => {
                 isOwnProfile={isOwnProfile}
                 relationship={relationship}
                 onRelationshipChange={setRelationship}
+              />
+              
+              {/* Social Buttons */}
+              <SocialButtons 
+                user={user} 
+                isOwnProfile={isOwnProfile} 
+                currentUserId={localStorage.getItem('userId')}
               />
               
               {/* Dynamic Profile Sections */}
