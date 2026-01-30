@@ -27,7 +27,16 @@ async function RegisterHandler(req, res) {
     });
 
     // Send OTP email
-    await sendMail(email, "Your OTP Of JEERA", `Your OTP is ${otp}`);
+    const emailSent = await sendMail(
+      email, 
+      "Your OTP for JEERA Verification", 
+      createOTPEmailTemplate(otp, username)
+    );
+    
+    if (!emailSent) {
+      console.error("Failed to send OTP email");
+      // Continue with authentication even if email fails, but log the error
+    }
 
     // Generate temporary token
     const token = await GenerateToken(testUser._id);
@@ -78,7 +87,16 @@ async function LoginHandler(req, res) {
       return res.status(500).json({ message: "error creating testUser" });
     }
     // Send OTP email
-    await sendMail(email, "Your OTP Of JEERA", `Your OTP is ${otp}`);
+    const emailSent = await sendMail(
+      email, 
+      "Your OTP for JEERA Verification", 
+      createOTPEmailTemplate(otp, username)
+    );
+    
+    if (!emailSent) {
+      console.error("Failed to send OTP email");
+      // Continue with authentication even if email fails, but log the error
+    }
 
     // Generate temporary token
     const token = await GenerateToken(testUser._id);
