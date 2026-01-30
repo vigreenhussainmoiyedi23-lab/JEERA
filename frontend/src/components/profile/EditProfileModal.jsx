@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, Upload, MapPin, Briefcase, Link as LinkIcon, User } from "lucide-react";
+import { X, Upload, MapPin, Briefcase, Link as LinkIcon, User, Phone, Globe } from "lucide-react";
 import axiosInstance from "../../utils/axiosInstance";
 
 const EditProfileModal = ({ user, isOpen, onClose, onUpdate, activeTab }) => {
@@ -7,11 +7,11 @@ const EditProfileModal = ({ user, isOpen, onClose, onUpdate, activeTab }) => {
     username: user?.username || "",
     headline: user?.headline || "",
     bio: user?.bio || "",
+    pronouns: user?.pronouns || "",
     location: {
       city: user?.location?.city || "",
       country: user?.location?.country || ""
     },
-    profileProjects: user?.profileProjects || [],
     contactInfo: {
       phone: user?.contactInfo?.phone || "",
       website: user?.contactInfo?.website || ""
@@ -19,12 +19,7 @@ const EditProfileModal = ({ user, isOpen, onClose, onUpdate, activeTab }) => {
   });
   
   const [loading, setLoading] = useState(false);
-  const [portfolioItem, setPortfolioItem] = useState({
-    title: "",
-    description: "",
-    link: "",
-    technologies: ""
-  });
+  const [activeSection, setActiveSection] = useState(activeTab || 'basic');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,294 +37,215 @@ const EditProfileModal = ({ user, isOpen, onClose, onUpdate, activeTab }) => {
     }
   };
 
-  const addPortfolioItem = () => {
-    if (portfolioItem.title && portfolioItem.link) {
-      setFormData(prev => ({
-        ...prev,
-        profileProjects: [...prev.profileProjects, {
-          ...portfolioItem,
-          technologies: portfolioItem.technologies.split(',').map(t => t.trim()).filter(t => t)
-        }]
-      }));
-      setPortfolioItem({ title: "", description: "", link: "", technologies: "" });
-    }
-  };
-
-  const removePortfolioItem = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      profileProjects: prev.profileProjects.filter((_, i) => i !== index)
-    }));
-  };
-
-  useEffect(() => {
-    if (isOpen && activeTab === 'portfolio') {
-      // Small delay to ensure modal is rendered
-      setTimeout(() => {
-        const portfolioSection = document.getElementById('portfolio-section');
-        if (portfolioSection) {
-          portfolioSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }, 100);
-    }
-  }, [isOpen, activeTab]);
+  const sections = [
+    { id: 'basic', label: 'Basic Info', icon: <User className="w-4 h-4" /> },
+    { id: 'location', label: 'Location', icon: <MapPin className="w-4 h-4" /> },
+    { id: 'contact', label: 'Contact', icon: <Phone className="w-4 h-4" /> }
+  ];
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-slate-900 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto my-8">
+      <div className="bg-slate-900 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-white/10 sticky top-0 bg-slate-900 z-10">
+        <div className="flex items-center justify-between p-6 border-b border-white/10 shrink-0">
           <h2 className="text-xl font-semibold text-white">Edit Profile</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-gray-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Basic Info */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-white flex items-center gap-2">
-              <User className="w-5 h-5 text-yellow-400" />
-              Basic Information
-            </h3>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Username
-              </label>
-              <input
-                type="text"
-                value={formData.username}
-                onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
-                className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50"
-                placeholder="Your username"
-              />
-            </div>
+        {/* Tab Navigation */}
+        <div className="flex border-b border-white/10 shrink-0">
+          {sections.map((section) => (
+            <button
+              key={section.id}
+              onClick={() => setActiveSection(section.id)}
+              className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
+                activeSection === section.id
+                  ? 'text-yellow-400 border-yellow-400 bg-yellow-400/10'
+                  : 'text-gray-400 border-transparent hover:text-white hover:bg-white/5'
+              }`}
+            >
+              {section.icon}
+              {section.label}
+            </button>
+          ))}
+        </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Headline
-              </label>
-              <input
-                type="text"
-                value={formData.headline}
-                onChange={(e) => setFormData(prev => ({ ...prev, headline: e.target.value }))}
-                className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50"
-                placeholder="e.g. Software Developer at Tech Company"
-              />
-            </div>
+        {/* Form Content */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+          <div className="p-6 space-y-6">
+            {/* Basic Info Section */}
+            {activeSection === 'basic' && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.username}
+                    onChange={(e) => setFormData({...formData, username: e.target.value})}
+                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50 transition-colors"
+                    placeholder="your_username"
+                  />
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Bio
-              </label>
-              <textarea
-                value={formData.bio}
-                onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
-                className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50 resize-none"
-                rows={3}
-                placeholder="Tell us about yourself..."
-              />
-            </div>
-          </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Headline
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.headline}
+                    onChange={(e) => setFormData({...formData, headline: e.target.value})}
+                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50 transition-colors"
+                    placeholder="e.g., Senior Software Engineer at Google"
+                  />
+                </div>
 
-          {/* Location */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-white flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-yellow-400" />
-              Location
-            </h3>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  City
-                </label>
-                <input
-                  type="text"
-                  value={formData.location.city}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                    location: { ...prev.location, city: e.target.value }
-                  }))}
-                  className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50"
-                  placeholder="City"
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Pronouns
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.pronouns}
+                    onChange={(e) => setFormData({...formData, pronouns: e.target.value})}
+                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50 transition-colors"
+                    placeholder="e.g., He/Him, She/Her, They/Them"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Bio
+                  </label>
+                  <textarea
+                    value={formData.bio}
+                    onChange={(e) => setFormData({...formData, bio: e.target.value})}
+                    rows={4}
+                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50 transition-colors resize-none"
+                    placeholder="Tell us about yourself, your experience, and what you're passionate about..."
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {formData.bio.length}/500 characters
+                  </p>
+                </div>
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Country
-                </label>
-                <input
-                  type="text"
-                  value={formData.location.country}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                    location: { ...prev.location, country: e.target.value }
-                  }))}
-                  className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50"
-                  placeholder="Country"
-                />
-              </div>
-            </div>
-          </div>
+            )}
 
-          {/* Contact */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-white flex items-center gap-2">
-              <LinkIcon className="w-5 h-5 text-yellow-400" />
-              Contact Information
-            </h3>
-            
-            <div className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Phone
-                </label>
-                <input
-                  type="tel"
-                  value={formData.contactInfo.phone}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                    contactInfo: { ...prev.contactInfo, phone: e.target.value }
-                  }))}
-                  className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50"
-                  placeholder="+1 (555) 123-4567"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Website
-                </label>
-                <input
-                  type="url"
-                  value={formData.contactInfo.website}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                    contactInfo: { ...prev.contactInfo, website: e.target.value }
-                  }))}
-                  className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50"
-                  placeholder="https://yourwebsite.com"
-                />
-              </div>
-            </div>
-          </div>
+            {/* Location Section */}
+            {activeSection === 'location' && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <MapPin className="w-5 h-5 text-yellow-400" />
+                  <h3 className="text-lg font-medium text-white">Location Information</h3>
+                </div>
 
-          {/* Portfolio */}
-          <div id="portfolio-section" className="space-y-4">
-            <h3 className="text-lg font-medium text-white flex items-center gap-2">
-              <Briefcase className="w-5 h-5 text-yellow-400" />
-              Portfolio Projects
-            </h3>
-            
-            {/* Add new portfolio item */}
-            <div className="bg-black/20 border border-white/10 rounded-lg p-4 space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <input
-                  type="text"
-                  value={portfolioItem.title}
-                  onChange={(e) => setPortfolioItem(prev => ({ ...prev, title: e.target.value }))}
-                  className="bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50"
-                  placeholder="Project title"
-                />
-                <input
-                  type="url"
-                  value={portfolioItem.link}
-                  onChange={(e) => setPortfolioItem(prev => ({ ...prev, link: e.target.value }))}
-                  className="bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50"
-                  placeholder="Project link"
-                />
-              </div>
-              <textarea
-                value={portfolioItem.description}
-                onChange={(e) => setPortfolioItem(prev => ({ ...prev, description: e.target.value }))}
-                className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50 resize-none"
-                rows={2}
-                placeholder="Project description"
-              />
-              <input
-                type="text"
-                value={portfolioItem.technologies}
-                onChange={(e) => setPortfolioItem(prev => ({ ...prev, technologies: e.target.value }))}
-                className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50"
-                placeholder="Technologies (comma-separated)"
-              />
-              <button
-                type="button"
-                onClick={addPortfolioItem}
-                disabled={!portfolioItem.title || !portfolioItem.link}
-                className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Add Project
-              </button>
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.location.city}
+                    onChange={(e) => setFormData({
+                      ...formData, 
+                      location: {...formData.location, city: e.target.value}
+                    })}
+                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50 transition-colors"
+                    placeholder="e.g., San Francisco"
+                  />
+                </div>
 
-            {/* Existing portfolio items */}
-            {formData.profileProjects.length > 0 && (
-              <div className="space-y-3">
-                {formData.profileProjects.map((item, index) => (
-                  <div key={index} className="bg-black/20 border border-white/10 rounded-lg p-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h4 className="font-medium text-white">{item.title}</h4>
-                        <p className="text-sm text-gray-400 mt-1">{item.description}</p>
-                        <a
-                          href={item.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-yellow-400 hover:text-yellow-300 text-sm mt-2 inline-block"
-                        >
-                          View Project
-                        </a>
-                        {item.technologies && item.technologies.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {item.technologies.map((tech, techIndex) => (
-                              <span
-                                key={techIndex}
-                                className="px-2 py-1 bg-white/10 text-xs text-gray-300 rounded"
-                              >
-                                {tech}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => removePortfolioItem(index)}
-                        className="text-red-400 hover:text-red-300 ml-4"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Country
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.location.country}
+                    onChange={(e) => setFormData({
+                      ...formData, 
+                      location: {...formData.location, country: e.target.value}
+                    })}
+                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50 transition-colors"
+                    placeholder="e.g., United States"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Contact Section */}
+            {activeSection === 'contact' && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Phone className="w-5 h-5 text-yellow-400" />
+                  <h3 className="text-lg font-medium text-white">Contact Information</h3>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.contactInfo.phone}
+                    onChange={(e) => setFormData({
+                      ...formData, 
+                      contactInfo: {...formData.contactInfo, phone: e.target.value}
+                    })}
+                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50 transition-colors"
+                    placeholder="+1 (555) 123-4567"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Website
+                  </label>
+                  <div className="relative">
+                    <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="url"
+                      value={formData.contactInfo.website}
+                      onChange={(e) => setFormData({
+                        ...formData, 
+                        contactInfo: {...formData.contactInfo, website: e.target.value}
+                      })}
+                      className="w-full bg-black/20 border border-white/10 rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50 transition-colors"
+                      placeholder="https://yourwebsite.com"
+                    />
                   </div>
-                ))}
+                </div>
               </div>
             )}
           </div>
 
-          {/* Submit Buttons */}
-          <div className="flex gap-3 pt-4 pb-6 border-t border-white/10 sticky bottom-0 bg-slate-900">
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-black font-medium py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? "Saving..." : "Save Changes"}
-            </button>
+          {/* Footer */}
+          <div className="flex gap-3 p-6 border-t border-white/10 shrink-0 bg-slate-900/50">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-white/10 hover:bg-white/20 text-white font-medium py-3 rounded-lg transition-colors"
+              className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 rounded-lg transition-colors"
             >
               Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-black font-medium py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {loading && (
+                <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+              )}
+              {loading ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </form>

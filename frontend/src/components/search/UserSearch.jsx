@@ -17,7 +17,6 @@ const UserSearch = () => {
         setShowResults(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -25,7 +24,7 @@ const UserSearch = () => {
   // Search users
   useEffect(() => {
     const searchUsers = async () => {
-      if (searchQuery.trim().length < 2) {
+      if (searchQuery.trim().length < 1) {
         setSearchResults([]);
         setShowResults(false);
         return;
@@ -33,7 +32,9 @@ const UserSearch = () => {
 
       setIsSearching(true);
       try {
-        const response = await axiosInstance.get(`/user/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        const response = await axiosInstance.post(`/user/profile/search`, {
+          username: searchQuery.trim()
+        });
         setSearchResults(response.data.users || []);
         setShowResults(true);
       } catch (error) {

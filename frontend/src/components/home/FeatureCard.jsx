@@ -87,26 +87,48 @@ const FeatureCard = ({ feature, i, GettingStarted }) => {
                 <div className="h-8 w-20 rounded-full bg-white/5 border border-white/10" />
               </div>
 
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <div className="h-2.5 w-16 rounded-full bg-white/25" />
-                  <div className="mt-3 h-2 w-24 rounded-full bg-white/15" />
-                  <div className="mt-2 h-2 w-20 rounded-full bg-white/10" />
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <div className="h-2.5 w-20 rounded-full bg-white/25" />
-                  <div className="mt-3 h-2 w-28 rounded-full bg-white/15" />
-                  <div className="mt-2 h-2 w-16 rounded-full bg-white/10" />
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <div className="h-2.5 w-14 rounded-full bg-white/25" />
-                  <div className="mt-3 h-2 w-24 rounded-full bg-white/15" />
-                  <div className="mt-2 h-2 w-28 rounded-full bg-white/10" />
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <div className="h-2.5 w-24 rounded-full bg-white/25" />
-                  <div className="mt-3 h-2 w-20 rounded-full bg-white/15" />
-                  <div className="mt-2 h-2 w-16 rounded-full bg-white/10" />
+              {/* Image with tilt and skew effects */}
+              <div className="mt-6 relative">
+                <motion.img
+                  src={feature.image}
+                  alt={feature.title}
+                  className="w-full h-64 object-cover rounded-xl border border-white/10"
+                  initial={{ 
+                    rotate: 0, 
+                    scale: 0.95,
+                    opacity: 0
+                  }}
+                  whileInView={{ 
+                    rotate: [0, -2, 2, 0], // Tilt effect
+                    scale: 1,
+                    opacity: 1,
+                    transition: {
+                      duration: 0.6,
+                      ease: "easeInOut"
+                    }
+                  }}
+                  whileHover={{
+                    rotate: [0, 3, -3, 0],
+                    scale: 1.05,
+                    transition: {
+                      duration: 0.3,
+                      ease: "easeInOut"
+                    }
+                  }}
+                  style={{
+                    transform: `perspective(1000px) rotateY(${i % 2 === 0 ? -5 : 5}deg)`, // Skew effect
+                    boxShadow: "0 20px 40px rgba(0,0,0,0.3)"
+                  }}
+                />
+                
+                {/* Image overlay with gradient */}
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                
+                {/* Image title overlay */}
+                <div className="absolute bottom-4 left-4 right-4">
+                  <div className="bg-black/60 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
+                    <p className="text-white text-sm font-medium truncate">{feature.title}</p>
+                  </div>
                 </div>
               </div>
             </div>

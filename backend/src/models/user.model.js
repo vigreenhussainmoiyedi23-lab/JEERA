@@ -74,25 +74,31 @@ const userSchema = mongoose.Schema(
       phone: { type: String, default: "" },
       website: { type: String, default: "" },
     },
-
+    // the thing is if the array's length is 0 dont show the section yet 
     experience: [
       {
-        role: String,
+        title: String,
         company: String,
+        employmentType: String,
+        startDate: String,
+        endDate: String,
+        current: { type: Boolean, default: false },
+        location: String,
         description: String,
-        startDate: Date,
-        endDate: Date, // null if current
-        isCurrent: { type: Boolean, default: false },
+        companyWebsite: String
       }
     ],
 
     education: [
       {
-        school: String,
         degree: String,
-        fieldOfStudy: String,
-        startYear: Number,
-        endYear: Number,
+        school: String,
+        field: String,
+        startDate: String,
+        endDate: String,
+        current: { type: Boolean, default: false },
+        location: String,
+        description: String
       }
     ],
 
@@ -100,7 +106,13 @@ const userSchema = mongoose.Schema(
       {
         title: String,
         description: String,
+        image: String,
         url: String,
+        githubUrl: String,
+        technologies: [String],
+        startDate: String,
+        endDate: String,
+        current: { type: Boolean, default: false }
       }
     ],
 
@@ -108,8 +120,12 @@ const userSchema = mongoose.Schema(
       {
         name: String,
         organization: String,
-        issueDate: Date,
+        issuer: String,
+        issueDate: String,
+        expirationDate: String,
+        credentialId: String,
         credentialUrl: String,
+        doesNotExpire: { type: Boolean, default: false }
       }
     ],
 
@@ -119,18 +135,26 @@ const userSchema = mongoose.Schema(
       portfolio: { type: String, default: "" },
       twitter: { type: String, default: "" },
     },
-
+    // also now update there is a reason that both of this may happen
     openToWork: {
       type: Boolean,
       default: false,
     },
+    openToHiring: {
+      type: Boolean,
+      default: false,
+    },
+    // also show at frontend that how many followers and connections he has and make him able to remove followers or unfollow others or remove connections or requests
 
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
-
     connections: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
     connectionRequestsSent: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
     connectionRequestsReceived: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    skillImage: {
+      url: { type: String, default: "" },
+      fileId: { type: String, default: "" }
+    },
 
     profileVisibility: {
       type: String,

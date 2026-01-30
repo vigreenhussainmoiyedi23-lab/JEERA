@@ -18,6 +18,7 @@ const postRoutes = require("./routes/main/post.routes")
 const analyticsRoutes = require("./routes/analytics.routes")
 const profileUploadRoutes = require("./routes/user/profileUpload.routes")
 const notificationRoutes = require("./routes/notification.routes")
+const projectInviteRoutes = require("./routes/projectInvite.routes")
 // requiring Middlewares
 const { UserIsLoggedIn } = require("./middlewares/UserAuth.middleware");
 
@@ -59,6 +60,7 @@ app.use("/api/post", UserIsLoggedIn, postRoutes)
 app.use("/api/analytics", UserIsLoggedIn, analyticsRoutes)
 app.use("/api/user/profile", UserIsLoggedIn, profileUploadRoutes)
 app.use("/api/notifications", UserIsLoggedIn, notificationRoutes)
+app.use("/api/project-invite", UserIsLoggedIn, projectInviteRoutes)
 //_______routes_______
 app.use("/api/user", userRoutes);
 app.use("/api/project", UserIsLoggedIn, projectRoutes);

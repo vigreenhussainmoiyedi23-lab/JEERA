@@ -1,7 +1,7 @@
 const userModel = require("../../models/user.model");
-const { 
+const {
   createConnectionRequestNotification,
-  createConnectionAcceptedNotification 
+  createConnectionAcceptedNotification
 } = require("../notification.controllers");
 
 const sanitizeUser = (u) => {
@@ -13,8 +13,11 @@ const sanitizeUser = (u) => {
 
 const ProfileIndexHandler = async (req, res) => {
   try {
-    const user = sanitizeUser(req.user);
-    return res.status(200).json({ message: "User Profile Data", user });
+    const user = await userModel.findById(req.user._id)
+      .select(
+        "username email profilePic profileBanner bio skills headline pronouns location education experience certifications profileProjects socialLinks contactInfo openToWork followers following connections connectionRequestsSent connectionRequestsReceived"
+      );
+    return res.status(200).json({ message: "User Profile Data", user: sanitizeUser(user) });
   } catch (error) {
     return res.status(500).json({ message: "Error Fetching User Profile Data", error });
   }
@@ -32,6 +35,8 @@ const UpdateHandler = async (req, res) => {
       openToWork,
       location,
       education,
+      experience,
+      certifications,
       profileProjects,
       socialLinks,
       contactInfo,
@@ -54,6 +59,8 @@ const UpdateHandler = async (req, res) => {
     }
 
     if (Array.isArray(education)) user.education = education;
+    if (Array.isArray(experience)) user.experience = experience;
+    if (Array.isArray(certifications)) user.certifications = certifications;
     if (Array.isArray(profileProjects)) user.profileProjects = profileProjects;
     if (socialLinks && typeof socialLinks === "object") {
       user.socialLinks = {
@@ -74,6 +81,7 @@ const UpdateHandler = async (req, res) => {
     await user.save();
     return res.status(200).json({ message: "Profile updated", user: sanitizeUser(user) });
   } catch (error) {
+    console.error("Error updating profile:", error);
     return res.status(500).json({ message: "Error updating profile", error });
   }
 };
@@ -83,7 +91,7 @@ const ProfileByIdHandler = async (req, res) => {
     const { userId } = req.params;
     const target = await userModel.findById(userId)
       .select(
-        "username email profilePic profileBanner bio skills headline pronouns location education profileProjects socialLinks contactInfo openToWork followers following connections",
+        "username email profilePic profileBanner bio skills headline pronouns location education experience certifications profileProjects socialLinks contactInfo openToWork followers following connections connectionRequestsSent connectionRequestsReceived"
       );
     if (!target) return res.status(404).json({ message: "User not found" });
 
@@ -214,26 +222,66 @@ const ToggleConnectHandler = async (req, res) => {
   }
 };
 
-const SearchUsersHandler = async (req, res) => {
+const RejectConnectionRequestHandler = async (req, res) => {
   try {
-    const { q } = req.query;
-    
-    if (!q || q.trim().length < 2) {
-      return res.status(400).json({ message: "Search query must be at least 2 characters" });
+    const { userId } = req.params;
+    if (req.user._id.toString() === userId.toString()) {
+      return res.status(400).json({ message: "Cannot reject your own request" });
     }
 
-    const searchQuery = q.trim();
+    const target = await userModel.findById(userId);
+    if (!target) return res.status(404).json({ message: "User not found" });
+
+    const viewer = await userModel.findById(req.user._id);
+
+    // Check if target sent a request to viewer
+    const targetRequestedViewer = (viewer.connectionRequestsReceived || []).some(
+      (id) => id.toString() === userId.toString(),
+    );
+
+    if (targetRequestedViewer) {
+      // Remove the request from both sides
+      viewer.connectionRequestsReceived = (viewer.connectionRequestsReceived || []).filter(
+        (id) => id.toString() !== userId.toString(),
+      );
+      target.connectionRequestsSent = (target.connectionRequestsSent || []).filter(
+        (id) => id.toString() !== viewer._id.toString(),
+      );
+
+      await Promise.all([viewer.save(), target.save()]);
+      return res.status(200).json({ 
+        message: "Connection request rejected", 
+        requestReceived: false,
+        isConnected: false 
+      });
+    }
+
+    return res.status(400).json({ message: "No connection request to reject" });
+  } catch (error) {
+    return res.status(500).json({ message: "Error rejecting connection request", error });
+  }
+};
+
+const SearchUsersHandler = async (req, res) => {
+  try {
+    const { username } = req.body;
+
+    if (!username || username.trim().length < 2) {
+      return res.status(400).json({ message: "Search username must be at least 2 characters" });
+    }
     
+    const searchUsername = username.trim();
+
     // Search users by username (case-insensitive)
     const users = await userModel
       .find({
-        username: { $regex: searchQuery, $options: 'i' }
+        username: { $regex: searchUsername, $options: 'i' }
       })
       .select('username profilePic headline followersCount')
       .limit(10)
       .lean();
-
-    return res.status(200).json({ 
+    
+    return res.status(200).json({
       message: "Users found successfully",
       users: users.map(user => ({
         ...user,
@@ -252,5 +300,6 @@ module.exports = {
   ProfileByIdHandler,
   ToggleFollowHandler,
   ToggleConnectHandler,
+  RejectConnectionRequestHandler,
   SearchUsersHandler,
 };

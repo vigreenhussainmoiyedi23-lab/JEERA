@@ -137,37 +137,37 @@ const GettingStarted = [
     title: "Create Project",
     desc: "Go to Projects page and create your first project.",
     bg: "bg-gradient-to-br from-slate-800 via-slate-900 to-black",
-    image:"/36.jpg.webp"
+    image: "/gettingStarted/create_project.png"
   },
   {
     title: "Create Your First Task",
-    desc: "Tailor dashboards, workflows, and themes to perfectly fit your team’s needs.",
+    desc: "Tailor dashboards, workflows, and themes to perfectly fit your team's needs.",
     bg: "bg-gradient-to-br from-slate-800 via-slate-950 to-black",
-    image:"/36.jpg.webp"
+    image: "/gettingStarted/create_task.png"
   },
   {
     title: "Manage Tasks",
     desc: "Drag and drop tasks to update their state effortlessly.",
     bg: "bg-gradient-to-br from-slate-900 via-black to-black",
-    image:"/36.jpg.webp"
+    image: "/gettingStarted/drag_drop_manage_task.png"
   },
   {
     title: "Chat Support",
     desc: "Chat with anyone anytime — either in a project or through their profile.",
     bg: "bg-gradient-to-br from-black via-slate-950 to-black",
-    image:"/36.jpg.webp"
+    image: "/gettingStarted/chat_with_project_members.png"
   },
   {
     title: "Post Like LinkedIn",
     desc: "Post your thoughts just like LinkedIn, with profiles and feeds.",
     bg: "bg-gradient-to-br from-black via-slate-900 to-black",
-    image:"/36.jpg.webp"
+    image: "/gettingStarted/create_post_like_linkedIn.png"
   },
   {
     title: "Cloud Synced",
     desc: "Access your data anywhere, anytime — with real-time syncing across all devices.",
     bg: "bg-slate-900",
-    image:"/36.jpg.webp"
+    image: "/gettingStarted/create_project.png"
   },
 ];
 
@@ -192,6 +192,58 @@ const GettingStarted = [
         {GettingStarted.map((feature, i) => {
           return <FeatureCard GettingStarted={GettingStarted} i={i} feature={feature} key={i}/>
        })}
+      </div>
+
+      {/* Ad Section */}
+      <div className="relative py-20 px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="max-w-4xl mx-auto"
+        >
+          <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-sm rounded-3xl border border-white/20 p-8 shadow-2xl">
+            <div className="text-center">
+              <motion.h3
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="text-3xl md:text-4xl font-bold text-white mb-4"
+              >
+                Unlock Your Full Potential
+              </motion.h3>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="text-gray-300 text-lg mb-8 max-w-2xl mx-auto"
+              >
+                Join thousands of professionals who are already using Jeera to streamline their workflow, collaborate seamlessly, and achieve their goals faster.
+              </motion.p>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+                className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+              >
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg"
+                >
+                  Get Started Free
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl transition-all duration-300 border border-white/30"
+                >
+                  Watch Demo
+                </motion.button>
+              </motion.div>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   );

@@ -1,63 +1,20 @@
-// import React, { useState, useEffect } from "react";
-// import Information from "../../components/profile/Information";
-// import CreatePost from "../../components/post/CreatePost";
-// import AllPosts from "../../components/post/AllPosts";
-// import PostSuggestions from "../../components/post/PostSuggestions";
-// import axiosInstance from "../../utils/axiosInstance";
-// import Navbar from "../../components/Navbar";
-
-// const Profile = () => {
-//   const [user, setUser] = useState(null);
-//   const [posts, setPosts] = useState([]);
-//   const [suggestedPosts, setSuggestedPosts] = useState([]);
-
-//   // Fetch user info and posts
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       try {
-//         const userRes = await axiosInstance.get("/user/profile");
-//         setUser(userRes.data.user);
-
-//         const postRes = await axiosInstance.post("/post/feed", { postIds: [] });
-//         setSuggestedPosts(postRes.data.posts || []);
-
-//         const ownPosts = await axiosInstance.get("/post/all");
-//         setPosts(ownPosts.data.posts || []);
-//       } catch (error) {
-//         console.error("Error fetching profile data:", error);
-//       }
-//     };
-//     fetchData();
-//   }, []);
-
-//   return (
-//     <>
-//       <Navbar />
-//       <div className="bg-linear-to-br overflow-x-hidden pt-5 flex md:flex-row flex-col   text-white min-h-screen h-max w-full relative from-zinc-800 via-slate-950 to-gray-900 px-5">
-//         {/* User Information */}
-//         <div className="flex flex-col items-center justify-start w-2/3 min-w-75 max-w-4xl  px-5 gap-5">
-//           <Information user={user} />
-//           {/* Create Post */}
-//           <CreatePost setPosts={setPosts} />
-//           {/* User’s All Posts */}
-//           <AllPosts posts={posts} user={user} />
-//           {/* Suggested Posts */}
-//           <PostSuggestions posts={suggestedPosts} user={user} />
-//         </div>
-//         <div>
-//           Advertises
-//         </div>
-//       </div>
-//     </>
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../../utils/axiosInstance";
 import { getRandomAds } from "../../config/ads";
 import Information from "../../components/profile/Information";
+import ProfileSections from "../../components/profile/ProfileSections";
+import PostsSwiper from "../../components/profile/PostsSwiper";
 import LinkedInCreatePost from "../../components/post/LinkedInCreatePost";
 import LinkedInPostCard from "../../components/post/LinkedInPostCard";
 import PostSuggestions from "../../components/post/PostSuggestions";
 import Navbar from "../../components/Navbar";
+// Import new section components
+import SkillsSection from "../../components/profile/sections/SkillsSection";
+import EducationSection from "../../components/profile/sections/EducationSection";
+import ExperienceSection from "../../components/profile/sections/ExperienceSection";
+import CertificationsSection from "../../components/profile/sections/CertificationsSection";
+import ProjectsSection from "../../components/profile/sections/ProjectsSection";
 
 const Profile = () => {
   const { userId } = useParams();
@@ -123,6 +80,34 @@ const Profile = () => {
                 relationship={relationship}
                 onRelationshipChange={setRelationship}
               />
+              
+              {/* Dynamic Profile Sections */}
+              <SkillsSection 
+                user={user} 
+                isOwnProfile={isOwnProfile} 
+                onSectionUpdate={() => window.location.reload()}
+              />
+              <EducationSection 
+                user={user} 
+                isOwnProfile={isOwnProfile} 
+                onSectionUpdate={() => window.location.reload()}
+              />
+              <ExperienceSection 
+                user={user} 
+                isOwnProfile={isOwnProfile} 
+                onSectionUpdate={() => window.location.reload()}
+              />
+              <CertificationsSection 
+                user={user} 
+                isOwnProfile={isOwnProfile} 
+                onSectionUpdate={() => window.location.reload()}
+              />
+              <ProjectsSection 
+                user={user} 
+                isOwnProfile={isOwnProfile} 
+                onSectionUpdate={() => window.location.reload()}
+              />
+              
               {isOwnProfile && (
                 <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md shadow-[0_18px_60px_rgba(0,0,0,0.35)] p-4">
                   <button
@@ -139,18 +124,13 @@ const Profile = () => {
                 </div>
               )}
               
-              {/* Posts Feed */}
-              <div className="space-y-4">
-                {posts.map((post) => (
-                  <LinkedInPostCard key={post._id} post={post} user={user} />
-                ))}
-                {posts.length === 0 && isOwnProfile && (
-                  <div className="text-center py-12 text-gray-400">
-                    <p className="text-lg mb-2">No posts yet</p>
-                    <p className="text-sm">Share your first post to get started!</p>
-                  </div>
-                )}
-              </div>
+              {/* Profile Sections - Only show on own profile */}
+              {isOwnProfile && (
+                <ProfileSections user={user} isOwnProfile={isOwnProfile} />
+              )}
+              
+              {/* Posts Swiper */}
+              <PostsSwiper posts={posts} user={user} />
               
               {/* Suggested Posts */}
               {isOwnProfile && suggestedPosts.length > 0 && (
