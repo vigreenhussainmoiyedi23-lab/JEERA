@@ -17,9 +17,9 @@ import VerifyOtp from "./pages/auth/VerifyOtp";
 import About from "./pages/About";
 import Payment from "./pages/Payment";
 import PaymentSuccess from "./pages/PaymentSuccess";
-import FollowersPage from "./pages/profile/FollowersPage";
-import FollowingPage from "./pages/profile/FollowingPage";
-import ConnectionsPage from "./pages/profile/ConnectionsPage";
+import FollowersPage from "./pages/Profile/FollowersPage";
+import FollowingPage from "./pages/Profile/FollowingPage";
+import ConnectionsPage from "./pages/Profile/ConnectionsPage";
 import FeaturesPage from "./components/home/FeaturesPage";
 import { ReactLenis, useLenis } from "lenis/react";
 const App = () => {
