@@ -2,7 +2,8 @@ import axios from "axios";
 
 // Check if VITE_API_URL is set and contains /api, otherwise use fallback
 const envURL = import.meta.env.VITE_API_URL;
-const baseURL = envURL || "http://localhost:5000/api";
+const isdevelopment = (process.meta.VITE_NODE == "development");
+const baseURL = !isdevelopment ? envURL : "http://localhost:5000/api";
 
 console.log("Environment VITE_API_URL:", envURL);
 console.log("Final Axios baseURL:", baseURL);
@@ -20,7 +21,7 @@ axiosInstance.interceptors.response.use(
     (error) => {
         console.error("Axios error:", error);
         console.error("Error response:", error.response);
-        
+
         if (error.response?.status === 401) {
             const redirectTo = error.response?.data?.redirectTo;
             const target = redirectTo || "/login";
