@@ -13,12 +13,12 @@ Router.get("/all", async function (req, res) {
     try {
         const user = req.user
         const { limit = 10, offset = 0, visibility } = req.query;
-        
+
         const filter = { createdBy: user._id };
         if (visibility) {
             filter.visibility = visibility;
         }
-        
+
         const posts = await postModel.find(filter)
             .populate({
                 path: "createdBy",
@@ -31,9 +31,9 @@ Router.get("/all", async function (req, res) {
             .sort({ createdAt: -1, isPinned: -1 })
             .limit(parseInt(limit))
             .skip(parseInt(offset));
-            
+
         const total = await postModel.countDocuments(filter);
-        
+
         // Increment views for all posts being sent (except own posts - optional)
         const postIds = posts.map(p => p._id);
         if (postIds.length > 0) {
@@ -41,9 +41,9 @@ Router.get("/all", async function (req, res) {
             // Uncomment the line below if you want to track views even for own posts
             await postModel.updateMany({ _id: { $in: postIds } }, { $inc: { "engagement.views": 1 } });
         }
-        
-        return res.status(200).json({ 
-            message: "All User Posts", 
+
+        return res.status(200).json({
+            message: "All User Posts",
             posts,
             pagination: {
                 total,
@@ -57,39 +57,18 @@ Router.get("/all", async function (req, res) {
     }
 })
 
-Router.post("/create", upload.array("media", 5), async (req, res) => {
+Router.post("/create", async (req, res) => {
     const user = req.user
+    console.log(req.body)
+    if(!req.body)return res.status(500).json({message:"Body is empty"})
     try {
-        const files = [...req.files] || [];
         const { content, title, visibility, hashtags, mentions, tags, industry, location, linkUrl, poll, article } = req.body
-        
+
         if (!content || content.trim().length === 0) {
             return res.status(400).json({ message: "Content is required" })
         }
 
-        // Process media uploads
-        let media = [];
-        if (files && files.length > 0) {
-            const uploadedMedia = await Promise.all(
-                files.map(async (file) => {
-                    const result = await imagekit.upload({
-                        file: file.buffer,
-                        fileName: `${Date.now()}-${file.originalname}`,
-                        folder: "/JEERA/posts",
-                    });
-                    return {
-                        type: file.mimetype.startsWith('video/') ? 'video' : 'image',
-                        url: result.url,
-                        fileId: result.fileId,
-                        metadata: {
-                            size: file.size,
-                            format: file.mimetype
-                        }
-                    };
-                })
-            );
-            media = uploadedMedia;
-        }
+        // Media uploads are disabled - no file processing
 
         // Parse JSON fields
         let parsedHashtags = [];
@@ -97,7 +76,7 @@ Router.post("/create", upload.array("media", 5), async (req, res) => {
         let parsedTags = [];
         let parsedPoll = null;
         let parsedArticle = null;
-        
+
         try {
             if (hashtags) parsedHashtags = JSON.parse(hashtags);
             if (mentions) parsedMentions = JSON.parse(mentions);
@@ -114,8 +93,8 @@ Router.post("/create", upload.array("media", 5), async (req, res) => {
 
         // Extract mentions from content
         const contentMentions = content.match(/@\w+/g)?.map(mention => mention.substring(1)) || [];
-        const mentionedUsers = await userModel.find({ 
-            username: { $in: contentMentions } 
+        const mentionedUsers = await userModel.find({
+            username: { $in: contentMentions }
         }).select('_id');
         const allMentions = [...new Set([...mentionedUsers.map(u => u._id.toString()), ...parsedMentions])];
 
@@ -160,7 +139,7 @@ Router.post("/create", upload.array("media", 5), async (req, res) => {
             content,
             title,
             createdBy: user._id,
-            media,
+            media: [], // Media uploads disabled
             hashtags: allHashtags,
             mentions: allMentions,
             visibility: visibility || "public",
@@ -201,11 +180,11 @@ Router.post("/create", upload.array("media", 5), async (req, res) => {
             { path: "createdBy", select: "username email profilePic headline" },
             { path: "mentions", select: "username profilePic" }
         ]);
-        
+
         // Update user's posts array
         user.posts.push(post._id);
         await user.save();
-        
+
         return res.status(201).json({
             message: "Post created successfully",
             post: populatedPost
@@ -291,11 +270,11 @@ Router.post("/feed", async (req, res) => {
         if (postIds.length > 0) {
             // Only increment views for posts not created by the current user
             await postModel.updateMany(
-                { 
+                {
                     _id: { $in: postIds },
                     createdBy: { $ne: req.user._id } // Exclude own posts
                 },
-                { 
+                {
                     $inc: { "engagement.views": 1 },
                     $set: { lastActivityAt: new Date() }
                 }
@@ -325,24 +304,24 @@ Router.patch("/likeUnlike/:postId", async function (req, res) {
     try {
         const user = req.user
         const { postId } = req.params
-        
+
         const post = await postModel.findById(postId);
         if (!post) {
             return res.status(404).json({ message: "Post not found" });
         }
-        
+
         const userIdStr = user._id.toString();
         const likeIndex = post.engagement.likes.findIndex(id => id.toString() === userIdStr);
-        
+
         if (likeIndex === -1) {
             post.engagement.likes.push(user._id);
         } else {
             post.engagement.likes.splice(likeIndex, 1);
         }
-        
+
         post.lastActivityAt = new Date();
         await post.save();
-        
+
         return res.status(200).json({
             message: likeIndex === -1 ? "Post liked" : "Post unliked",
             liked: likeIndex === -1,
@@ -358,22 +337,22 @@ Router.patch("/vote/:postId", async function (req, res) {
         const user = req.user
         const { postId } = req.params
         const { optionIndex } = req.body
-        
+
         if (typeof optionIndex !== "number" || optionIndex < 0) {
             return res.status(400).json({ message: "Invalid option index" });
         }
-        
+
         const post = await postModel.findById(postId);
         if (!post || !post.hasPoll) {
             return res.status(404).json({ message: "Poll not found" });
         }
-        
+
         if (optionIndex >= post.poll.options.length) {
             return res.status(400).json({ message: "Option index out of range" });
         }
-        
+
         const userIdStr = user._id.toString();
-        
+
         // Remove vote from all options if multiple choice is not allowed
         if (!post.poll.allowMultipleChoice) {
             post.poll.options.forEach(option => {
@@ -383,18 +362,18 @@ Router.patch("/vote/:postId", async function (req, res) {
                 }
             });
         }
-        
+
         // Add vote to selected option
         const targetOption = post.poll.options[optionIndex];
         const existingVoteIndex = targetOption.votes.findIndex(id => id.toString() === userIdStr);
-        
+
         if (existingVoteIndex === -1) {
             targetOption.votes.push(user._id);
         }
-        
+
         post.lastActivityAt = new Date();
         await post.save();
-        
+
         // Calculate vote percentages
         const totalVotes = post.poll.options.reduce((sum, opt) => sum + opt.votes.length, 0);
         const optionsWithPercentages = post.poll.options.map(opt => ({
@@ -403,7 +382,7 @@ Router.patch("/vote/:postId", async function (req, res) {
             percentage: totalVotes > 0 ? Math.round((opt.votes.length / totalVotes) * 100) : 0,
             hasVoted: opt.votes.some(id => id.toString() === userIdStr)
         }));
-        
+
         return res.status(200).json({
             message: "Vote recorded successfully",
             poll: {
@@ -423,17 +402,17 @@ Router.patch("/click/:postId", async function (req, res) {
     try {
         const user = req.user
         const { postId } = req.params
-        
+
         const post = await postModel.findById(postId);
         if (!post) {
             return res.status(404).json({ message: "Post not found" });
         }
-        
+
         // Increment click counter
         post.engagement.clicks = (post.engagement.clicks || 0) + 1;
         post.lastActivityAt = new Date();
         await post.save();
-        
+
         return res.status(200).json({
             message: "Click tracked successfully",
             clicks: post.engagement.clicks
@@ -447,12 +426,12 @@ Router.patch("/view/:postId", async function (req, res) {
     try {
         const user = req.user
         const { postId } = req.params
-        
+
         const post = await postModel.findById(postId);
         if (!post) {
             return res.status(404).json({ message: "Post not found" });
         }
-        
+
         // Don't track views for own posts
         if (post.createdBy.toString() === user._id.toString()) {
             return res.status(200).json({
@@ -460,28 +439,28 @@ Router.patch("/view/:postId", async function (req, res) {
                 views: post.engagement.views || 0
             });
         }
-        
+
         // Check if user already viewed this post in the last hour (to prevent duplicate tracking)
         const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
         const recentView = post.engagement.viewEvents.find(
-          event => event.user.toString() === user._id.toString() && 
-          new Date(event.timestamp) > oneHourAgo
+            event => event.user.toString() === user._id.toString() &&
+                new Date(event.timestamp) > oneHourAgo
         );
-        
+
         if (!recentView) {
-          // Add view event
-          post.engagement.viewEvents.push({
-            user: user._id,
-            timestamp: new Date()
-          });
-          
-          // Increment view counter
-          post.engagement.views = (post.engagement.views || 0) + 1;
-          post.lastActivityAt = new Date();
+            // Add view event
+            post.engagement.viewEvents.push({
+                user: user._id,
+                timestamp: new Date()
+            });
+
+            // Increment view counter
+            post.engagement.views = (post.engagement.views || 0) + 1;
+            post.lastActivityAt = new Date();
         }
-        
+
         await post.save();
-        
+
         return res.status(200).json({
             message: "View tracked successfully",
             views: post.engagement.views

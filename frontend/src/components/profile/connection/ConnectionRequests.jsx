@@ -7,7 +7,7 @@ import {
   Briefcase,
   MapPin
 } from "lucide-react";
-import axiosInstance from "../../utils/axiosInstance";
+import axiosInstance from "../../../utils/axiosInstance";
 
 const ConnectionRequests = ({ currentUser, onConnectionUpdate }) => {
   const [requests, setRequests] = useState([]);

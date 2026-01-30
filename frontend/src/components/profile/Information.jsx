@@ -5,7 +5,7 @@ import EditProfileModal from "./EditProfileModal";
 import AddProfileSectionModal from "./AddProfileSectionModal";
 import AddProjectModal from "./AddProjectModal";
 import ProfileSectionsModal from "./ProfileSectionAdder/ProfileSectionsModal";
-import ConnectionRequests from "./ConnectionRequests";
+import ConnectionRequests from "./connection/ConnectionRequests";
 import InviteButton from "./InviteButton";
 
 const Information = ({ user, isOwnProfile, relationship, onRelationshipChange }) => {

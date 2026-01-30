@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, UserPlus, Link2 } from 'lucide-react';
-import axiosInstance from '../../utils/axiosInstance';
+import axiosInstance from '../../../utils/axiosInstance';
 
 const SocialButtons = ({ user, isOwnProfile, currentUserId }) => {
   const [loading, setLoading] = useState(false);

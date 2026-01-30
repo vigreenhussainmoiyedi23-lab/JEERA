@@ -3,7 +3,7 @@ import { Image, Loader } from "lucide-react";
 import axiosInstance from "../../utils/axiosInstance";
 
 const CreatePost = ({ setPosts }) => {
-  const [formData, setFormData] = useState({ title: "", description: "" });
+  const [formData, setFormData] = useState({ title: "", content: "" });
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -13,11 +13,11 @@ const CreatePost = ({ setPosts }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title || !formData.description) return;
+    if (!formData.title || !formData.content) return;
 
     const data = new FormData();
     data.append("title", formData.title);
-    data.append("description", formData.description);
+    data.append("content", formData.content);
     images.forEach((img) => data.append("images", img));
 
     setLoading(true);
@@ -26,7 +26,7 @@ const CreatePost = ({ setPosts }) => {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setPosts((prev) => [res.data.post, ...prev]);
-      setFormData({ title: "", description: "" });
+      setFormData({ title: "", content: "" });
       setImages([]);
     } catch (err) {
       console.error(err);
@@ -56,12 +56,12 @@ const CreatePost = ({ setPosts }) => {
         className="w-full bg-black/20 border border-white/10 rounded-2xl px-4 py-3 text-gray-100 placeholder-gray-400/80 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent transition"
       />
 
-      {/* Description */}
+      {/* content */}
       <textarea
         placeholder="Write your post..."
-        value={formData.description}
+        value={formData.content}
         onChange={(e) =>
-          setFormData({ ...formData, description: e.target.value })
+          setFormData({ ...formData, content: e.target.value })
         }
         className="w-full bg-black/20 border border-white/10 rounded-2xl px-4 py-3 text-gray-100 placeholder-gray-400/80 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent transition min-h-30"
       />

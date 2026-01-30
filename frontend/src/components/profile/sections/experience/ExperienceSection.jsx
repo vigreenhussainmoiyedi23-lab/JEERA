@@ -1,6 +1,14 @@
-import React, { useState } from 'react';
-import { X, Edit2, Plus, Calendar, MapPin, Briefcase, ExternalLink } from 'lucide-react';
-import axiosInstance from '../../../utils/axiosInstance';
+import React, { useEffect, useState } from "react";
+import {
+  X,
+  Edit2,
+  Plus,
+  Calendar,
+  MapPin,
+  Briefcase,
+  ExternalLink,
+} from "lucide-react";
+import axiosInstance from "../../../../utils/axiosInstance";
 
 const ExperienceSection = ({ user, isOwnProfile, onSectionUpdate }) => {
   const [showEditModal, setShowEditModal] = useState(false);
@@ -12,7 +20,7 @@ const ExperienceSection = ({ user, isOwnProfile, onSectionUpdate }) => {
     try {
       setLoading(true);
       let updatedExperience;
-      
+
       if (editingIndex !== null) {
         // Edit existing experience
         updatedExperience = [...experience];
@@ -21,8 +29,10 @@ const ExperienceSection = ({ user, isOwnProfile, onSectionUpdate }) => {
         // Add new experience
         updatedExperience = [...experience, experienceData];
       }
-      
-      await axiosInstance.patch("/user/profile/update", { experience: updatedExperience });
+
+      await axiosInstance.patch("/user/profile/update", {
+        experience: updatedExperience,
+      });
       setExperience(updatedExperience);
       setShowEditModal(false);
       setEditingIndex(null);
@@ -35,11 +45,18 @@ const ExperienceSection = ({ user, isOwnProfile, onSectionUpdate }) => {
     }
   };
 
+  useEffect(() => {
+    if (user?.experience) setExperience(user.experience);
+  }, [user]);
   const handleRemoveExperience = async (indexToRemove) => {
-    const updatedExperience = experience.filter((_, index) => index !== indexToRemove);
+    const updatedExperience = experience.filter(
+      (_, index) => index !== indexToRemove,
+    );
     try {
       setLoading(true);
-      await axiosInstance.patch("/user/profile/update", { experience: updatedExperience });
+      await axiosInstance.patch("/user/profile/update", {
+        experience: updatedExperience,
+      });
       setExperience(updatedExperience);
       onSectionUpdate?.();
     } catch (error) {
@@ -59,131 +76,147 @@ const ExperienceSection = ({ user, isOwnProfile, onSectionUpdate }) => {
   }
 
   return (
-    <div className="mt-8 bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
+    <div className="mt-8 bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-white/10 overflow-y-scroll h-max">
       {/* Section Header */}
-      <div className="px-6 py-4 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border-b border-white/10">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-              <Briefcase className="w-5 h-5 text-white" />
+      {!showEditModal && (
+        <div className="px-6 py-4 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border-b border-white/10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                <Briefcase className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white">Experience</h3>
+                <p className="text-sm text-gray-300">
+                  Work experience and professional background
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-white">Experience</h3>
-              <p className="text-sm text-gray-300">Work experience and professional background</p>
-            </div>
+            {isOwnProfile && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowEditModal(true)}
+                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors flex items-center gap-2 shadow-lg"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Experience
+                </button>
+              </div>
+            )}
           </div>
-          {isOwnProfile && (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowEditModal(true)}
-                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors flex items-center gap-2 shadow-lg"
-              >
-                <Plus className="w-4 h-4" />
-                Add Experience
-              </button>
+        </div>
+      )}
+
+      {/* Section Content */}
+      {!showEditModal && (
+        <div className="p-6">
+          {experience && experience.length > 0 ? (
+            <div className="space-y-6">
+              {experience.map((exp, i) => (
+                <div key={i} className="relative group">
+                  <div className="flex gap-4">
+                    <div className="shrink-0">
+                      <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                        <Briefcase className="w-6 h-6 text-blue-400" />
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="text-lg font-semibold text-white">
+                            {exp.title}
+                          </h4>
+                          <p className="text-gray-200 font-medium">
+                            {exp.company}
+                          </p>
+                          {exp.employmentType && (
+                            <p className="text-gray-400 text-sm">
+                              {exp.employmentType}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                            {exp.startDate && (
+                              <div className="flex items-center gap-1">
+                                <Calendar className="w-4 h-4" />
+                                {exp.startDate} -{" "}
+                                {exp.current ? "Present" : exp.endDate}
+                              </div>
+                            )}
+                            {exp.location && (
+                              <div className="flex items-center gap-1">
+                                <MapPin className="w-4 h-4" />
+                                {exp.location}
+                              </div>
+                            )}
+                          </div>
+                          {exp.description && (
+                            <p className="text-gray-300 mt-2">
+                              {exp.description}
+                            </p>
+                          )}
+                          {exp.companyWebsite && (
+                            <a
+                              href={exp.companyWebsite}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 text-sm mt-2 transition-colors"
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                              Visit Website
+                            </a>
+                          )}
+                        </div>
+                        {isOwnProfile && (
+                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                            <button
+                              onClick={() => handleEditExperience(i)}
+                              className="w-8 h-8 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg flex items-center justify-center transition-colors"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleRemoveExperience(i)}
+                              className="w-8 h-8 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg flex items-center justify-center transition-colors"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  {i < experience.length - 1 && (
+                    <div className="ml-6 mt-4 border-l-2 border-white/10"></div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Briefcase className="w-8 h-8 text-gray-400" />
+              </div>
+              <h4 className="text-lg font-medium text-white mb-2">
+                No Experience Added Yet
+              </h4>
+              <p className="text-gray-400 mb-6 max-w-md mx-auto">
+                {isOwnProfile
+                  ? "Showcase your professional journey by adding your work experience."
+                  : "This user hasn't added any work experience yet."}
+              </p>
+              {isOwnProfile && (
+                <button
+                  onClick={() => setShowEditModal(true)}
+                  className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors flex items-center gap-2 mx-auto shadow-lg"
+                >
+                  <Plus className="w-5 h-5" />
+                  Add Your First Experience
+                </button>
+              )}
             </div>
           )}
         </div>
-      </div>
-      
-      {/* Section Content */}
-      <div className="p-6">
-        {experience && experience.length > 0 ? (
-          <div className="space-y-6">
-            {experience.map((exp, i) => (
-              <div key={i} className="relative group">
-                <div className="flex gap-4">
-                  <div className="shrink-0">
-                    <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                      <Briefcase className="w-6 h-6 text-blue-400" />
-                    </div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h4 className="text-lg font-semibold text-white">{exp.title}</h4>
-                        <p className="text-gray-200 font-medium">{exp.company}</p>
-                        {exp.employmentType && (
-                          <p className="text-gray-400 text-sm">{exp.employmentType}</p>
-                        )}
-                        <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                          {exp.startDate && (
-                            <div className="flex items-center gap-1">
-                              <Calendar className="w-4 h-4" />
-                              {exp.startDate} - {exp.current ? 'Present' : exp.endDate}
-                            </div>
-                          )}
-                          {exp.location && (
-                            <div className="flex items-center gap-1">
-                              <MapPin className="w-4 h-4" />
-                              {exp.location}
-                            </div>
-                          )}
-                        </div>
-                        {exp.description && (
-                          <p className="text-gray-300 mt-2">{exp.description}</p>
-                        )}
-                        {exp.companyWebsite && (
-                          <a
-                            href={exp.companyWebsite}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 text-sm mt-2 transition-colors"
-                          >
-                            <ExternalLink className="w-3 h-3" />
-                            Visit Website
-                          </a>
-                        )}
-                      </div>
-                      {isOwnProfile && (
-                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                          <button
-                            onClick={() => handleEditExperience(i)}
-                            className="w-8 h-8 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg flex items-center justify-center transition-colors"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleRemoveExperience(i)}
-                            className="w-8 h-8 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg flex items-center justify-center transition-colors"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                {i < experience.length - 1 && (
-                  <div className="ml-6 mt-4 border-l-2 border-white/10"></div>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Briefcase className="w-8 h-8 text-gray-400" />
-            </div>
-            <h4 className="text-lg font-medium text-white mb-2">No Experience Added Yet</h4>
-            <p className="text-gray-400 mb-6 max-w-md mx-auto">
-              {isOwnProfile 
-                ? "Showcase your professional journey by adding your work experience."
-                : "This user hasn't added any work experience yet."
-              }
-            </p>
-            {isOwnProfile && (
-              <button
-                onClick={() => setShowEditModal(true)}
-                className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors flex items-center gap-2 mx-auto shadow-lg"
-              >
-                <Plus className="w-5 h-5" />
-                Add Your First Experience
-              </button>
-            )}
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Add/Edit Modal */}
       {showEditModal && (
@@ -203,15 +236,15 @@ const ExperienceSection = ({ user, isOwnProfile, onSectionUpdate }) => {
 
 const ExperienceModal = ({ experience, onSave, onClose, loading }) => {
   const [formData, setFormData] = useState({
-    title: experience?.title || '',
-    company: experience?.company || '',
-    employmentType: experience?.employmentType || '',
-    startDate: experience?.startDate || '',
-    endDate: experience?.endDate || '',
+    title: experience?.title || "",
+    company: experience?.company || "",
+    employmentType: experience?.employmentType || "",
+    startDate: experience?.startDate || "",
+    endDate: experience?.endDate || "",
     current: experience?.current || false,
-    location: experience?.location || '',
-    description: experience?.description || '',
-    companyWebsite: experience?.companyWebsite || ''
+    location: experience?.location || "",
+    description: experience?.description || "",
+    companyWebsite: experience?.companyWebsite || "",
   });
 
   const handleSubmit = (e) => {
@@ -220,7 +253,7 @@ const ExperienceModal = ({ experience, onSave, onClose, loading }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div className="h-max inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
       <div className="bg-slate-900 rounded-2xl w-full max-w-2xl min-h-[80vh] max-h-[90vh] flex flex-col shadow-2xl border border-white/10 my-8">
         {/* Fixed Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/10 shrink-0 rounded-t-2xl">
@@ -230,10 +263,12 @@ const ExperienceModal = ({ experience, onSave, onClose, loading }) => {
             </div>
             <div>
               <h3 className="text-xl font-semibold text-white">
-                {experience ? 'Edit Experience' : 'Add Experience'}
+                {experience ? "Edit Experience" : "Add Experience"}
               </h3>
               <p className="text-sm text-gray-400">
-                {experience ? 'Update your work experience' : 'Add your professional experience'}
+                {experience
+                  ? "Update your work experience"
+                  : "Add your professional experience"}
               </p>
             </div>
           </div>
@@ -258,12 +293,14 @@ const ExperienceModal = ({ experience, onSave, onClose, loading }) => {
                     type="text"
                     required
                     value={formData.title}
-                    onChange={(e) => setFormData({...formData, title: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
                     className="w-full bg-slate-800 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
                     placeholder="e.g., Senior Software Engineer"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-200 mb-2">
                     Company *
@@ -272,7 +309,9 @@ const ExperienceModal = ({ experience, onSave, onClose, loading }) => {
                     type="text"
                     required
                     value={formData.company}
-                    onChange={(e) => setFormData({...formData, company: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, company: e.target.value })
+                    }
                     className="w-full bg-slate-800 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
                     placeholder="e.g., Google"
                   />
@@ -285,7 +324,9 @@ const ExperienceModal = ({ experience, onSave, onClose, loading }) => {
                 </label>
                 <select
                   value={formData.employmentType}
-                  onChange={(e) => setFormData({...formData, employmentType: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, employmentType: e.target.value })
+                  }
                   className="w-full bg-slate-800 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
                 >
                   <option value="">Select type</option>
@@ -307,11 +348,13 @@ const ExperienceModal = ({ experience, onSave, onClose, loading }) => {
                     type="month"
                     required
                     value={formData.startDate}
-                    onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, startDate: e.target.value })
+                    }
                     className="w-full bg-slate-800 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-200 mb-2">
                     End Date
@@ -319,7 +362,9 @@ const ExperienceModal = ({ experience, onSave, onClose, loading }) => {
                   <input
                     type="month"
                     value={formData.endDate}
-                    onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, endDate: e.target.value })
+                    }
                     disabled={formData.current}
                     className="w-full bg-slate-800 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 disabled:opacity-50 disabled:bg-slate-800 transition-all"
                   />
@@ -331,10 +376,19 @@ const ExperienceModal = ({ experience, onSave, onClose, loading }) => {
                   type="checkbox"
                   id="current"
                   checked={formData.current}
-                  onChange={(e) => setFormData({...formData, current: e.target.checked, endDate: ''})}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      current: e.target.checked,
+                      endDate: "",
+                    })
+                  }
                   className="w-4 h-4 bg-blue-500 border-blue-400 rounded text-white focus:ring-blue-400 focus:ring-offset-2"
                 />
-                <label htmlFor="current" className="text-sm font-medium text-gray-200">
+                <label
+                  htmlFor="current"
+                  className="text-sm font-medium text-gray-200"
+                >
                   Currently working here
                 </label>
               </div>
@@ -346,7 +400,9 @@ const ExperienceModal = ({ experience, onSave, onClose, loading }) => {
                 <input
                   type="text"
                   value={formData.location}
-                  onChange={(e) => setFormData({...formData, location: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, location: e.target.value })
+                  }
                   className="w-full bg-slate-800 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
                   placeholder="e.g., San Francisco, CA"
                 />
@@ -359,7 +415,9 @@ const ExperienceModal = ({ experience, onSave, onClose, loading }) => {
                 <input
                   type="url"
                   value={formData.companyWebsite}
-                  onChange={(e) => setFormData({...formData, companyWebsite: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, companyWebsite: e.target.value })
+                  }
                   className="w-full bg-slate-800 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
                   placeholder="https://company.com"
                 />
@@ -371,7 +429,9 @@ const ExperienceModal = ({ experience, onSave, onClose, loading }) => {
                 </label>
                 <textarea
                   value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
                   className="w-full bg-slate-800 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 resize-none transition-all"
                   rows={4}
                   placeholder="Describe your role, responsibilities, achievements, etc."
@@ -399,7 +459,11 @@ const ExperienceModal = ({ experience, onSave, onClose, loading }) => {
             {loading && (
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             )}
-            {loading ? "Saving..." : (experience ? "Update Experience" : "Add Experience")}
+            {loading
+              ? "Saving..."
+              : experience
+                ? "Update Experience"
+                : "Add Experience"}
           </button>
         </div>
       </div>

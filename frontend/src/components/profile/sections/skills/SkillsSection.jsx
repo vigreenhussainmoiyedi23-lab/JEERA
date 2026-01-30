@@ -9,9 +9,9 @@ const SkillsSection = ({ user, isOwnProfile, onSectionUpdate }) => {
   const [imagePreview, setImagePreview] = useState("");
   const fileInputRef = useRef(null);
   useEffect(() => {
-    if(user?.skills)setSkills(user.skills)
-  }, [user])
-  
+    if (user?.skills) setSkills(user.skills);
+  }, [user]);
+
   const handleSaveSkills = async (newSkills) => {
     try {
       setLoading(true);

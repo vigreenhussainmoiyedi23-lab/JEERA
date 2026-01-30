@@ -24,7 +24,7 @@ const upload = multer({
 Router.post("/upload/banner", upload.single('banner'), async (req, res) => {
   try {
     const user = req.user;
-    
+
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
@@ -86,7 +86,7 @@ Router.post("/upload/banner", upload.single('banner'), async (req, res) => {
 Router.post("/upload/profile-pic", upload.single('profilePic'), async (req, res) => {
   try {
     const user = req.user;
-    
+
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
@@ -234,93 +234,93 @@ Router.delete("/delete/profile-pic", async (req, res) => {
   }
 });
 
-// Upload skill image
-Router.post("/upload/skill-image", upload.single('skillImage'), async (req, res) => {
-  try {
-    const user = req.user;
-    
-    if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
-    }
+// Upload skill image - DISABLED
+// Router.post("/upload/skill-image", upload.single('skillImage'), async (req, res) => {
+//   try {
+//     const user = req.user;
+//     
+//     if (!req.file) {
+//       return res.status(400).json({ message: "No file uploaded" });
+//     }
 
-    // Delete old skill image file from ImageKit if exists
-    if (user.skillImage?.fileId) {
-      try {
-        await imagekit.deleteFile(user.skillImage.fileId);
-        console.log("Old skill image deleted from ImageKit:", user.skillImage.fileId);
-      } catch (error) {
-        console.error("Failed to delete old skill image from ImageKit:", error);
-        // Continue with upload even if old file deletion fails
-      }
-    }
+//     // Delete old skill image file from ImageKit if exists
+//     if (user.skillImage?.fileId) {
+//       try {
+//         await imagekit.deleteFile(user.skillImage.fileId);
+//         console.log("Old skill image deleted from ImageKit:", user.skillImage.fileId);
+//       } catch (error) {
+//         console.error("Failed to delete old skill image from ImageKit:", error);
+//         // Continue with upload even if old file deletion fails
+//       }
+//     }
 
-    // Upload new skill image to ImageKit
-    imagekit.upload({
-      file: req.file.buffer,
-      fileName: `skill-${user._id}-${Date.now()}`,
-      folder: "/JEERA/skills"
-    }, async (error, result) => {
-      if (error) {
-        console.error("ImageKit upload error:", error);
-        return res.status(500).json({ message: "Failed to upload skill image to ImageKit" });
-      }
+//     // Upload new skill image to ImageKit
+//     imagekit.upload({
+//       file: req.file.buffer,
+//       fileName: `skill-${user._id}-${Date.now()}`,
+//       folder: "/JEERA/skills"
+//     }, async (error, result) => {
+//       if (error) {
+//         console.error("ImageKit upload error:", error);
+//         return res.status(500).json({ message: "Failed to upload skill image to ImageKit" });
+//       }
 
-      try {
-        // Update user with new skill image info including fileId
-        user.skillImage = {
-          url: result.url,
-          fileId: result.fileId
-        };
-        await user.save();
+//       try {
+//         // Update user with new skill image info including fileId
+//         user.skillImage = {
+//           url: result.url,
+//           fileId: result.fileId
+//         };
+//         await user.save();
 
-        console.log("Skill image uploaded successfully:", { fileId: result.fileId, url: result.url });
-        res.status(200).json({
-          message: "Skill image uploaded successfully",
-          skillImage: user.skillImage
-        });
-      } catch (saveError) {
-        console.error("Failed to save skill image to database:", saveError);
-        // Try to delete the uploaded file from ImageKit if save fails
-        try {
-          await imagekit.deleteFile(result.fileId);
-          console.log("Cleaned up uploaded skill image from ImageKit:", result.fileId);
-        } catch (deleteError) {
-          console.error("Failed to cleanup uploaded skill image:", deleteError);
-        }
-        res.status(500).json({ message: "Failed to save skill image to database" });
-      }
-    });
-  } catch (error) {
-    console.error("Skill image upload error:", error);
-    res.status(500).json({ message: "Failed to upload skill image" });
-  }
-});
+//         console.log("Skill image uploaded successfully:", { fileId: result.fileId, url: result.url });
+//         res.status(200).json({
+//           message: "Skill image uploaded successfully",
+//           skillImage: user.skillImage
+//         });
+//       } catch (saveError) {
+//         console.error("Failed to save skill image to database:", saveError);
+//         // Try to delete the uploaded file from ImageKit if save fails
+//         try {
+//           await imagekit.deleteFile(result.fileId);
+//           console.log("Cleaned up uploaded skill image from ImageKit:", result.fileId);
+//         } catch (deleteError) {
+//           console.error("Failed to cleanup uploaded skill image:", deleteError);
+//         }
+//         res.status(500).json({ message: "Failed to save skill image to database" });
+//       }
+//     });
+//   } catch (error) {
+//     console.error("Skill image upload error:", error);
+//     res.status(500).json({ message: "Failed to upload skill image" });
+//   }
+// });
 
-// Delete skill image
-Router.delete("/delete/skill-image", async (req, res) => {
-  try {
-    const user = req.user;
+// Delete skill image - DISABLED
+// Router.delete("/delete/skill-image", async (req, res) => {
+//   try {
+//     const user = req.user;
 
-    if (user.skillImage?.fileId) {
-      // Delete file from ImageKit using fileId
-      try {
-        await imagekit.deleteFile(user.skillImage.fileId);
-        console.log("Skill image deleted from ImageKit:", user.skillImage.fileId);
-      } catch (error) {
-        console.error("Failed to delete skill image file from ImageKit:", error);
-        // Still proceed to remove from database even if ImageKit deletion fails
-      }
-    }
+//     if (user.skillImage?.fileId) {
+//       // Delete file from ImageKit using fileId
+//       try {
+//         await imagekit.deleteFile(user.skillImage.fileId);
+//         console.log("Skill image deleted from ImageKit:", user.skillImage.fileId);
+//       } catch (error) {
+//         console.error("Failed to delete skill image file from ImageKit:", error);
+//         // Still proceed to remove from database even if ImageKit deletion fails
+//       }
+//     }
 
-    // Remove skill image from user profile
-    user.skillImage = undefined;
-    await user.save();
+//     // Remove skill image from user profile
+//     user.skillImage = undefined;
+//     await user.save();
 
-    res.status(200).json({ message: "Skill image deleted successfully" });
-  } catch (error) {
-    console.error("Skill image delete error:", error);
-    res.status(500).json({ message: "Failed to delete skill image" });
-  }
-});
+//     res.status(200).json({ message: "Skill image deleted successfully" });
+//   } catch (error) {
+//     console.error("Skill image delete error:", error);
+//     res.status(500).json({ message: "Failed to delete skill image" });
+//   }
+// });
 
 module.exports = Router;
