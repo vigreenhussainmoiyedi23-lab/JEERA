@@ -326,6 +326,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <div align="center">
-  <p>Made with ❤️ by <strong>Vigreen Hussain Moiyedi</strong></p>
-  <p>© 2024 JEERA. All rights reserved.</p>
+  <p>Made with ❤️ by <strong>Hussain Moiyedi</strong></p>
+  <p>Created by <strong>Hussain Moiyedi</strong> | © 2024 JEERA. All rights reserved.</p>
 </div>
