@@ -5,12 +5,17 @@ const postModel = require("../../models/post.model");
 const { default: mongoose } = require("mongoose");
 const commentModel = require("../../models/comment.model");
 const { populate } = require("dotenv");
+const { UserIsLoggedIn } = require("../../middlewares/UserAuth.middleware");
 
 // post  --> create comment
 // patch --> Update comment
 // delete--> delete comment
 
 const Router = express.Router();
+
+// Apply authentication middleware to all routes that need it
+Router.use(UserIsLoggedIn);
+
 Router.get("/all/:postId", async function (req, res) {
     try {
         const { postId } = req.params;
@@ -71,26 +76,84 @@ Router.get("/replies/:commentId", async function (req, res) {
 
 Router.post("/create/:postId", async function (req, res) {
     try {
+        console.log('🔍 Comment creation request received');
+        console.log('🔍 Request body:', req.body);
+        console.log('🔍 Request params:', req.params);
+        console.log('🔍 Request user:', req.user ? req.user._id : 'No user');
+        
         const user = req.user
         const { message } = req.body
         const { postId } = req.params
+        
+        if (!user) {
+            console.log('❌ No user found in request');
+            return res.status(401).json({ 
+                success: false,
+                message: "User not authenticated" 
+            });
+        }
+        
+        if (!message || !message.trim()) {
+            console.log('❌ Empty message received');
+            return res.status(400).json({ 
+                success: false,
+                message: "Comment message cannot be empty" 
+            });
+        }
+        
+        console.log('🔍 Looking for post:', postId);
         const post = await postModel.findById(postId)
-        if (!message || !post) return res.status(400).json({ message: "Either postId is incorrect or message is empty" })
+        if (!post) {
+            console.log('❌ Post not found:', postId);
+            return res.status(404).json({ 
+                success: false,
+                message: "Post not found" 
+            });
+        }
+        
+        console.log('✅ Post found, creating comment...');
         const comment = await commentModel.create({
-            message,
+            message: message.trim(),
             user: user._id,
             post: postId
         })
-        post.comments.push(comment._id)
+        
+        console.log('✅ Comment created:', comment._id);
+        
+        // Populate user data for the response
+        const populatedComment = await commentModel.findById(comment._id)
+            .populate({
+                path: "user",
+                select: "username email profilePic"
+            });
+        
+        console.log('✅ Comment populated with user data');
+        
+        // Initialize engagement.comments array if it doesn't exist
+        if (!post.engagement) {
+            post.engagement = {};
+        }
+        if (!post.engagement.comments) {
+            post.engagement.comments = [];
+        }
+        
+        post.engagement.comments.push(comment._id)
         await post.save()
+        
+        console.log('✅ Post updated with comment reference');
+        
         return res.status(200).json({
+            success: true,
             message: "comment posted successfully",
-            comment
+            comment: populatedComment
         })
     } catch (error) {
+        console.error("❌ Error creating comment:", error);
+        console.error("❌ Error stack:", error.stack);
         return res.status(500).json({
-            message: "Something Went Wrong",
-            error
+            success: false,
+            message: "Something went wrong while creating comment",
+            error: error.message
         })
     }
 })
@@ -126,9 +189,16 @@ Router.delete("/:postId/:commentId", async function (req, res) {
         // Delete main comment
         await commentModel.findByIdAndDelete(commentId);
 
-        // If it was a direct comment (not reply), remove from post.comments
+        // If it was a direct comment (not reply), remove from post.engagement.comments
         if (!comment.isReply) {
-            post.comments = post.comments.filter(
+            // Initialize engagement.comments array if it doesn't exist
+            if (!post.engagement) {
+                post.engagement = {};
+            }
+            if (!post.engagement.comments) {
+                post.engagement.comments = [];
+            }
+            post.engagement.comments = post.engagement.comments.filter(
                 (c) => c._id.toString() !== commentId.toString()
             );
             await post.save();

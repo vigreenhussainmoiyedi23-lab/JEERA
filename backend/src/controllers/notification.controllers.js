@@ -1,6 +1,14 @@
 const UserModel = require("../models/user.model");
 const TaskModel = require("../models/task.model");
 const projectModel = require("../models/project.model");
+const {
+  sendConnectionRequestEmail,
+  sendConnectionAcceptedEmail,
+  sendTaskAssignedEmail,
+  sendTaskStatusUpdateEmail,
+  sendTaskCompletedEmail,
+  sendProjectInvitationEmail
+} = require("../config/emailTemplates");
 
 // Enhanced notification schema for better structure
 const createNotification = async (userId, notificationData) => {
@@ -169,54 +177,137 @@ const NotificationTypes = {
 
 // Create connection request notification
 const createConnectionRequestNotification = async (fromUserId, toUserId) => {
-  return await createNotification(toUserId, {
-    type: NotificationTypes.CONNECTION_REQUEST,
-    title: "New Connection Request",
-    message: "wants to connect with you",
-    fromUser: fromUserId,
-    relatedId: fromUserId,
-    relatedType: 'user',
-    actionUrl: `/profile/${fromUserId}`
-  });
+  try {
+    const fromUser = await UserModel.findById(fromUserId);
+    const toUser = await UserModel.findById(toUserId);
+    
+    if (!fromUser || !toUser) return false;
+    
+    // Create in-app notification
+    const notificationResult = await createNotification(toUserId, {
+      type: NotificationTypes.CONNECTION_REQUEST,
+      title: "New Connection Request",
+      message: "wants to connect with you",
+      fromUser: fromUserId,
+      relatedId: fromUserId,
+      relatedType: 'user',
+      actionUrl: `/profile/${fromUserId}`
+    });
+    
+    // Send email notification
+    if (toUser.email) {
+      await sendConnectionRequestEmail(toUser.email, fromUser, toUser);
+    }
+    
+    return notificationResult;
+  } catch (error) {
+    console.error("Failed to create connection request notification:", error);
+    return false;
+  }
 };
 
 // Create connection accepted notification
 const createConnectionAcceptedNotification = async (fromUserId, toUserId) => {
-  return await createNotification(toUserId, {
-    type: NotificationTypes.CONNECTION_ACCEPTED,
-    title: "Connection Accepted",
-    message: "accepted your connection request",
-    fromUser: fromUserId,
-    relatedId: fromUserId,
-    relatedType: 'user',
-    actionUrl: `/profile/${fromUserId}`
-  });
+  try {
+    const fromUser = await UserModel.findById(fromUserId);
+    const toUser = await UserModel.findById(toUserId);
+    
+    if (!fromUser || !toUser) return false;
+    
+    // Create in-app notification
+    const notificationResult = await createNotification(toUserId, {
+      type: NotificationTypes.CONNECTION_ACCEPTED,
+      title: "Connection Accepted",
+      message: "accepted your connection request",
+      fromUser: fromUserId,
+      relatedId: fromUserId,
+      relatedType: 'user',
+      actionUrl: `/profile/${fromUserId}`
+    });
+    
+    // Send email notification
+    if (toUser.email) {
+      await sendConnectionAcceptedEmail(toUser.email, fromUser, toUser);
+    }
+    
+    return notificationResult;
+  } catch (error) {
+    console.error("Failed to create connection accepted notification:", error);
+    return false;
+  }
 };
 
 // Create task notification
-const createTaskNotification = async (userId, task, type, message) => {
-  return await createNotification(userId, {
-    type,
-    title: `Task ${type}`,
-    message,
-    fromUser: task.assignedTo,
-    relatedId: task._id,
-    relatedType: 'task',
-    actionUrl: `/projects/${task.project}/tasks/${task._id}`
-  });
+const createTaskNotification = async (userId, task, type, message, additionalData = {}) => {
+  try {
+    const user = await UserModel.findById(userId);
+    const project = await projectModel.findById(task.project);
+    const assignedBy = await UserModel.findById(task.assignedBy || additionalData.assignedBy);
+    
+    if (!user || !project) return false;
+    
+    // Create in-app notification
+    const notificationResult = await createNotification(userId, {
+      type,
+      title: `Task ${type}`,
+      message,
+      fromUser: task.assignedTo,
+      relatedId: task._id,
+      relatedType: 'task',
+      actionUrl: `/projects/${task.project}/tasks/${task._id}`
+    });
+    
+    // Send email notification based on task type
+    if (user.email) {
+      switch (type) {
+        case 'assigned':
+          await sendTaskAssignedEmail(user.email, task, assignedBy, project);
+          break;
+        case 'completed':
+          await sendTaskCompletedEmail(user.email, task, additionalData.completedBy || user, project);
+          break;
+        case 'updated':
+          await sendTaskStatusUpdateEmail(user.email, task, additionalData.oldStatus, additionalData.newStatus, additionalData.updatedBy);
+          break;
+      }
+    }
+    
+    return notificationResult;
+  } catch (error) {
+    console.error("Failed to create task notification:", error);
+    return false;
+  }
 };
 
 // Create project invitation notification
 const createProjectInvitationNotification = async (userId, project, inviterId) => {
-  return await createNotification(userId, {
-    type: NotificationTypes.PROJECT_INVITATION,
-    title: "Project Invitation",
-    message: `invited you to join project "${project.title}"`,
-    fromUser: inviterId,
-    relatedId: project._id,
-    relatedType: 'project',
-    actionUrl: `/projects/${project._id}`
-  });
+  try {
+    const user = await UserModel.findById(userId);
+    const inviter = await UserModel.findById(inviterId);
+    
+    if (!user || !inviter) return false;
+    
+    // Create in-app notification
+    const notificationResult = await createNotification(userId, {
+      type: NotificationTypes.PROJECT_INVITATION,
+      title: "Project Invitation",
+      message: `invited you to join project "${project.title}"`,
+      fromUser: inviterId,
+      relatedId: project._id,
+      relatedType: 'project',
+      actionUrl: `/projects/${project._id}`
+    });
+    
+    // Send email notification
+    if (user.email) {
+      await sendProjectInvitationEmail(user.email, project, inviter);
+    }
+    
+    return notificationResult;
+  } catch (error) {
+    console.error("Failed to create project invitation notification:", error);
+    return false;
+  }
 };
 
 module.exports = {

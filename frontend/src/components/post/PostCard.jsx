@@ -19,7 +19,7 @@ const PostCard = ({ post, user }) => {
   const [openComments, setOpenComments] = useState(false);
   const [liked, setLiked] = useState(post.likedBy.includes(user?._id));
   const [likeCount, setLikeCount] = useState(post.likedBy.length);
-
+  console.log(post);
   const handleLike = async () => {
     try {
       const { data } = await axiosInstance.patch(
@@ -36,78 +36,78 @@ const PostCard = ({ post, user }) => {
     <div className="relative mb-5">
       <div className="absolute inset-0 rounded-3xl bg-linear-to-br from-white/8 via-white/4 to-transparent" />
       <div className="relative rounded-3xl border border-white/10 bg-slate-950/30 backdrop-blur-md shadow-[0_18px_60px_rgba(0,0,0,0.35)] hover:shadow-[0_22px_70px_rgba(0,0,0,0.45)] transition-shadow overflow-hidden">
-      {/* 1. Top Header Section (MainHead should contain Avatar, Name, Headline) */}
-      <div className="px-5 pt-4">
-        <MainHead post={post} user={user} />
-      </div>
-
-      {/* 2. Post Description */}
-      <div className="px-5 py-3 text-gray-200/90 text-sm md:text-[15px] leading-relaxed">
-        {post.description}
-      </div>
-
-      {/* 3. Media Section */}
-      {post.images && post.images.length > 0 && (
-        <div className="border-y border-white/10 bg-black/20">
-          <ImageSwiper post={post} />
+        {/* 1. Top Header Section (MainHead should contain Avatar, Name, Headline) */}
+        <div className="px-5 pt-4">
+          <MainHead post={post} user={user} />
         </div>
-      )}
 
-      {/* 4. Social Stats (Like count, Comment count) */}
-      <div className="px-5 py-2.5 flex items-center justify-between border-b border-white/10">
-        <div className="flex items-center gap-1 group cursor-pointer">
-          <div className="flex -space-x-1">
-            <div className="bg-blue-500 rounded-full p-0.5 border border-black/30">
-              <ThumbsUp size={10} className="text-white fill-white" />
+        {/* 2. Post Description */}
+        <div className="px-5 py-3 text-gray-200/90 text-sm md:text-[15px] leading-relaxed">
+          {post.description}
+        </div>
+
+        {/* 3. Media Section */}
+        {post.images && post.images.length > 0 && (
+          <div className="border-y border-white/10 bg-black/20">
+            <ImageSwiper post={post} />
+          </div>
+        )}
+
+        {/* 4. Social Stats (Like count, Comment count) */}
+        <div className="px-5 py-2.5 flex items-center justify-between border-b border-white/10">
+          <div className="flex items-center gap-1 group cursor-pointer">
+            <div className="flex -space-x-1">
+              <div className="bg-blue-500 rounded-full p-0.5 border border-black/30">
+                <ThumbsUp size={10} className="text-white fill-white" />
+              </div>
+            </div>
+            <span className="text-xs text-gray-200/70 hover:text-blue-300 hover:underline">
+              {likeCount}
+            </span>
+          </div>
+          <div className="text-xs text-gray-200/70 hover:text-blue-300 hover:underline cursor-pointer">
+            {post.comments?.length || 0} comments
+          </div>
+        </div>
+
+        {/* 5. Interaction Bar */}
+        <div className="px-2 py-1.5 flex items-center justify-between">
+          <button
+            onClick={handleLike}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl hover:bg-white/5 transition-colors ${
+              liked ? "text-blue-400" : "text-gray-400"
+            }`}
+          >
+            <ThumbsUp size={20} className={liked ? "fill-blue-400" : ""} />
+            <span className="font-semibold text-sm">Like</span>
+          </button>
+
+          <button
+            onClick={() => setOpenComments(!openComments)}
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl hover:bg-white/5 transition-colors text-gray-400"
+          >
+            <MessageSquare size={20} />
+            <span className="font-semibold text-sm">Comment</span>
+          </button>
+
+          <div className="flex-1 hidden sm:flex items-center justify-center gap-2 py-3 rounded-md hover:bg-white/5 transition-colors text-gray-400">
+            <ShareButton />
+          </div>
+        </div>
+
+        {/* 6. Collapsible Comments Section */}
+        {openComments && (
+          <div className="px-5 pb-5 animate-in fade-in slide-in-from-top-2">
+            <div
+              data-lenis-prevent
+              data-lenis-prevent-wheel
+              data-lenis-prevent-touch
+              className="max-h-[65vh] overflow-y-auto overscroll-auto pr-1 [scrollbar-gutter:stable] touch-pan-y [-webkit-overflow-scrolling:touch]"
+            >
+              <Comments post={post} user={user} />
             </div>
           </div>
-          <span className="text-xs text-gray-200/70 hover:text-blue-300 hover:underline">
-            {likeCount}
-          </span>
-        </div>
-        <div className="text-xs text-gray-200/70 hover:text-blue-300 hover:underline cursor-pointer">
-          {post.comments?.length || 0} comments
-        </div>
-      </div>
-
-      {/* 5. Interaction Bar */}
-      <div className="px-2 py-1.5 flex items-center justify-between">
-        <button
-          onClick={handleLike}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl hover:bg-white/5 transition-colors ${
-            liked ? "text-blue-400" : "text-gray-400"
-          }`}
-        >
-          <ThumbsUp size={20} className={liked ? "fill-blue-400" : ""} />
-          <span className="font-semibold text-sm">Like</span>
-        </button>
-
-        <button
-          onClick={() => setOpenComments(!openComments)}
-          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl hover:bg-white/5 transition-colors text-gray-400"
-        >
-          <MessageSquare size={20} />
-          <span className="font-semibold text-sm">Comment</span>
-        </button>
-
-        <div className="flex-1 hidden sm:flex items-center justify-center gap-2 py-3 rounded-md hover:bg-white/5 transition-colors text-gray-400">
-          <ShareButton />
-        </div>
-      </div>
-
-      {/* 6. Collapsible Comments Section */}
-      {openComments && (
-        <div className="px-5 pb-5 animate-in fade-in slide-in-from-top-2">
-          <div
-            data-lenis-prevent
-            data-lenis-prevent-wheel
-            data-lenis-prevent-touch
-            className="max-h-[65vh] overflow-y-auto overscroll-auto pr-1 [scrollbar-gutter:stable] touch-pan-y [-webkit-overflow-scrolling:touch]"
-          >
-            <Comments post={post} user={user} />
-          </div>
-        </div>
-      )}
+        )}
       </div>
     </div>
   );

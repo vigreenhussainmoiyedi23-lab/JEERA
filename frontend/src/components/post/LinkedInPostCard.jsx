@@ -1,30 +1,25 @@
 import React, { useState, useEffect } from "react";
-import {
-  ThumbsUp,
-  MessageSquare,
-  Share2,
-  Send,
-  MoreHorizontal,
-  X,
-  Copy,
-  MessageCircle,
-  Eye,
-  BarChart3,
-  Calendar,
-  MapPin,
-  Briefcase,
-  Hash,
-  AtSign,
-  Users,
-  Globe,
-  Lock,
-  ChevronDown,
-  ChevronUp
+import { 
+  Heart, 
+  MessageSquare, 
+  Share2, 
+  MoreHorizontal, 
+  ThumbsUp, 
+  Eye, 
+  Globe, 
+  Users, 
+  Lock, 
+  MapPin, 
+  Briefcase, 
+  BarChart3, 
+  Copy, 
+  X 
 } from "lucide-react";
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { MessageCircle } from "lucide-react";
 import axiosInstance from "../../utils/axiosInstance";
-import CommentSection from "./CommentSection";
+import { useNavigate } from "react-router-dom";
+import Comments from "./PostCard/Comments";
 
 const LinkedInPostCard = ({ post, user }) => {
   const navigate = useNavigate();
@@ -318,7 +313,7 @@ const LinkedInPostCard = ({ post, user }) => {
         )}
 
         {/* Poll */}
-        {pollData && (
+        {pollData && pollData.question && pollData.options && pollData.options.length > 0 && (
           <div className="border-y border-white/10 bg-black/20 p-4">
             <h4 className="font-medium text-white mb-3">{pollData.question}</h4>
             <div className="space-y-2">
@@ -427,7 +422,7 @@ const LinkedInPostCard = ({ post, user }) => {
               </span>
             </div>
             <div className="hover:text-blue-300 hover:underline cursor-pointer">
-              {post.commentCount || 0} comments
+              {post.engagement?.comments?.length || 0} comments
             </div>
             <div className="flex items-center gap-1">
               <Eye className="w-4 h-4" />
@@ -467,7 +462,7 @@ const LinkedInPostCard = ({ post, user }) => {
 
         {/* Comments Section */}
         {openComments && (
-          <CommentSection postId={post._id} user={user} />
+          <Comments post={post} user={user} />
         )}
       </div>
 

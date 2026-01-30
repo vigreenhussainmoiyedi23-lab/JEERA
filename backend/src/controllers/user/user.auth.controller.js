@@ -3,6 +3,7 @@ const testUserModel = require("../../models/testUser.model");
 const { HashPassword, comparePassword } = require("../../utils/bcrypt");
 const { GenerateToken, VerifyToken } = require("../../utils/jwt");
 const sendMail = require("../../config/sendMail");
+const createOTPEmailTemplate = require("../../config/otpEmailTemplate");
 const { OAuth2Client } = require("google-auth-library");
 const jwt = require("jsonwebtoken");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);

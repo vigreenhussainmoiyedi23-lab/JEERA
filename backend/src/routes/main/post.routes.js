@@ -57,18 +57,39 @@ Router.get("/all", async function (req, res) {
     }
 })
 
-Router.post("/create", async (req, res) => {
+Router.post("/create", upload.array("media", 5), async (req, res) => {
     const user = req.user
-    console.log(req.body)
-    if(!req.body)return res.status(500).json({message:"Body is empty"})
     try {
+        const files = [...req.files] || [];
         const { content, title, visibility, hashtags, mentions, tags, industry, location, linkUrl, poll, article } = req.body
 
         if (!content || content.trim().length === 0) {
             return res.status(400).json({ message: "Content is required" })
         }
 
-        // Media uploads are disabled - no file processing
+        // Process media uploads
+        let media = [];
+        if (files && files.length > 0) {
+            const uploadedMedia = await Promise.all(
+                files.map(async (file) => {
+                    const result = await imagekit.upload({
+                        file: file.buffer,
+                        fileName: `${Date.now()}-${file.originalname}`,
+                        folder: "/JEERA/posts",
+                    });
+                    return {
+                        type: file.mimetype.startsWith('video/') ? 'video' : 'image',
+                        url: result.url,
+                        fileId: result.fileId,
+                        metadata: {
+                            size: file.size,
+                            format: file.mimetype
+                        }
+                    };
+                })
+            );
+            media = uploadedMedia;
+        }
 
         // Parse JSON fields
         let parsedHashtags = [];
@@ -139,7 +160,7 @@ Router.post("/create", async (req, res) => {
             content,
             title,
             createdBy: user._id,
-            media: [], // Media uploads disabled
+            media,
             hashtags: allHashtags,
             mentions: allMentions,
             visibility: visibility || "public",

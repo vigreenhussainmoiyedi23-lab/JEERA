@@ -7,7 +7,7 @@ import {
   Trash,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import axiosInstance from "../../../../utils/axiosInstance";
+import axiosInstance from "../../../utils/axiosInstance";
 
 const CommentCard = ({
   c,

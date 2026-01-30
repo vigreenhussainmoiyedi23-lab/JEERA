@@ -2,8 +2,8 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "../../../utils/axiosInstance";
-import CreateComment from "./comments/CreateComment";
-import CommentCard from "./comments/CommentCard";
+import CreateComment from "../comments/CreateComment";
+import CommentCard from "../comments/CommentCard";
 
 const Comments = ({ post, user }) => {
   const queryClient = useQueryClient();
@@ -17,42 +17,131 @@ const Comments = ({ post, user }) => {
   });
 
   const addCommentMutation = useMutation({
-    mutationFn: async (message) =>
-      (await axiosInstance.post(`/comment/create/${post._id}`, { message }))
-        .data.comment,
-    onSuccess: () => {
-      queryClient.invalidateQueries(["comments", post._id]);
+    mutationFn: async (message) => {
+      const response = await axiosInstance.post(`/comment/create/${post._id}`, { message });
+      return response.data;
+    },
+    onMutate: async (newMessage) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries(["comments", post._id]);
+      
+      // Snapshot the previous value
+      const previousComments = queryClient.getQueryData(["comments", post._id]);
+      
+      // Optimistically update to the new value
+      const optimisticComment = {
+        _id: `temp-${Date.now()}`,
+        message: newMessage,
+        user: {
+          _id: user._id,
+          username: user.username,
+          profilePic: user.profilePic
+        },
+        createdAt: new Date().toISOString(),
+        likedBy: [],
+        replies: []
+      };
+      
+      queryClient.setQueryData(["comments", post._id], (old = []) => [
+        optimisticComment,
+        ...old
+      ]);
+      
       setNewComment("");
-      refetch();
+      
+      return { previousComments };
+    },
+    onError: (err, newMessage, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      queryClient.setQueryData(["comments", post._id], context.previousComments);
+    },
+    onSettled: () => {
+      // Always refetch after error or success to make sure the server state is reflected
+      queryClient.invalidateQueries(["comments", post._id]);
     },
   });
 
   const editCommentMutation = useMutation({
-    mutationFn: async ({ id, message }) =>
-      (await axiosInstance.patch(`/comment/edit/${id}`, { message })).data
-        .comment,
-    onSuccess: () => {
+    mutationFn: async ({ id, message }) => {
+      const response = await axiosInstance.patch(`/comment/edit/${id}`, { message });
+      return response.data;
+    },
+    onMutate: async ({ id, message }) => {
+      await queryClient.cancelQueries(["comments", post._id]);
+      
+      const previousComments = queryClient.getQueryData(["comments", post._id]);
+      
+      queryClient.setQueryData(["comments", post._id], (old = []) =>
+        old.map(comment =>
+          comment._id === id ? { ...comment, message } : comment
+        )
+      );
+      
+      return { previousComments };
+    },
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(["comments", post._id], context.previousComments);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries(["comments", post._id]);
-      refetch();
     },
   });
 
   const deleteCommentMutation = useMutation({
-    mutationFn: async (id) =>{
-      console.log(id,post._id)
-      await axiosInstance.delete(`/comment/${post._id}/${id}`)},
-    onSuccess: () => {
+    mutationFn: async (id) => {
+      console.log(id, post._id);
+      await axiosInstance.delete(`/comment/${post._id}/${id}`);
+      return id;
+    },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries(["comments", post._id]);
+      
+      const previousComments = queryClient.getQueryData(["comments", post._id]);
+      
+      queryClient.setQueryData(["comments", post._id], (old = []) =>
+        old.filter(comment => comment._id !== id)
+      );
+      
+      return { previousComments };
+    },
+    onError: (err, id, context) => {
+      queryClient.setQueryData(["comments", post._id], context.previousComments);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries(["comments", post._id]);
-      refetch();
     },
   });
 
   const likeCommentMutation = useMutation({
-    mutationFn: async (id) =>
-      (await axiosInstance.patch(`/comment/like/${id}`)).data,
-    onSuccess: () => {
+    mutationFn: async (id) => {
+      const response = await axiosInstance.patch(`/comment/like/${id}`);
+      return { id, liked: response.data.liked };
+    },
+    onMutate: async ({ id, liked }) => {
+      await queryClient.cancelQueries(["comments", post._id]);
+      
+      const previousComments = queryClient.getQueryData(["comments", post._id]);
+      
+      queryClient.setQueryData(["comments", post._id], (old = []) =>
+        old.map(comment =>
+          comment._id === id
+            ? {
+                ...comment,
+                likedBy: liked
+                  ? [...(comment.likedBy || []), user._id]
+                  : (comment.likedBy || []).filter(userId => userId !== user._id)
+              }
+            : comment
+        )
+      );
+      
+      return { previousComments };
+    },
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(["comments", post._id], context.previousComments);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries(["comments", post._id]);
-      refetch();
     },
   });
 

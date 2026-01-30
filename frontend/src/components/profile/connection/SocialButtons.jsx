@@ -13,17 +13,17 @@ const SocialButtons = ({ user, isOwnProfile, currentUserId }) => {
       <div className="flex gap-4 mb-6">
         <div className="flex items-center gap-2 px-4 py-2 bg-slate-700 text-gray-400 rounded-lg">
           <Users className="w-4 h-4" />
-          <span className="font-medium">0</span>
+          <span className="font-medium">Loading...</span>
           <span className="text-sm">Followers</span>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 bg-slate-700 text-gray-400 rounded-lg">
           <UserPlus className="w-4 h-4" />
-          <span className="font-medium">0</span>
+          <span className="font-medium">Loading...</span>
           <span className="text-sm">Following</span>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 bg-slate-700 text-gray-400 rounded-lg">
           <Link2 className="w-4 h-4" />
-          <span className="font-medium">0</span>
+          <span className="font-medium">Loading...</span>
           <span className="text-sm">Connections</span>
         </div>
       </div>
