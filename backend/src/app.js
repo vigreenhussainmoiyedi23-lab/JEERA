@@ -26,6 +26,7 @@ if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "develope
   console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
   console.log("Allowed Origins:", allowedOrigins);
 }
+console.log(allowedOrigins)
 // requiring Routes
 const userRoutes = require("./routes/main/user.routes");
 const taskRoutes = require("./routes/task/task.routes");
