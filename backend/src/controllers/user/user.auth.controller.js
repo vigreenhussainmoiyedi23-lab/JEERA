@@ -240,10 +240,8 @@ async function GoogleHandler(req, res) {
     // Set HTTP-only cookie
     res.cookie("token", jwtToken, {
       httpOnly: true,
-      path: "/",
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict"
     });
 
     res.status(200).json({
