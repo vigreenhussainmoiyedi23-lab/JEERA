@@ -34,7 +34,7 @@ const { Server } = require("socket.io");
 const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL || "http://localhost:5173/", // or specify your frontend domain
-    // methods: ["GET", "POST","PUT","Patch"],
+    methods: ["GET", "POST","PUT","Patch"],
     credentials: true,
   },
 });
