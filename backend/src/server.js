@@ -2,7 +2,6 @@ require("dotenv").config();
 const express = require("express");
 const http = require("http");
 const connectDB = require("./config/db");
-const connectDBFallback = require("./config/db-fallback");
 const initializeSockets = require("./socket/index"); // we'll create this soon
 
 const app = require("./app");
