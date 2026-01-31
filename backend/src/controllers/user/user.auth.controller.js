@@ -242,6 +242,7 @@ async function GoogleHandler(req, res) {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax"
     });
 
     res.status(200).json({
