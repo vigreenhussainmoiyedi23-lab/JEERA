@@ -8,7 +8,7 @@ const helmet = require("helmet");
 // _______OTHERS_______
 const { limiter } = require("./config/limiters");
 
-const allowedOrigins = process.env.NODE_ENV=="developement"?["http://localhost:5173", "http://127.0.0.1:5173"]:process.env.FRONTEND_URL;
+const allowedOrigins = process.env.NODE_ENV == "developement" ? ["http://localhost:5173", "http://127.0.0.1:5173"] : process.env.FRONTEND_URL;
 // requiring Routes
 const userRoutes = require("./routes/main/user.routes");
 const taskRoutes = require("./routes/task/task.routes");
@@ -34,6 +34,7 @@ app.use(
       scriptSrc: ["'self'", "https://accounts.google.com"],
       frameSrc: ["https://accounts.google.com"],
     },
+    crossOriginOpenerPolicy: false, // disable strict COOP
   })
 );
 app.use(

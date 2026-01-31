@@ -8,8 +8,13 @@ async function connectDBFallback() {
         const fallbackOptions = {
             ssl: true,
             sslValidate: false, // Allow invalid certificates for testing
+            tls: true,
+            tlsAllowInvalidCertificates: true, // Allow invalid certificates
+            tlsAllowInvalidHostnames: true, // Allow invalid hostnames
             serverSelectionTimeoutMS: 10000,
             socketTimeoutMS: 45000,
+            bufferMaxEntries: 0,
+            bufferCommands: false,
             maxPoolSize: 5,
             minPoolSize: 2,
             retryWrites: false, // Disable retry writes for testing
@@ -50,6 +55,8 @@ async function connectDBFallback() {
                 ssl: false,
                 serverSelectionTimeoutMS: 5000,
                 socketTimeoutMS: 30000,
+                bufferMaxEntries: 0,
+                bufferCommands: false,
                 maxPoolSize: 3,
                 retryWrites: false
             };
