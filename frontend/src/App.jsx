@@ -23,6 +23,7 @@ import ConnectionsPage from "./pages/Profile/ConnectionsPage";
 import FeaturesPage from "./components/home/FeaturesPage";
 import BackendLoader from "./components/ui/BackendLoader";
 import VideoLoader from "./components/ui/VideoLoader";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { ReactLenis, useLenis } from "lenis/react";
 const App = () => {
   const lenis = useLenis((lenis) => {
@@ -61,23 +62,85 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-otp" element={<VerifyOtp />} />
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/profile/:userId" element={<Profile />} />
-          <Route path="/profile/:userId/followers" element={<FollowersPage />} />
-          <Route path="/profile/:userId/following" element={<FollowingPage />} />
-          <Route path="/profile/:userId/connections" element={<ConnectionsPage />} />
-          <Route path="/posts" element={<Posts />} />
-          <Route path="/search" element={<SearchResults />} />
-          <Route path="/invites" element={<Invites />} />
-          <Route path="/tasks" element={<Tasks />} />
           <Route path="/about" element={<About />} />
-          <Route path="/createProject" element={<CreateProject />} />
-          <Route path="/project/:projectid" element={<ProjectDetails />} />
-          <Route path="/analytics/post/:postId" element={<PostAnalytics />} />
-          <Route path="/payment" element={<Payment />} />
-          <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/features" element={<FeaturesPage />} />
+          
+          {/* Protected Routes - require authentication */}
+          <Route path="/projects" element={
+            <ProtectedRoute>
+              <Projects />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile/:userId" element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile/:userId/followers" element={
+            <ProtectedRoute>
+              <FollowersPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile/:userId/following" element={
+            <ProtectedRoute>
+              <FollowingPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile/:userId/connections" element={
+            <ProtectedRoute>
+              <ConnectionsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/posts" element={
+            <ProtectedRoute>
+              <Posts />
+            </ProtectedRoute>
+          } />
+          <Route path="/search" element={
+            <ProtectedRoute>
+              <SearchResults />
+            </ProtectedRoute>
+          } />
+          <Route path="/invites" element={
+            <ProtectedRoute>
+              <Invites />
+            </ProtectedRoute>
+          } />
+          <Route path="/tasks" element={
+            <ProtectedRoute>
+              <Tasks />
+            </ProtectedRoute>
+          } />
+          <Route path="/createProject" element={
+            <ProtectedRoute>
+              <CreateProject />
+            </ProtectedRoute>
+          } />
+          <Route path="/project/:projectid" element={
+            <ProtectedRoute>
+              <ProjectDetails />
+            </ProtectedRoute>
+          } />
+          <Route path="/analytics/post/:postId" element={
+            <ProtectedRoute>
+              <PostAnalytics />
+            </ProtectedRoute>
+          } />
+          <Route path="/payment" element={
+            <ProtectedRoute>
+              <Payment />
+            </ProtectedRoute>
+          } />
+          <Route path="/payment-success" element={
+            <ProtectedRoute>
+              <PaymentSuccess />
+            </ProtectedRoute>
+          } />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>

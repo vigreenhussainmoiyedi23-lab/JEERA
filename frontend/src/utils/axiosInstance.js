@@ -1,9 +1,34 @@
 import axios from "axios";
 
-// Check if VITE_API_URL is set and contains /api, otherwise use fallback
-const envURL = import.meta.env.VITE_API_URL + "/api";
+// Get the base URL from environment variables
+const envURL = import.meta.env.VITE_API_URL;
 const isDevelopment = import.meta.env.DEV;
-const baseURL = !isDevelopment && envURL ? envURL : "http://localhost:5000/api";
+
+// Debug logging in development
+if (isDevelopment) {
+    console.log("Environment VITE_API_URL:", envURL);
+    console.log("Is Development:", isDevelopment);
+}
+// Construct the proper base URL
+const getBaseURL = () => {
+  if (isDevelopment) {
+    return "http://localhost:5000/api";
+  }
+  
+  if (envURL) {
+    // If envURL already contains /api, use it as is
+    if (envURL.endsWith('/api')) {
+      return envURL;
+    }
+    // If envURL doesn't contain /api, append it
+    return envURL.endsWith('/') ? `${envURL}api` : `${envURL}/api`;
+  }
+  
+  // Fallback to localhost
+  return "http://localhost:5000/api";
+};
+
+const baseURL = getBaseURL();
 
 // Only log in development
 if (isDevelopment) {

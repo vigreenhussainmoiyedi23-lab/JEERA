@@ -183,9 +183,27 @@ async function LogoutHandler(req, res) {
       .json({ message: "error occured While logging out", error });
   }
 }
+
 async function GoogleHandler(req, res) {
   try {
     const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ message: "Google token is required" });
+    }
+
+    // Log environment variables for debugging (remove in production)
+    if (process.env.NODE_ENV === "development") {
+      console.log("Google Client ID:", process.env.GOOGLE_CLIENT_ID ? "Set" : "NOT SET");
+    }
+
+    // Check if Google Client ID is configured
+    if (!process.env.GOOGLE_CLIENT_ID) {
+      console.error("GOOGLE_CLIENT_ID is not configured");
+      return res.status(500).json({ 
+        message: "Google OAuth not configured properly" 
+      });
+    }
 
     // 1️⃣ Verify Google ID token
     const ticket = await client.verifyIdToken({
@@ -200,7 +218,7 @@ async function GoogleHandler(req, res) {
     let user = await UserModel.findOne({ email });
 
     if (!user) {
-      // 3️⃣ If not, create new user (register)
+      // 3️⃣ Create new user if doesn't exist
       user = await UserModel.create({
         email,
         username: name,
@@ -209,22 +227,72 @@ async function GoogleHandler(req, res) {
         authProvider: "google",
         isVerified: true, // Google verified email
       });
+    } else if (!user.googleId) {
+      // Link Google account to existing user
+      user.googleId = googleId;
+      user.authProvider = user.authProvider === "local" ? "hybrid" : "google";
+      await user.save();
     }
-    // 4️⃣ Generate your own JWT for session management
-    let id = user._id
-    const appToken = await GenerateToken(id)
-    res.cookie("token", appToken)
 
-    // 5️⃣ Return success response
-    res.status(200).json({
-      message: user.isNew ? "User registered successfully" : "Login successful",
-      user,
+    // 4️⃣ Generate your own JWT for session management
+    const jwtToken = await GenerateToken(user._id);
+
+    // Set HTTP-only cookie
+    res.cookie("token", jwtToken, {
+      httpOnly: true,
+      path: "/",
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict"
     });
+
+    res.status(200).json({
+      message: "Google login successful",
+      user: {
+        id: user._id,
+        email: user.email,
+        username: user.username,
+        avatar: user.avatar,
+        isVerified: user.isVerified
+      },
+      token: jwtToken
+    });
+
   } catch (error) {
-    console.error("Google login failed:", error);
-    res.status(401).json({ message: "Invalid Google token" });
+    console.error("Google login failed:", error.message);
+    
+    // Provide more specific error messages
+    if (error.message.includes("Wrong number of segments in token")) {
+      return res.status(400).json({ 
+        message: "Invalid Google token format" 
+      });
+    }
+    
+    if (error.message.includes("Token used too early")) {
+      return res.status(400).json({ 
+        message: "Token is not yet valid" 
+      });
+    }
+    
+    if (error.message.includes("Token used too late")) {
+      return res.status(400).json({ 
+        message: "Token has expired" 
+      });
+    }
+
+    if (error.message.includes("Invalid token signature")) {
+      return res.status(400).json({ 
+        message: "Invalid token signature" 
+      });
+    }
+
+    res.status(401).json({ 
+      message: "Invalid Google token",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined
+    });
   }
 }
+
 module.exports = {
   LogoutHandler,
   LoginHandler,

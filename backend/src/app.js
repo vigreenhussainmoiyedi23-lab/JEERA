@@ -8,7 +8,19 @@ const helmet = require("helmet");
 // _______OTHERS_______
 const { limiter } = require("./config/limiters");
 
-const allowedOrigins = process.env.NODE_ENV == "developement" ? ["http://localhost:5173", "http://127.0.0.1:5173"] : process.env.FRONTEND_URL;
+const allowedOrigins = (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "developement") 
+  ? ["http://localhost:5173", "http://127.0.0.1:5173"] 
+  : process.env.FRONTEND_URL 
+    ? [process.env.FRONTEND_URL] 
+    : [];
+
+// Debug CORS configuration
+if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "developement") {
+  console.log("🔧 CORS Configuration:");
+  console.log("NODE_ENV:", process.env.NODE_ENV);
+  console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
+  console.log("Allowed Origins:", allowedOrigins);
+}
 // requiring Routes
 const userRoutes = require("./routes/main/user.routes");
 const taskRoutes = require("./routes/task/task.routes");
@@ -40,13 +52,35 @@ app.use(
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Allow requests with no origin (mobile apps, Postman, etc.)
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      // Debug logging in development
+      if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "developement") {
+        console.log("🌐 CORS Request Origin:", origin);
+        console.log("📋 Allowed Origins:", allowedOrigins);
+        console.log("✅ Origin Allowed:", allowedOrigins.includes(origin));
+      }
+
+      // Check if origin is allowed
+      if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        // In development, be more permissive
+        if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "developement") {
+          console.warn("⚠️ CORS: Allowing origin in development:", origin);
+          callback(null, true);
+        } else {
+          console.error("❌ CORS: Origin not allowed:", origin);
+          callback(new Error("Not allowed by CORS"));
+        }
       }
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   })
 );
 app.use((req, res, next) => {

@@ -11,7 +11,7 @@ const BackendLoader = () => {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-xl">
+    <div className="fixed inset-0 z-9999 flex items-center justify-center bg-slate-950/95 backdrop-blur-xl">
       {/* Video Background */}
       <video
         autoPlay
