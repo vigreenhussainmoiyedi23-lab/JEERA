@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosInstance";
+import { authUtils } from "../../utils/auth";
 
 const Login = () => {
   const [errorMessage, setErrorMessage] = useState(null);
@@ -15,7 +16,20 @@ const Login = () => {
         { token },
         { withCredentials: true }
       );
-     navigate("/projects");
+      
+      console.log("Google login response:", res.data);
+      
+      if (res.data.message === "Google login successful") {
+        // Store user data using auth utilities
+        authUtils.setUser(res.data.user);
+        
+        console.log("User logged in successfully:", res.data.user);
+        
+        // Force a page reload to ensure cookies are properly set and state is fresh
+        window.location.href = "/projects";
+      } else {
+        setErrorMessage("Login failed. Please try again.");
+      }
     } catch (err) {
       console.error(
         "Backend verification failed:",

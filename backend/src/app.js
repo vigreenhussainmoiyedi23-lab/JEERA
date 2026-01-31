@@ -5,6 +5,9 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
 
+// Trust proxy for rate limiting (important for production deployments)
+app.set('trust proxy', 1);
+
 // _______OTHERS_______
 const { limiter } = require("./config/limiters");
 
@@ -12,7 +15,7 @@ const allowedOrigins = (process.env.NODE_ENV === "development" || process.env.NO
   ? ["http://localhost:5173", "http://127.0.0.1:5173"] 
   : process.env.FRONTEND_URL 
     ? [process.env.FRONTEND_URL] 
-    : [];
+    : ["https://jeera-virid.vercel.app"]; // Fallback to production domain
 
 
 // requiring Routes
@@ -51,7 +54,10 @@ app.use(
         return callback(null, true);
       }
 
-    console.log(origin,allowedOrigins)
+      // Debug logging for CORS
+      console.log(`🌐 CORS Request - Origin: ${origin}`);
+      console.log(`📋 Allowed Origins: [${allowedOrigins.join(', ')}]`);
+      console.log(`✅ Origin Allowed: ${allowedOrigins.includes(origin)}`);
 
       // Check if origin is allowed
       if (allowedOrigins.includes(origin)) {
