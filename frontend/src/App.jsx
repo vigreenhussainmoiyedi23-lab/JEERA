@@ -21,6 +21,8 @@ import FollowersPage from "./pages/Profile/FollowersPage";
 import FollowingPage from "./pages/Profile/FollowingPage";
 import ConnectionsPage from "./pages/Profile/ConnectionsPage";
 import FeaturesPage from "./components/home/FeaturesPage";
+import BackendLoader from "./components/ui/BackendLoader";
+import VideoLoader from "./components/ui/VideoLoader";
 import { ReactLenis, useLenis } from "lenis/react";
 const App = () => {
   const lenis = useLenis((lenis) => {
@@ -50,6 +52,9 @@ const App = () => {
           },
         }}
       />
+      {/* Choose one of the loaders: BackendLoader (with video background) or VideoLoader (full video background) */}
+      <BackendLoader />
+      {/* <VideoLoader /> */}
       <div className="flex flex-col min-h-screen">
         <Routes>
           <Route path="/" element={<Home />} />
