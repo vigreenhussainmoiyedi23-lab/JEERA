@@ -12,21 +12,9 @@ const allowedOrigins = (process.env.NODE_ENV === "development" || process.env.NO
   ? ["http://localhost:5173", "http://127.0.0.1:5173"] 
   : process.env.FRONTEND_URL 
     ? [process.env.FRONTEND_URL] 
-    : ["https://jeera-virid.vercel.app"]; // Fallback to production domain
+    : [];
 
-// Debug CORS configuration
-if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "developement") {
-  console.log("🔧 CORS Configuration:");
-  console.log("NODE_ENV:", process.env.NODE_ENV);
-  console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
-  console.log("Allowed Origins:", allowedOrigins);
-} else {
-  console.log("🌐 Production CORS Configuration:");
-  console.log("NODE_ENV:", process.env.NODE_ENV);
-  console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
-  console.log("Allowed Origins:", allowedOrigins);
-}
-console.log(allowedOrigins)
+
 // requiring Routes
 const userRoutes = require("./routes/main/user.routes");
 const taskRoutes = require("./routes/task/task.routes");
@@ -63,12 +51,7 @@ app.use(
         return callback(null, true);
       }
 
-      // Debug logging in development
-      if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "developement") {
-        console.log("🌐 CORS Request Origin:", origin);
-        console.log("📋 Allowed Origins:", allowedOrigins);
-        console.log("✅ Origin Allowed:", allowedOrigins.includes(origin));
-      }
+    console.log(origin,allowedOrigins)
 
       // Check if origin is allowed
       if (allowedOrigins.includes(origin)) {
